@@ -5,14 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:viewModel="clr-namespace:Spector.ViewModel"
+        xmlns:view="clr-namespace:Spector.View"
         mc:Ignorable="d"
+        Style="{StaticResource MaterialDesignWindow}"
         Title="MainWindow" Height="450" Width="800">
     <Window.DataContext>
         <viewModel:MainWindowViewModel/>
     </Window.DataContext>
-    <lvc:CartesianChart
-        SyncContext="{Binding Sync}"
-        Series="{Binding Series}"
-        XAxes="{Binding XAxes}">
-    </lvc:CartesianChart>
+    <view:AudioInterfacesChart/>
 </Window>
