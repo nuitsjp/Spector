@@ -29,7 +29,7 @@ namespace Spector.View
 
         Random rand = new();
         private double[] LiveData { get; } = new double[4800];
-        private CaptureDevice CaptureDevice { get; } = new();
+        private CaptureDevice CaptureDevice { get; }
 
         DataGen.Electrocardiogram ecg = new();
         Stopwatch sw = Stopwatch.StartNew();
@@ -40,6 +40,10 @@ namespace Spector.View
         public AudioInterfacesChart()
         {
             InitializeComponent();
+
+            var audioInterface = new AudioInterface();
+            audioInterface.ActivateAsync().Wait();
+            CaptureDevice = (CaptureDevice)audioInterface.Devices[1];
 
             Array.Fill(LiveData, Decibel.Minimum.AsPrimitive());
 

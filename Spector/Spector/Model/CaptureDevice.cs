@@ -1,48 +1,53 @@
-﻿using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace Spector.Model;
 
-public class CaptureDevice : IDisposable
+public class CaptureDevice : IDevice
 {
-    public CaptureDevice()
+    public CaptureDevice(MMDevice mmDevice)
     {
-        WaveIn = new WaveInEvent();
-        WaveIn.WaveFormat = RecordingConfig.Default.WaveFormat;
-        var sampleProvider = new WaveInProvider(WaveIn).ToSampleProvider();
-        AWeightingFilter = new AWeightingFilter(sampleProvider);
-        FastResponse = new();
+        Id = (DeviceId)mmDevice.ID;
+        MmDevice = mmDevice;
+        WasapiCapture = new WasapiCapture(mmDevice);
+        WasapiCapture.WaveFormat = RecordingConfig.Default.WaveFormat;
 
-        WaveIn.DataAvailable += WaveInOnDataAvailable;
+        BufferedWaveProvider = new BufferedWaveProvider(WasapiCapture.WaveFormat);
+        AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
+
+        WasapiCapture.DataAvailable += OnDataAvailable;
     }
 
-    private WaveInEvent WaveIn { get; }
+    private MMDevice MmDevice { get; }
+    private WasapiCapture WasapiCapture { get; }
+    private BufferedWaveProvider BufferedWaveProvider { get; }
+
+    public DeviceId Id { get; }
     private AWeightingFilter AWeightingFilter { get; }
-    private FastResponse FastResponse { get; }
     public Decibel Level { get; private set; } = (Decibel)0;
 
     public void StartRecording()
     {
-        WaveIn.StartRecording();
+        WasapiCapture.StartRecording();
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
-        // Convert the byte array to an array of floats
-        int bytesPerSample = 2; // 16-bit audio
-        int sampleCount = e.Buffer.Length / bytesPerSample;
-        float max = 0;
+        BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+
+        float[] buffer = new float[e.BytesRecorded / 2];
+        int samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
 
         // 音量計算（RMS値）
-        for (int i = 0; i < sampleCount; i++)
+        double sum = 0;
+        for (int i = 0; i < samplesRead; i++)
         {
-            short sample = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
-            float sample32 = sample / 32768f; // Convert to float
-            if (sample32 < 0) sample32 = -sample32; // Take absolute value
-            if (sample32 > max) max = sample32; // Track maximum sample value
+            sum += buffer[i] * buffer[i];
         }
+        double rms = Math.Sqrt(sum / samplesRead);
+        double db = 20 * Math.Log10(rms);
 
-        // Convert to decibels
-        double db = 20 * Math.Log10(max);
         var level = (Decibel)db;
         Level = Decibel.Minimum <= level
             ? level
@@ -72,7 +77,7 @@ public class CaptureDevice : IDisposable
 
     public void Dispose()
     {
-        WaveIn.StopRecording();
-        WaveIn.Dispose();
+        MmDevice.Dispose();
+        WasapiCapture.Dispose();
     }
 }

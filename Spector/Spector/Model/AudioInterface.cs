@@ -1,11 +1,14 @@
 ﻿using NAudio.CoreAudioApi;
+using NAudio.Wave.SampleProviders;
+using NAudio.Wave;
 using Reactive.Bindings;
 
 namespace Spector.Model;
 
 public class AudioInterface
 {
-    private ReactiveCollection<IDevice> Devices { get; } = new();
+    private readonly ReactiveCollection<IDevice> _devices = new();
+    public ReadOnlyReactiveCollection<IDevice> Devices => _devices.ToReadOnlyReactiveCollection();
 
     public async Task ActivateAsync()
     {
@@ -20,25 +23,25 @@ public class AudioInterface
     {
         using var enumerator = new MMDeviceEnumerator();
         var mmDevices = enumerator
-            .EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active)
+            .EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active)
             .ToList();
 
         // 新しく接続されたデバイスの確認
         var connectedDevices = mmDevices
-            .Where(mmDevice => Devices.NotContains(device => device.Id.AsPrimitive() == mmDevice.ID));
+            .Where(mmDevice => _devices.NotContains(device => device.Id.AsPrimitive() == mmDevice.ID));
         foreach (var mmDevice in connectedDevices)
         {
             var device = await ResolveDeviceAsync(mmDevice);
-            Devices.Add(device);
+            _devices.Add(device);
         }
 
         // 切断されたデバイスの確認
-        var disconnectedDevices = Devices
+        var disconnectedDevices = _devices
             .Where(device => mmDevices.NotContains(mmDevice => device.Id.AsPrimitive() == mmDevice.ID))
             .ToList(); // _devicesから作成しているので、いったん別のListにしないとRemove時にエラーとなるので詰め替えておく
         foreach (var device in disconnectedDevices)
         {
-            Devices.Remove(device);
+            _devices.Remove(device);
             device.Dispose();
         }
     }
@@ -56,36 +59,7 @@ public class AudioInterface
         //    await _settingsRepository.SaveAsync(_settings);
         //}
 
-        IDevice device =
-            mmDevice.DataFlow == DataFlow.Capture
-                ? new CaptureDevice(
-                    deviceId,
-                    deviceConfig.Name,
-                    mmDevice.FriendlyName,
-                    deviceConfig.Measure,
-                    mmDevice,
-                    _fastFourierTransformSettings)
-                : new RenderDevice(
-                    deviceId,
-                    deviceConfig.Name,
-                    mmDevice.FriendlyName,
-                    deviceConfig.Measure,
-                    mmDevice,
-                    _fastFourierTransformSettings);
-        device.PropertyChanged += MicrophoneOnPropertyChanged;
-        return device;
+        return new CaptureDevice(mmDevice);
     }
 
-}
-
-public interface IDevice : IDisposable
-{
-}
-
-public class LocalDevice : IDevice
-{
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
 }
