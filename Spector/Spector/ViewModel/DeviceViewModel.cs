@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NAudio.CoreAudioApi;
 using Spector.Model;
 
 namespace Spector.ViewModel;
@@ -6,6 +7,8 @@ namespace Spector.ViewModel;
 public class DeviceViewModel(IDevice device) : ObservableObject
 {
     private IDevice Device { get; } = device;
+
+    public DataFlow DataFlow => Device.DataFlow;
 
     public string Name => Device.Name;
 

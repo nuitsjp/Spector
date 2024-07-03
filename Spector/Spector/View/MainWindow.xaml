@@ -8,9 +8,19 @@
         xmlns:view="clr-namespace:Spector.View"
         mc:Ignorable="d"
         Style="{StaticResource MaterialDesignWindow}"
-        Title="MainWindow" Height="450" Width="800">
-    <Window.DataContext>
-        <viewModel:MainWindowViewModel/>
-    </Window.DataContext>
-    <view:AudioInterfaceChart AudioInterface="{Binding AudioInterface}"/>
+        Background="White"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Specter" Height="1024" Width="1600"
+        d:DataContext="{d:DesignInstance {x:Type viewModel:MainWindowViewModel}, IsDesignTimeCreatable=True}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="500"/>
+        </Grid.RowDefinitions>
+
+        <view:DeviceList Grid.Row="0"/>
+
+        <view:AudioInterfaceChart Grid.Row="1"
+                                  AudioInterface="{Binding AudioInterface}"/>
+    </Grid>
 </Window>
