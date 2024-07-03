@@ -24,7 +24,7 @@ public class SettingsRepository : RepositoryBase<Settings>, ISettingsRepository
                     null,
                     true,
                     true,
-                    new List<DeviceConfig>()));
+                    new List<DeviceSettings>()));
 
     /// <summary>
     /// Settingsを保存する。

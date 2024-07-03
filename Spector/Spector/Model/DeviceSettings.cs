@@ -1,6 +1,6 @@
 ﻿namespace Spector.Model;
 
-public class DeviceConfig(
+public class DeviceSettings(
     DeviceId id,
     string name,
     bool measure)

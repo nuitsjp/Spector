@@ -10,17 +10,17 @@ public record Settings(
     DeviceId? PlaybackDeviceId, 
     bool EnableAWeighting,
     bool EnableFastTimeWeighting,
-    IReadOnlyList<DeviceConfig> DeviceConfigs)
+    IReadOnlyList<DeviceSettings> DeviceSettings)
 {
-    public bool TryGetMicrophoneConfig(DeviceId id, out DeviceConfig deviceConfig)
+    public bool TryGetMicrophoneConfig(DeviceId id, out DeviceSettings deviceSettings)
     {
-        var config = DeviceConfigs.SingleOrDefault(x => x.Id == id);
-        deviceConfig = config!;
+        var config = DeviceSettings.SingleOrDefault(x => x.Id == id);
+        deviceSettings = config!;
         return config is not null;
     }
 
-    public DeviceConfig GetMicrophoneConfig(DeviceId id)
+    public DeviceSettings GetDeviceSettings(DeviceId id)
     {
-        return DeviceConfigs.Single(x => x.Id == id);
+        return DeviceSettings.Single(x => x.Id == id);
     }
 }
