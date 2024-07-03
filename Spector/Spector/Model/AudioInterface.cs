@@ -52,15 +52,16 @@ public class AudioInterface(ISettingsRepository settingsRepository)
     private async Task<IDevice> ResolveDeviceAsync(MMDevice mmDevice)
     {
         var deviceId = new DeviceId(mmDevice.ID);
-        //// 新たに接続されたデバイスった場合
-        //if (_settings.TryGetMicrophoneConfig(deviceId, out var deviceConfig) is false)
-        //{
-        //    deviceConfig = new DeviceConfig(deviceId, mmDevice.FriendlyName, true);
-        //    List<DeviceConfig> deviceConfigs = _settings.DeviceConfigs.ToList();
-        //    deviceConfigs.Add(deviceConfig);
-        //    _settings = _settings with { DeviceConfigs = deviceConfigs };
-        //    await _settingsRepository.SaveAsync(_settings);
-        //}
+
+        // 新たに接続されたデバイスった場合
+        if (Settings.TryGetDeviceSettings(deviceId, out _) is false)
+        {
+            var deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
+            List<DeviceSettings> deviceConfigs = Settings.DeviceSettings.ToList();
+            deviceConfigs.Add(deviceSettings);
+            Settings = Settings with { DeviceSettings = deviceConfigs };
+            await settingsRepository.SaveAsync(Settings);
+        }
 
         var captureDevice = new CaptureDevice(mmDevice);
         captureDevice.StartRecording();
