@@ -25,6 +25,8 @@ public class CaptureDevice : IDevice
 
     public DeviceId Id { get; }
 
+    public DataFlow DataFlow => MmDevice.DataFlow;
+
     public string Name => MmDevice.FriendlyName;
 
     private AWeightingFilter AWeightingFilter { get; }
@@ -55,27 +57,6 @@ public class CaptureDevice : IDevice
         Level = Decibel.Minimum <= level
             ? level
             : Decibel.Minimum;
-    }
-
-    private void WaveInOnDataAvailable(object? sender, WaveInEventArgs e)
-    {
-        var buffer = new float[e.BytesRecorded / 2];
-        var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
-
-        // 音量計算（RMS値）
-        double sum = 0;
-        for (var i = 0; i < samplesRead; i++)
-        {
-            sum += buffer[i] * buffer[i];
-        }
-        var rms = Math.Sqrt(sum / samplesRead);
-        
-        var level =  (Decibel)(20 * Math.Log10(rms));
-        Level = Decibel.Minimum <= level
-            ? level
-            : Decibel.Minimum;
-
-        Console.WriteLine($"A-weighted Volume: {Level} dB");
     }
 
     public void Dispose()
