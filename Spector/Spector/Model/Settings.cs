@@ -12,7 +12,7 @@ public record Settings(
     bool EnableFastTimeWeighting,
     IReadOnlyList<DeviceSettings> DeviceSettings)
 {
-    public bool TryGetMicrophoneConfig(DeviceId id, out DeviceSettings deviceSettings)
+    public bool TryGetDeviceSettings(DeviceId id, out DeviceSettings deviceSettings)
     {
         var config = DeviceSettings.SingleOrDefault(x => x.Id == id);
         deviceSettings = config!;
