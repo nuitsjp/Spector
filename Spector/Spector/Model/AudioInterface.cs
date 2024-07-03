@@ -27,7 +27,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         await LoadDevicesAsync();
     }
 
-    private async void WatcherEventArrived(object sender, EventArrivedEventArgs e)
+    private void WatcherEventArrived(object sender, EventArrivedEventArgs e)
     {
         if (e.NewEvent["TargetInstance"] is not ManagementBaseObject) return;
 
@@ -36,11 +36,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         {
             case "__InstanceCreationEvent":
             case "__InstanceDeletionEvent":
-                await CurrentDispatcher.InvokeAsync(
-                    async () =>
-                    {
-                        await LoadDevicesAsync();
-                    });
+                CurrentDispatcher.InvokeAsync(async () => { await LoadDevicesAsync(); });
                 break;
         }
     }
