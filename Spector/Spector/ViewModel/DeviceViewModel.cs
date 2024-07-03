@@ -1,18 +1,55 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
+using Reactive.Bindings.Extensions;
 using Spector.Model;
 
 namespace Spector.ViewModel;
 
-public class DeviceViewModel(IDevice device) : ObservableObject
+public partial class DeviceViewModel : ObservableObject, IDisposable
 {
-    private IDevice Device { get; } = device;
+    public DeviceViewModel(IDevice device)
+    {
+        Device = device;
+        CompositeDisposable.Add(Device);
+
+        // デバイス名を同期する
+        Name = Device.Name;
+        this.ObserveProperty(x => x.Name)
+            .Skip(1) // 上記の「Name = Device.Name;」の変更をスキップする。
+            .Subscribe(name => Device.Name = name)
+            .AddTo(CompositeDisposable);
+        // 計測状態を同期する
+        Measure = Device.Measure;
+        this.ObserveProperty(x => x.Measure)
+            .Skip(1) // 上記の「Measure = Device.Measure;」の変更をスキップする。
+            .Subscribe(measure =>
+            {
+                if (measure)
+                {
+                    Device.StartMeasure();
+                }
+                else
+                {
+                    Device.StopMeasure();
+                }
+            })
+            .AddTo(CompositeDisposable);
+    }
+
+    private IDevice Device { get; }
 
     public DataFlow DataFlow => Device.DataFlow;
 
-    public string Name => Device.Name;
+    [ObservableProperty] private string _name;
+    public string SystemName => Device.SystemName;
+
+    [ObservableProperty] private bool _measure;
 
     public double[] LiveData { get; } = CreateEmptyData();
+
+    private CompositeDisposable CompositeDisposable { get; } = new();
 
     private static double[] CreateEmptyData()
     {
@@ -30,4 +67,8 @@ public class DeviceViewModel(IDevice device) : ObservableObject
         LiveData[^1] = Device.Level.AsPrimitive();
     }
 
+    public void Dispose()
+    {
+        CompositeDisposable.Dispose();
+    }
 }

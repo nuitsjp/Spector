@@ -1,18 +1,21 @@
-﻿using NAudio.CoreAudioApi;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
 namespace Spector.Model;
 
-public class CaptureDevice : IDevice
+public partial class CaptureDevice : ObservableObject, IDevice
 {
     public CaptureDevice(
         MMDevice mmDevice,
+        string name,
         bool measure,
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
         MmDevice = mmDevice;
+        Name = name;
         Measure = measure;
 
         WasapiCapture = new WasapiCapture(mmDevice);
@@ -27,27 +30,46 @@ public class CaptureDevice : IDevice
     }
 
     private MMDevice MmDevice { get; }
-    private WasapiCapture WasapiCapture { get; }
-    private BufferedWaveProvider BufferedWaveProvider { get; }
-
     public DeviceId Id { get; }
 
     public DataFlow DataFlow => MmDevice.DataFlow;
 
-    public string Name => MmDevice.FriendlyName;
-    public bool Measure { get; private set; }
+    /// <summary>
+    /// デバイス名。利用者が変更可能な名称。
+    /// </summary>
+    [ObservableProperty] private string _name;
+
+    /// <summary>
+    /// デバイス名。OSで設定されている名称。
+    /// </summary>
+    public string SystemName => MmDevice.FriendlyName;
+
+    /// <summary>
+    /// 計測するかどうかを表す
+    /// </summary>
+    [ObservableProperty] private bool _measure;
+    /// <summary>
+    /// 音量レベル
+    /// </summary>
+    public Decibel Level { get; private set; } = Decibel.Minimum;
+
+    private WasapiCapture WasapiCapture { get; }
+    private BufferedWaveProvider BufferedWaveProvider { get; }
 
     private AWeightingFilter AWeightingFilter { get; }
-    public Decibel Level { get; private set; } = Decibel.Minimum;
 
     public void StartMeasure()
     {
         WasapiCapture.StartRecording();
+        Measure = true;
     }
 
     public void StopMeasure()
     {
         WasapiCapture.StopRecording();
+        Measure = false;
+        // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
+        Level = Decibel.Minimum;
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)

@@ -1,4 +1,5 @@
-﻿using NAudio.CoreAudioApi;
+﻿using System.ComponentModel;
+using NAudio.CoreAudioApi;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 using Reactive.Bindings;
@@ -45,6 +46,7 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         foreach (var device in disconnectedDevices)
         {
             _devices.Remove(device);
+            device.PropertyChanged -= CaptureDeviceOnPropertyChanged;
             device.Dispose();
         }
     }
@@ -66,9 +68,24 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         var captureDevice = 
             new CaptureDevice(
                 mmDevice,
+                deviceSettings.Name,
                 deviceSettings.Measure,
                 RecordingConfig.Default.WaveFormat);
+
+        // プロパティの変更を監視する
+        captureDevice.PropertyChanged += CaptureDeviceOnPropertyChanged;
         return captureDevice;
+    }
+
+    private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateSettings();
+    }
+
+    private async void UpdateSettings()
+    {
+        Settings = Settings with { DeviceSettings = Devices.Select(x => new DeviceSettings(x.Id, x.Name, x.Measure)).ToArray() };
+        await settingsRepository.SaveAsync(Settings);
     }
 
 }
