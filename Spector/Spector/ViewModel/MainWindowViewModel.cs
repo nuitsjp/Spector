@@ -3,9 +3,10 @@ using Kamishibai;
 
 namespace Spector.ViewModel;
 
-public partial class MainWindowViewModel : ObservableObject, INavigatedAsyncAware, IDisposable
+public partial class MainWindowViewModel(AudioInterfaceViewModel audioInterface)
+    : ObservableObject, INavigatedAsyncAware, IDisposable
 {
-    public AudioInterfaceViewModel AudioInterface { get; } = new();
+    public AudioInterfaceViewModel AudioInterface { get; } = audioInterface;
 
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {

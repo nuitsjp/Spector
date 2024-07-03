@@ -8,8 +8,9 @@ public class AudioInterfaceViewModel
 {
     public event EventHandler? LiveDataUpdated;
 
-    public AudioInterfaceViewModel()
+    public AudioInterfaceViewModel(AudioInterface audioInterface)
     {
+        AudioInterface = audioInterface;
         Devices = AudioInterface
             .Devices
             .ToReadOnlyReactiveCollection(device => new DeviceViewModel(device));
@@ -20,7 +21,7 @@ public class AudioInterfaceViewModel
         DispatcherTimer.Tick += Update;
     }
 
-    private AudioInterface AudioInterface { get; } = new();
+    private AudioInterface AudioInterface { get; }
     public ReadOnlyReactiveCollection<DeviceViewModel> Devices { get; }
 
     private DispatcherTimer DispatcherTimer { get; }

@@ -1,13 +1,35 @@
 ﻿using Kamishibai;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spector;
+using Spector.Model;
+using Spector.Model.IO;
+using Spector.View;
 using Spector.ViewModel;
 
 // Create a builder by specifying the application and main window.
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 
+// View, ViewModel
 builder.Services.AddPresentation<MainWindow, MainWindowViewModel>();
 
-// Build and run the application.
-var app = builder.Build();
-app.RunAsync();
+// ViewModel
+builder.Services.AddTransient<AudioInterfaceViewModel>();
+
+// Model
+builder.Services.AddTransient<AudioInterface>();
+
+// Repository
+builder.Services.AddTransient<ISettingsRepository, SettingsRepository>();
+
+try
+{
+    // Build and run the application.
+    var app = builder.Build();
+    await app.RunAsync();
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+    throw;
+}

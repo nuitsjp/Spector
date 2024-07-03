@@ -29,9 +29,6 @@ public partial class AudioInterfaceChart : UserControl
     public AudioInterfaceChart()
     {
         InitializeComponent();
-
-        var audioInterface = new AudioInterface();
-        audioInterface.ActivateAsync().Wait();
     }
 
     private static void AudioInterfaceOnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

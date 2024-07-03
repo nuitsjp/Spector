@@ -5,13 +5,16 @@ using Reactive.Bindings;
 
 namespace Spector.Model;
 
-public class AudioInterface
+public class AudioInterface(ISettingsRepository settingsRepository)
 {
+    private Settings Settings { get; set; } = default!;
     private readonly ReactiveCollection<IDevice> _devices = new();
+
     public ReadOnlyReactiveCollection<IDevice> Devices => _devices.ToReadOnlyReactiveCollection();
 
     public async Task ActivateAsync()
     {
+        Settings = await settingsRepository.LoadAsync();
         await LoadDevicesAsync();
     }
 
