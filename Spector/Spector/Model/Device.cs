@@ -14,8 +14,9 @@ public partial class Device : ObservableObject, IDevice
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
-        MmDevice = mmDevice;
+        DataFlow = mmDevice.DataFlow;
         Name = name;
+        SystemName = mmDevice.FriendlyName;
         Measure = measure;
 
         WasapiCapture = 
@@ -33,10 +34,17 @@ public partial class Device : ObservableObject, IDevice
         if(Measure) StartMeasure();
     }
 
-    private MMDevice MmDevice { get; }
+    private MMDevice MmDevice
+    {
+        get
+        {
+            using var enumerator = new MMDeviceEnumerator();
+            return enumerator.GetDevice(Id.AsPrimitive());
+        }
+    }
     public DeviceId Id { get; }
 
-    public DataFlow DataFlow => MmDevice.DataFlow;
+    public DataFlow DataFlow { get; }
 
     /// <summary>
     /// デバイス名。利用者が変更可能な名称。
@@ -46,7 +54,7 @@ public partial class Device : ObservableObject, IDevice
     /// <summary>
     /// デバイス名。OSで設定されている名称。
     /// </summary>
-    public string SystemName => MmDevice.FriendlyName;
+    public string SystemName { get; }
 
     /// <summary>
     /// 計測するかどうかを表す

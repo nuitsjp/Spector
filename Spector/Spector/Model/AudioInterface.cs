@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Management;
 using NAudio.CoreAudioApi;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 using Reactive.Bindings;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Spector.Model;
 
@@ -13,10 +15,33 @@ public class AudioInterface(ISettingsRepository settingsRepository)
 
     public ReadOnlyReactiveCollection<IDevice> Devices => _devices.ToReadOnlyReactiveCollection();
 
+    private ManagementEventWatcher Watcher { get; } = new(
+        new WqlEventQuery("__InstanceOperationEvent")
+        {
+            WithinInterval = TimeSpan.FromSeconds(3),
+            Condition = "TargetInstance ISA 'Win32_SoundDevice'"
+        });
+
     public async Task ActivateAsync()
     {
         Settings = await settingsRepository.LoadAsync();
+        Watcher.EventArrived += WatcherEventArrived;
+        Watcher.Start();
         await LoadDevicesAsync();
+    }
+
+    private async void WatcherEventArrived(object sender, EventArrivedEventArgs e)
+    {
+        if (e.NewEvent["TargetInstance"] is not ManagementBaseObject) return;
+
+        var eventType = e.NewEvent.ClassPath.ClassName;
+        switch (eventType)
+        {
+            case "__InstanceCreationEvent":
+            case "__InstanceDeletionEvent":
+                await LoadDevicesAsync();
+                break;
+        }
     }
 
     /// <summary>
@@ -36,6 +61,8 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         foreach (var mmDevice in connectedDevices)
         {
             var device = await ResolveDeviceAsync(mmDevice);
+            // プロパティの変更を監視する
+            device.PropertyChanged += CaptureDeviceOnPropertyChanged;
             _devices.Add(device);
         }
 
@@ -46,6 +73,7 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         foreach (var device in disconnectedDevices)
         {
             _devices.Remove(device);
+            // プロパティの変更監視を解除する
             device.PropertyChanged -= CaptureDeviceOnPropertyChanged;
             device.Dispose();
         }
@@ -65,16 +93,11 @@ public class AudioInterface(ISettingsRepository settingsRepository)
             await settingsRepository.SaveAsync(Settings);
         }
 
-        var captureDevice = 
-            new Device(
-                mmDevice,
-                deviceSettings.Name,
-                deviceSettings.Measure,
-                RecordingConfig.Default.WaveFormat);
-
-        // プロパティの変更を監視する
-        captureDevice.PropertyChanged += CaptureDeviceOnPropertyChanged;
-        return captureDevice;
+        return new Device(
+            mmDevice,
+            deviceSettings.Name,
+            deviceSettings.Measure,
+            RecordingConfig.Default.WaveFormat);
     }
 
     private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
