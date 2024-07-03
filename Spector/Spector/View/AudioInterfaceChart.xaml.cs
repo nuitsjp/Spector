@@ -36,7 +36,7 @@ public partial class AudioInterfaceChart : UserControl
         if (e.NewValue as AudioInterfaceViewModel is { } audioInterface)
         {
             var audioInterfaceChart = (AudioInterfaceChart)d;
-            audioInterface.Devices.CollectionChangedAsObservable()
+            audioInterface.MeasureDevices.CollectionChangedAsObservable()
                 .Subscribe(audioInterfaceChart.DevicesOnChanged);
             audioInterface.LiveDataUpdated += audioInterfaceChart.Render;
         }
@@ -46,7 +46,7 @@ public partial class AudioInterfaceChart : UserControl
     {
         AudioInterfacePlot.Plot.Clear();
 
-        foreach (var device in AudioInterface.Devices)
+        foreach (var device in AudioInterface.MeasureDevices)
         {
             AudioInterfacePlot
                 .Plot
