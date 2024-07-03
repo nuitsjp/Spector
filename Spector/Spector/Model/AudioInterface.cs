@@ -59,7 +59,9 @@ public class AudioInterface
         //    await _settingsRepository.SaveAsync(_settings);
         //}
 
-        return new CaptureDevice(mmDevice);
+        var captureDevice = new CaptureDevice(mmDevice);
+        captureDevice.StartRecording();
+        return captureDevice;
     }
 
 }

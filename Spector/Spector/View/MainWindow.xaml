@@ -12,5 +12,5 @@
     <Window.DataContext>
         <viewModel:MainWindowViewModel/>
     </Window.DataContext>
-    <view:AudioInterfacesChart/>
+    <view:AudioInterfaceChart AudioInterface="{Binding AudioInterface}"/>
 </Window>

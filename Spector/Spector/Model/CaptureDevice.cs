@@ -24,6 +24,9 @@ public class CaptureDevice : IDevice
     private BufferedWaveProvider BufferedWaveProvider { get; }
 
     public DeviceId Id { get; }
+
+    public string Name => MmDevice.FriendlyName;
+
     private AWeightingFilter AWeightingFilter { get; }
     public Decibel Level { get; private set; } = Decibel.Minimum;
 

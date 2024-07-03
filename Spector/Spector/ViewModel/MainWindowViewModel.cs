@@ -6,17 +6,26 @@ using LiveChartsCore;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using Kamishibai;
+using Reactive.Bindings;
+using Spector.Model;
 
 namespace Spector.ViewModel;
 
-public partial class MainWindowViewModel : ObservableObject, INavigatedAsyncAware
+public partial class MainWindowViewModel : ObservableObject, INavigatedAsyncAware, IDisposable
 {
     public MainWindowViewModel()
     {
     }
 
-    public AudioInterfacesChartViewModel? AudioInterfacesChart { get; } = null;
+    public AudioInterfaceViewModel AudioInterface { get; } = new();
+
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {
+        await AudioInterface.ActivateAsync();
+    }
+
+    public void Dispose()
+    {
+        // TODO release managed resources here
     }
 }
