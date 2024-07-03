@@ -54,17 +54,20 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         var deviceId = new DeviceId(mmDevice.ID);
 
         // 新たに接続されたデバイスった場合
-        if (Settings.TryGetDeviceSettings(deviceId, out _) is false)
+        if (Settings.TryGetDeviceSettings(deviceId, out var deviceSettings) is false)
         {
-            var deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
-            List<DeviceSettings> deviceConfigs = Settings.DeviceSettings.ToList();
+            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
+            var deviceConfigs = Settings.DeviceSettings.ToList();
             deviceConfigs.Add(deviceSettings);
             Settings = Settings with { DeviceSettings = deviceConfigs };
             await settingsRepository.SaveAsync(Settings);
         }
 
-        var captureDevice = new CaptureDevice(mmDevice);
-        captureDevice.StartRecording();
+        var captureDevice = 
+            new CaptureDevice(
+                mmDevice,
+                deviceSettings.Measure,
+                RecordingConfig.Default.WaveFormat);
         return captureDevice;
     }
 

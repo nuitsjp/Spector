@@ -6,17 +6,24 @@ namespace Spector.Model;
 
 public class CaptureDevice : IDevice
 {
-    public CaptureDevice(MMDevice mmDevice)
+    public CaptureDevice(
+        MMDevice mmDevice,
+        bool measure,
+        WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
         MmDevice = mmDevice;
+        Measure = measure;
+
         WasapiCapture = new WasapiCapture(mmDevice);
-        WasapiCapture.WaveFormat = RecordingConfig.Default.WaveFormat;
+        WasapiCapture.WaveFormat = waveFormat;
 
         BufferedWaveProvider = new BufferedWaveProvider(WasapiCapture.WaveFormat);
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
 
         WasapiCapture.DataAvailable += OnDataAvailable;
+
+        if(Measure) StartMeasure();
     }
 
     private MMDevice MmDevice { get; }
@@ -28,13 +35,19 @@ public class CaptureDevice : IDevice
     public DataFlow DataFlow => MmDevice.DataFlow;
 
     public string Name => MmDevice.FriendlyName;
+    public bool Measure { get; private set; }
 
     private AWeightingFilter AWeightingFilter { get; }
     public Decibel Level { get; private set; } = Decibel.Minimum;
 
-    public void StartRecording()
+    public void StartMeasure()
     {
         WasapiCapture.StartRecording();
+    }
+
+    public void StopMeasure()
+    {
+        WasapiCapture.StopRecording();
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)

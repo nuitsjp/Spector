@@ -2,5 +2,5 @@
 
 namespace Spector.Model;
 
-[UnitOf<string>]
+[UnitOf<string>(UnitGenerateOptions.JsonConverter)]
 public partial struct DeviceId;
