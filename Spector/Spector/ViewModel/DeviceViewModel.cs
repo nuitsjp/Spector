@@ -20,6 +20,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             .Skip(1) // 上記の「Name = Device.Name;」の変更をスキップする。
             .Subscribe(name => Device.Name = name)
             .AddTo(CompositeDisposable);
+
         // 計測状態を同期する
         Measure = Device.Measure;
         this.ObserveProperty(x => x.Measure)
@@ -36,6 +37,21 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
                 }
             })
             .AddTo(CompositeDisposable);
+
+        // 入出力レベルを同期する
+        VolumeLevel = Device.VolumeLevel.AsPrimitive() * 100;
+        this.ObserveProperty(x => x.VolumeLevel)
+            .Skip(1) // 上記の「VolumeLevel = Device.VolumeLevel;」の変更をスキップする。
+            .Subscribe(volumeLevel =>
+            {
+                Device.VolumeLevel = volumeLevel switch
+                {
+                    < 0 => Model.VolumeLevel.Minimum,
+                    > 100 => Model.VolumeLevel.Maximum,
+                    _ => new VolumeLevel(volumeLevel / 100)
+                };
+            })
+            .AddTo(CompositeDisposable);
     }
 
     private IDevice Device { get; }
@@ -46,6 +62,8 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     public string SystemName => Device.SystemName;
 
     [ObservableProperty] private bool _measure;
+
+    [ObservableProperty] private float _volumeLevel;
 
     public double[] LiveData { get; } = CreateEmptyData();
 

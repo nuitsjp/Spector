@@ -10,6 +10,15 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     string Name { get; set; }
     string SystemName { get; }
     bool Measure { get; }
+
+    /// <summary>
+    /// 入出力レベル
+    /// </summary>
+    VolumeLevel VolumeLevel { get; set; }
+
+    /// <summary>
+    /// 音量レベル
+    /// </summary>
     Decibel Level { get; }
 
     void StartMeasure();

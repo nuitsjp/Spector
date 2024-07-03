@@ -48,6 +48,20 @@ public partial class CaptureDevice : ObservableObject, IDevice
     /// 計測するかどうかを表す
     /// </summary>
     [ObservableProperty] private bool _measure;
+
+    /// <summary>
+    /// 入出力レベル
+    /// </summary>
+    public VolumeLevel VolumeLevel
+    {
+        get => (VolumeLevel)MmDevice.AudioEndpointVolume.MasterVolumeLevelScalar;
+        set
+        {
+            MmDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)value;
+            OnPropertyChanged();
+        }
+    }
+
     /// <summary>
     /// 音量レベル
     /// </summary>
