@@ -25,7 +25,7 @@ public class CaptureDevice : IDevice
 
     public DeviceId Id { get; }
     private AWeightingFilter AWeightingFilter { get; }
-    public Decibel Level { get; private set; } = (Decibel)0;
+    public Decibel Level { get; private set; } = Decibel.Minimum;
 
     public void StartRecording()
     {
