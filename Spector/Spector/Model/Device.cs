@@ -5,9 +5,9 @@ using NAudio.Wave.SampleProviders;
 
 namespace Spector.Model;
 
-public partial class CaptureDevice : ObservableObject, IDevice
+public partial class Device : ObservableObject, IDevice
 {
-    public CaptureDevice(
+    public Device(
         MMDevice mmDevice,
         string name,
         bool measure,
@@ -18,7 +18,11 @@ public partial class CaptureDevice : ObservableObject, IDevice
         Name = name;
         Measure = measure;
 
-        WasapiCapture = new WasapiCapture(mmDevice);
+        WasapiCapture = 
+            MmDevice.DataFlow == DataFlow.Capture
+                ? new WasapiCapture(mmDevice)
+                : new WasapiLoopbackCapture(mmDevice);
+                
         WasapiCapture.WaveFormat = waveFormat;
 
         BufferedWaveProvider = new BufferedWaveProvider(WasapiCapture.WaveFormat);

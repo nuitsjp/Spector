@@ -27,7 +27,7 @@ public class AudioInterface(ISettingsRepository settingsRepository)
     {
         using var enumerator = new MMDeviceEnumerator();
         var mmDevices = enumerator
-            .EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active)
+            .EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active)
             .ToList();
 
         // 新しく接続されたデバイスの確認
@@ -66,7 +66,7 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         }
 
         var captureDevice = 
-            new CaptureDevice(
+            new Device(
                 mmDevice,
                 deviceSettings.Name,
                 deviceSettings.Measure,
