@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Management;
+using System.Windows;
 using NAudio.CoreAudioApi;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
@@ -39,7 +40,11 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         {
             case "__InstanceCreationEvent":
             case "__InstanceDeletionEvent":
-                await LoadDevicesAsync();
+                await CurrentDispatcher.InvokeAsync(
+                    async () =>
+                    {
+                        await LoadDevicesAsync();
+                    });
                 break;
         }
     }

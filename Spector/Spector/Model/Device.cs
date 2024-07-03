@@ -14,6 +14,7 @@ public partial class Device : ObservableObject, IDevice
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
+        MmDevice = mmDevice;
         DataFlow = mmDevice.DataFlow;
         Name = name;
         SystemName = mmDevice.FriendlyName;
@@ -34,14 +35,7 @@ public partial class Device : ObservableObject, IDevice
         if(Measure) StartMeasure();
     }
 
-    private MMDevice MmDevice
-    {
-        get
-        {
-            using var enumerator = new MMDeviceEnumerator();
-            return enumerator.GetDevice(Id.AsPrimitive());
-        }
-    }
+    private MMDevice MmDevice { get; }
     public DeviceId Id { get; }
 
     public DataFlow DataFlow { get; }
