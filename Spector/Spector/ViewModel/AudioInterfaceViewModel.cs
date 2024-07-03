@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Reactive.Linq;
 using System.Windows.Threading;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -15,7 +14,7 @@ public class AudioInterfaceViewModel : IDisposable
 
     public AudioInterfaceViewModel(AudioInterface audioInterface)
     {
-        AudioInterface = audioInterface;
+        AudioInterface = audioInterface.AddTo(CompositeDisposable);
         Devices = AudioInterface
             .Devices
             .ToReadOnlyReactiveCollection(device => new DeviceViewModel(device))
@@ -44,7 +43,7 @@ public class AudioInterfaceViewModel : IDisposable
     /// <summary>
     /// 計測対象のデバイス
     /// </summary>
-    public ObservableCollection<DeviceViewModel> MeasureDevices { get; } = new();
+    public ObservableCollection<DeviceViewModel> MeasureDevices { get; } = [];
 
     private DispatcherTimer DispatcherTimer { get; }
 
@@ -138,6 +137,5 @@ public class AudioInterfaceViewModel : IDisposable
     public void Dispose()
     {
         CompositeDisposable.Dispose();
-        Devices.Dispose();
     }
 }

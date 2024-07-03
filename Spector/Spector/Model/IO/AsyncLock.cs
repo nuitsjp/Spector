@@ -2,8 +2,7 @@
 
 public sealed class AsyncLock
 {
-    private readonly System.Threading.SemaphoreSlim _semaphore 
-        = new System.Threading.SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly Task<IDisposable> _releaser;
 
     public AsyncLock()
@@ -19,10 +18,10 @@ public sealed class AsyncLock
             wait.ContinueWith(
                 (_, state) => (IDisposable)state!,
                 _releaser.Result, 
-                System.Threading.CancellationToken.None,
+                CancellationToken.None,
                 TaskContinuationOptions.ExecuteSynchronously, 
                 TaskScheduler.Default
-            )!;
+            );
     }
     private sealed class Releaser : IDisposable
     {

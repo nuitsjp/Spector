@@ -3,7 +3,7 @@ using Kamishibai;
 
 namespace Spector.ViewModel;
 
-public partial class MainWindowViewModel(AudioInterfaceViewModel audioInterface)
+public class MainWindowViewModel(AudioInterfaceViewModel audioInterface)
     : ObservableObject, INavigatedAsyncAware, IDisposable
 {
     public AudioInterfaceViewModel AudioInterface { get; } = audioInterface;
@@ -15,6 +15,6 @@ public partial class MainWindowViewModel(AudioInterfaceViewModel audioInterface)
 
     public void Dispose()
     {
-        // TODO release managed resources here
+        AudioInterface.Dispose();
     }
 }

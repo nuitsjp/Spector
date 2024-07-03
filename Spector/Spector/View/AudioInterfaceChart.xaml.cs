@@ -1,10 +1,7 @@
 ﻿using System.Collections.Specialized;
 using ScottPlot;
 using Spector.Model;
-using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 using Reactive.Bindings.Extensions;
 using Spector.ViewModel;
 
@@ -13,7 +10,7 @@ namespace Spector.View;
 /// <summary>
 /// AudioInterfacesChart.xaml の相互作用ロジック
 /// </summary>
-public partial class AudioInterfaceChart : UserControl
+public partial class AudioInterfaceChart
 {
     private static readonly TimeSpan DisplayWidth = TimeSpan.FromSeconds(20);
 

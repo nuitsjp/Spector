@@ -18,9 +18,4 @@ public record Settings(
         deviceSettings = config!;
         return config is not null;
     }
-
-    public DeviceSettings GetDeviceSettings(DeviceId id)
-    {
-        return DeviceSettings.Single(x => x.Id == id);
-    }
 }

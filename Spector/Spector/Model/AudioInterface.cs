@@ -1,15 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Management;
-using System.Windows;
 using NAudio.CoreAudioApi;
-using NAudio.Wave.SampleProviders;
-using NAudio.Wave;
 using Reactive.Bindings;
-using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Spector.Model;
 
-public class AudioInterface(ISettingsRepository settingsRepository)
+public class AudioInterface(ISettingsRepository settingsRepository) : IDisposable
 {
     private Settings Settings { get; set; } = default!;
     private readonly ReactiveCollection<IDevice> _devices = new();
@@ -116,4 +112,13 @@ public class AudioInterface(ISettingsRepository settingsRepository)
         await settingsRepository.SaveAsync(Settings);
     }
 
+    public void Dispose()
+    {
+        foreach (var device in _devices)
+        {
+            device.Dispose();
+        }
+        _devices.Dispose();
+        Watcher.Dispose();
+    }
 }

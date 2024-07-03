@@ -5,6 +5,7 @@ namespace Spector.Model.IO;
 
 public abstract class RepositoryBase<T> where T : class
 {
+    // ReSharper disable once StaticMemberInGenericType
     private static readonly AsyncLock Lock = new();
     protected async Task<T> LoadAsync(FileInfo fileInfo, Func<T> getDefault)
     {
