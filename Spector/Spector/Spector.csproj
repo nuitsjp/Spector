@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 	  <None Remove="View\DeviceList.xaml" />
+	  <None Remove="View\MeasureTab.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>

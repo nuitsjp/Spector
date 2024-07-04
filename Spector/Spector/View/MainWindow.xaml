@@ -12,15 +12,14 @@
         Title="Specter" Height="1024" Width="1600"
         d:DataContext="{d:DesignInstance {x:Type viewModel:MainWindowViewModel}, IsDesignTimeCreatable=True}"
         Loaded="MainWindow_OnLoaded">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="500"/>
-        </Grid.RowDefinitions>
-
-        <view:DeviceList Grid.Row="0"/>
-
-        <view:AudioInterfaceChart Grid.Row="1"
-                                  AudioInterface="{Binding AudioInterface}"/>
-    </Grid>
+    <TabControl HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                Style="{StaticResource MaterialDesignFilledTabControl}">
+        <TabItem Header="Measure">
+            <view:MeasureTab/>
+        </TabItem>
+        <TabItem Header="Analysis">
+        </TabItem>
+        <TabItem Header="Settings">
+        </TabItem>
+    </TabControl>
 </Window>
