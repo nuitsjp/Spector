@@ -3,18 +3,20 @@ using Kamishibai;
 
 namespace Spector.ViewModel;
 
-public class MainWindowViewModel(AudioInterfaceViewModel audioInterface)
-    : ObservableObject, INavigatedAsyncAware, IDisposable
+public class MainWindowViewModel(
+    AudioInterfaceViewModel audioInterfaceViewModel, 
+    RecorderViewModel recorderViewModel) : ObservableObject, INavigatedAsyncAware, IDisposable
 {
-    public AudioInterfaceViewModel AudioInterface { get; } = audioInterface;
+    public AudioInterfaceViewModel AudioInterfaceViewModel { get; } = audioInterfaceViewModel;
+    public RecorderViewModel RecorderViewModel { get; } = recorderViewModel;
 
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {
-        await AudioInterface.ActivateAsync();
+        await AudioInterfaceViewModel.ActivateAsync();
     }
 
     public void Dispose()
     {
-        AudioInterface.Dispose();
+        AudioInterfaceViewModel.Dispose();
     }
 }

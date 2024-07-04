@@ -5,31 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spector.View"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:viewModel="clr-namespace:Spector.ViewModel"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance {x:Type viewModel:MainWindowViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="500"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" 
                     Margin="5"
-                    HorizontalAlignment="Stretch">
-            <ComboBox ItemsSource="{Binding MeasureDevices}"
-                      SelectedItem="{Binding RecordDevice, Mode=TwoWay}"
-                      DisplayMemberPath="Name"
-                      materialDesign:HintAssist.Hint="Record Device"
-                      Width="300"/>
+                    HorizontalAlignment="Stretch"
+                    DataContext="{Binding RecorderViewModel}">
             <ComboBox ItemsSource="{Binding Directions}"
                       SelectedItem="{Binding SelectedDirection, Mode=TwoWay}"
                       materialDesign:HintAssist.Hint="Direction"
                       Width="200"/>
 
-            <CheckBox Content="With Voice" IsChecked="{Binding VoiceState}"
+            <CheckBox Content="With Voice" IsChecked="{Binding WithVoice}"
                       Margin="5"/>
 
-            <CheckBox Content="With Buzz" IsChecked="{Binding BuzzState}"
+            <CheckBox Content="With Buzz" IsChecked="{Binding WithBuzz}"
                       Margin="5"/>
 
             <Button
@@ -78,6 +76,6 @@
         <local:DeviceList Grid.Row="1"/>
 
         <local:AudioInterfaceChart Grid.Row="2"
-                                  AudioInterface="{Binding AudioInterface}"/>
+                                  AudioInterface="{Binding AudioInterfaceViewModel}"/>
     </Grid>
 </UserControl>

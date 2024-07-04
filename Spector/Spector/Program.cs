@@ -15,9 +15,10 @@ builder.Services.AddPresentation<MainWindow, MainWindowViewModel>();
 
 // ViewModel
 builder.Services.AddTransient<AudioInterfaceViewModel>();
+builder.Services.AddTransient<RecorderViewModel>();
 
 // Model
-builder.Services.AddTransient<AudioInterface>();
+builder.Services.AddSingleton<AudioInterface>();
 
 // Repository
 builder.Services.AddTransient<ISettingsRepository, SettingsRepository>();
