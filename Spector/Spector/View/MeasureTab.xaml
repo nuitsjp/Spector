@@ -4,17 +4,80 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spector.View"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="1024" d:DesignWidth="1600">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="500"/>
         </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" 
+                    Margin="5"
+                    HorizontalAlignment="Stretch">
+            <ComboBox ItemsSource="{Binding MeasureDevices}"
+                      SelectedItem="{Binding RecordDevice, Mode=TwoWay}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Record Device"
+                      Width="300"/>
+            <ComboBox ItemsSource="{Binding Directions}"
+                      SelectedItem="{Binding SelectedDirection, Mode=TwoWay}"
+                      materialDesign:HintAssist.Hint="Direction"
+                      Width="200"/>
 
-        <local:DeviceList Grid.Row="0"/>
+            <CheckBox Content="With Voice" IsChecked="{Binding VoiceState}"
+                      Margin="5"/>
 
-        <local:AudioInterfaceChart Grid.Row="1"
+            <CheckBox Content="With Buzz" IsChecked="{Binding BuzzState}"
+                      Margin="5"/>
+
+            <Button
+                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding Recording}"
+                materialDesign:ButtonProgressAssist.Value="{Binding RecordingProgress}"
+                Command="{Binding RecordCommand}"
+                ToolTip="録音">
+                <Button.Content>
+                    <materialDesign:PackIcon>
+                        <materialDesign:PackIcon.Style>
+                            <Style TargetType="{x:Type materialDesign:PackIcon}">
+                                <Setter Property="Kind" Value="Record"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Recording}" Value="True">
+                                        <Setter Property="Kind" Value="Stop"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </materialDesign:PackIcon.Style>
+                    </materialDesign:PackIcon>
+                </Button.Content>
+            </Button>
+
+            <Rectangle Width="20" />
+
+            <ComboBox ItemsSource="{Binding RenderDevices}"
+                      SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Playback Device"
+                      Width="300"/>
+            <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
+                          IsChecked="{Binding Playing}"
+                          ToolTip="再生"/>
+
+            <Rectangle Width="20" />
+
+            <TextBox Text="{Binding RecordingSpan, Mode=TwoWay}" 
+                     materialDesign:HintAssist.Hint="Recording Span"
+                     Width="100"/>
+            <TextBox Text="{Binding RecorderHost}"
+                     materialDesign:HintAssist.Hint="Connect Host Address"
+                     Width="150"
+                     Margin="50, 5, 5, 5"/>
+        </StackPanel>
+
+        <local:DeviceList Grid.Row="1"/>
+
+        <local:AudioInterfaceChart Grid.Row="2"
                                   AudioInterface="{Binding AudioInterface}"/>
     </Grid>
 </UserControl>
