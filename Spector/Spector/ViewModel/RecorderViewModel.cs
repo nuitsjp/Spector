@@ -51,16 +51,19 @@ public partial class RecorderViewModel(
     /// <summary>
     /// 録音の進捗を取得する
     /// </summary>
-    [ObservableProperty] public int _recordingProgress;
+    [ObservableProperty] private int _recordingProgress;
 
     public async Task ActivateAsync()
     {
+        PlaybackDevices.CollectionChanged += (_, _) =>
+        {
+            PlaybackDevice ??= PlaybackDevices.FirstOrDefault();
+        };
+
         var settings = await settingsRepository.LoadAsync();
         RecordingSpan = settings.RecorderSettings.RecordingSpan;
         WithVoice = settings.RecorderSettings.WithVoice;
         WithBuzz = settings.RecorderSettings.WithBuzz;
-
-        PlaybackDevice = PlaybackDevices.FirstOrDefault();
 
 
         this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
