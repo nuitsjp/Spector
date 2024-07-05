@@ -73,38 +73,43 @@ public partial class RecorderViewModel(
     {
         if (IsRecording is false)
         {
-            var settings = await settingsRepository.LoadAsync();
-
-            Recorder.StartRecording(
-                new DirectoryInfo("Record"),
-                audioInterfaceViewModel
-                    .Devices
-                    .Where(x => x.Measure)
-                    .Select(x => x.Device));
-
-            // 録音開始時刻を記録する
-            StartRecordingTime = DateTime.Now;
-            RecordingProgress = 0;
-
-            // 進捗更新タイマーを起動する
-            UpdateProgressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-            UpdateProgressTimer.Tick += (_, _) =>
-            {
-                RecordingProgress = (int)((DateTime.Now - StartRecordingTime).TotalSeconds * 100 / RecordingSpan.TotalSeconds);
-            };
-            UpdateProgressTimer.Start();
-
-            // 録音タイマーを起動する
-            RecordTimer = new DispatcherTimer { Interval = RecordingSpan };
-            RecordTimer.Tick += (_, _) => StopRecording();
-            RecordTimer.Start();
+            await StartRecording();
         }
         else
         {
             StopRecording();
         }
+    }
 
-        IsRecording = !IsRecording;
+    private async Task StartRecording()
+    {
+        var settings = await settingsRepository.LoadAsync();
+
+        Recorder.StartRecording(
+            new DirectoryInfo("Record"),
+            audioInterfaceViewModel
+                .Devices
+                .Where(x => x.Measure)
+                .Select(x => x.Device));
+
+        // 録音開始時刻を記録する
+        StartRecordingTime = DateTime.Now;
+        RecordingProgress = 0;
+
+        // 進捗更新タイマーを起動する
+        UpdateProgressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        UpdateProgressTimer.Tick += (_, _) =>
+        {
+            RecordingProgress = (int)((DateTime.Now - StartRecordingTime).TotalSeconds * 100 / RecordingSpan.TotalSeconds);
+        };
+        UpdateProgressTimer.Start();
+
+        // 録音タイマーを起動する
+        RecordTimer = new DispatcherTimer { Interval = RecordingSpan };
+        RecordTimer.Tick += (_, _) => StopRecording();
+        RecordTimer.Start();
+
+        IsRecording = true;
     }
 
     private void StopRecording()
@@ -118,6 +123,7 @@ public partial class RecorderViewModel(
         RecordTimer.Stop();
 
         IsRecording = false;
+        RecordingProgress = 0;
     }
 
     private async void OnUpdated()
