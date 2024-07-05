@@ -53,7 +53,7 @@
 
             <Rectangle Width="20" />
 
-            <ComboBox ItemsSource="{Binding RenderDevices}"
+            <ComboBox ItemsSource="{Binding PlaybackDevices}"
                       SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
                       DisplayMemberPath="Name"
                       materialDesign:HintAssist.Hint="Playback Device"

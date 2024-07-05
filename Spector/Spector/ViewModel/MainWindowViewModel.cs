@@ -12,6 +12,7 @@ public class MainWindowViewModel(
 
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {
+        await RecorderViewModel.ActivateAsync();
         await AudioInterfaceViewModel.ActivateAsync();
     }
 

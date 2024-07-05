@@ -19,11 +19,14 @@ public class SettingsRepository : RepositoryBase<Settings>, ISettingsRepository
             () =>
                 new (
                     "localhost",
-                    TimeSpan.FromSeconds(30),
                     null,
                     null,
                     true,
                     true,
+                    new RecorderSettings(
+                        TimeSpan.FromSeconds(30),
+                        false, 
+                        true),
                     new List<DeviceSettings>()));
 
     /// <summary>

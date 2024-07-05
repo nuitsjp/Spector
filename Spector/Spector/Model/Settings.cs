@@ -5,11 +5,11 @@
 /// </summary>
 public record Settings(
     string RecorderHost,
-    TimeSpan RecordingSpan,
     DeviceId? RecordDeviceId,
     DeviceId? PlaybackDeviceId, 
     bool EnableAWeighting,
     bool EnableFastTimeWeighting,
+    RecorderSettings RecorderSettings,
     IReadOnlyList<DeviceSettings> DeviceSettings)
 {
     public bool TryGetDeviceSettings(DeviceId id, out DeviceSettings deviceSettings)
@@ -19,3 +19,8 @@ public record Settings(
         return config is not null;
     }
 }
+
+public record RecorderSettings(
+    TimeSpan RecordingSpan,
+    bool WithVoice,
+    bool WithBuzz);
