@@ -117,6 +117,36 @@ public partial class Device : ObservableObject, IDevice
             : Decibel.Minimum;
     }
 
+    /// <summary>
+    /// キャンセルされるまでループ再生する。
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public void PlayLooping(CancellationToken token)
+    {
+        // スピーカーからNAudioで再生するためのプレイヤーを生成する。
+        using var enumerator = new MMDeviceEnumerator();
+        var mmDevice = enumerator.GetDevice(Id.AsPrimitive());
+        IWavePlayer wavePlayer = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 0);
+
+        // ループ音源を作成する。
+        WaveStream waveStream = new LoopStream(new WaveFileReader(Properties.Resources.吾輩は猫である));
+
+        // 終了処理を登録する。
+        token.Register(() =>
+        {
+            // リソースを開放する。
+            wavePlayer.Stop();
+            wavePlayer.Dispose();
+            mmDevice.Dispose();
+            waveStream.Dispose();
+        });
+
+        // 出力に入力を接続して再生を開始する。
+        wavePlayer.Init(waveStream);
+        wavePlayer.Play();
+    }
+
     public void Dispose()
     {
         MmDevice.Dispose();

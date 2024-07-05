@@ -59,7 +59,7 @@
                       materialDesign:HintAssist.Hint="Playback Device"
                       Width="300"/>
             <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
-                          IsChecked="{Binding Playing}"
+                          IsChecked="{Binding IsPlaying}"
                           ToolTip="再生"/>
 
             <Rectangle Width="20" />

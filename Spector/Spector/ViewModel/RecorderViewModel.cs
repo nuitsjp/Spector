@@ -53,6 +53,8 @@ public partial class RecorderViewModel(
     /// </summary>
     [ObservableProperty] private int _recordingProgress;
 
+    [ObservableProperty] private bool _isPlaying;
+
     public async Task ActivateAsync()
     {
         PlaybackDevices.CollectionChanged += (_, _) =>
@@ -69,6 +71,7 @@ public partial class RecorderViewModel(
         this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
+        this.ObserveProperty(x => x.IsPlaying).Subscribe(OnPlaying).AddTo(CompositeDisposable);
     }
 
     [RelayCommand]
@@ -127,6 +130,28 @@ public partial class RecorderViewModel(
 
         IsRecording = false;
         RecordingProgress = 0;
+    }
+
+    private CancellationTokenSource PlayBackCancellationTokenSource { get; set; } = new();
+
+    private void OnPlaying(bool playBack)
+    {
+        if (playBack)
+        {
+            if (PlaybackDevice is null)
+            {
+                IsPlaying = false;
+                return;
+            }
+
+            PlayBackCancellationTokenSource = new();
+            PlaybackDevice.PlayLooping(PlayBackCancellationTokenSource.Token);
+        }
+        else
+        {
+            PlayBackCancellationTokenSource.Cancel();
+        }
+
     }
 
     private async void OnUpdated()
