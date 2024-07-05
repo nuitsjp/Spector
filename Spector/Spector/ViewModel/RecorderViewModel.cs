@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NAudio.CoreAudioApi;
@@ -32,6 +33,26 @@ public partial class RecorderViewModel(
     [ObservableProperty] private TimeSpan _recordingSpan;
     [ObservableProperty] private bool _isRecording;
 
+    /// <summary>
+    /// 録音開始時刻
+    /// </summary>
+    private DateTime StartRecordingTime { get; set; }
+
+    /// <summary>
+    /// 進捗更新タイマー
+    /// </summary>
+    private DispatcherTimer UpdateProgressTimer { get; set; } = new();
+
+    /// <summary>
+    /// 録音停止タイマー
+    /// </summary>
+    private DispatcherTimer RecordTimer { get; set; } = new();
+
+    /// <summary>
+    /// 録音の進捗を取得する
+    /// </summary>
+    [ObservableProperty] public int _recordingProgress;
+
     public async Task ActivateAsync()
     {
         var settings = await settingsRepository.LoadAsync();
@@ -60,13 +81,43 @@ public partial class RecorderViewModel(
                     .Devices
                     .Where(x => x.Measure)
                     .Select(x => x.Device));
+
+            // 録音開始時刻を記録する
+            StartRecordingTime = DateTime.Now;
+            RecordingProgress = 0;
+
+            // 進捗更新タイマーを起動する
+            UpdateProgressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            UpdateProgressTimer.Tick += (_, _) =>
+            {
+                RecordingProgress = (int)((DateTime.Now - StartRecordingTime).TotalSeconds * 100 / RecordingSpan.TotalSeconds);
+            };
+            UpdateProgressTimer.Start();
+
+            // 録音タイマーを起動する
+            RecordTimer = new DispatcherTimer { Interval = RecordingSpan };
+            RecordTimer.Tick += (_, _) => StopRecording();
+            RecordTimer.Start();
         }
         else
         {
-            Recorder.StopRecording();
+            StopRecording();
         }
 
         IsRecording = !IsRecording;
+    }
+
+    private void StopRecording()
+    {
+        Recorder.StopRecording();
+
+        // 進捗更新タイマーを停止する
+        UpdateProgressTimer.Stop();
+
+        // 録音タイマーを停止する
+        RecordTimer.Stop();
+
+        IsRecording = false;
     }
 
     private async void OnUpdated()

@@ -28,10 +28,10 @@
                       Margin="5"/>
 
             <CheckBox Content="With Buzz" IsChecked="{Binding WithBuzz}"
-                      Margin="5"/>
+                      Margin="5"/>  
 
             <Button
-                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding Recording}"
+                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRecording}"
                 materialDesign:ButtonProgressAssist.Value="{Binding RecordingProgress}"
                 Command="{Binding StartRecordingCommand}"
                 ToolTip="録音">
