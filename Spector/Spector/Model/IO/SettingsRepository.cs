@@ -25,6 +25,7 @@ public class SettingsRepository : RepositoryBase<Settings>, ISettingsRepository
                     true,
                     new RecorderSettings(
                         TimeSpan.FromSeconds(30),
+                        "Record",
                         false, 
                         true),
                     new List<DeviceSettings>()));

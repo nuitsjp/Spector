@@ -54,7 +54,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
     }
 
-    private IDevice Device { get; }
+    public IDevice Device { get; }
 
     public DataFlow DataFlow => Device.DataFlow;
 

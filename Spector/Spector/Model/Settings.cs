@@ -22,5 +22,6 @@ public record Settings(
 
 public record RecorderSettings(
     TimeSpan RecordingSpan,
+    string OutputDirectory,
     bool WithVoice,
     bool WithBuzz);

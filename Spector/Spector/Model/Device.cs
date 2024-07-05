@@ -6,6 +6,8 @@ namespace Spector.Model;
 
 public partial class Device : ObservableObject, IDevice
 {
+    public event EventHandler<WaveInEventArgs>? DataAvailable;
+
     public Device(
         MMDevice mmDevice,
         string name,
@@ -30,14 +32,16 @@ public partial class Device : ObservableObject, IDevice
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
 
         WasapiCapture.DataAvailable += OnDataAvailable;
+        WasapiCapture.DataAvailable += (sender, args) => DataAvailable?.Invoke(this, args);
 
-        if(Measure) StartMeasure();
+        if (Measure) StartMeasure();
     }
 
     private MMDevice MmDevice { get; }
     public DeviceId Id { get; }
 
     public DataFlow DataFlow { get; }
+    public WaveFormat WaveFormat => WasapiCapture.WaveFormat;
 
     /// <summary>
     /// デバイス名。利用者が変更可能な名称。

@@ -14,8 +14,8 @@ var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 builder.Services.AddPresentation<MainWindow, MainWindowViewModel>();
 
 // ViewModel
-builder.Services.AddTransient<AudioInterfaceViewModel>();
-builder.Services.AddTransient<RecorderViewModel>();
+builder.Services.AddSingleton<AudioInterfaceViewModel>();
+builder.Services.AddSingleton<RecorderViewModel>();
 
 // Model
 builder.Services.AddSingleton<AudioInterface>();

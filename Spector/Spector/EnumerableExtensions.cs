@@ -1,6 +1,6 @@
 ﻿namespace Spector;
 
-public static class EnumerableExtension
+public static class EnumerableExtensions
 {
     /// <summary>
     /// 条件を満たす要素が含まれないことを確認する。
