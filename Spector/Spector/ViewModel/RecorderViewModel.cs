@@ -56,7 +56,7 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private bool _isPlaying;
 
-    [ObservableProperty] private string _recorderHost;
+    [ObservableProperty] private string _recorderHost = string.Empty;
 
     public async Task ActivateAsync()
     {
