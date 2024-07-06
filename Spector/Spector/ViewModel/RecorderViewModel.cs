@@ -159,6 +159,12 @@ public partial class RecorderViewModel(
 
     }
 
+    [RelayCommand]
+    private async Task ConnectCaptureDeviceAsync()
+    {
+        await audioInterface.ConnectCaptureDeviceAsync(RecorderHost);
+    }
+
     private async void OnUpdated()
     {
         var settings = await settingsRepository.LoadAsync();

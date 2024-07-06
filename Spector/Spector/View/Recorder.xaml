@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:viewModel="clr-namespace:Spector.ViewModel"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance {x:Type viewModel:MainWindowViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -79,7 +81,8 @@
 
         <Button Content="{materialDesign:PackIcon Kind=MicrophonePlus}"
                     Style="{StaticResource MaterialDesignIconButton}"
-                    ToolTip="リモート収音デバイスを追加する"/>
+                    ToolTip="リモート収音デバイスを追加する"
+                    Command="{Binding ConnectCaptureDeviceCommand}"/>
 
         <Button Content="{materialDesign:PackIcon Kind=Speaker}"
                     Style="{StaticResource MaterialDesignIconButton}"
