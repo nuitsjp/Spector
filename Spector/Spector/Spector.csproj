@@ -12,7 +12,7 @@
 	<ItemGroup>
 	  <None Remove="View\DeviceList.xaml" />
 	  <None Remove="View\MeasureTab.xaml" />
-	  <None Remove="View\RecordingController.xaml" />
+	  <None Remove="View\Recorder.xaml" />
 	  <None Remove="View\Style\Generic.xaml" />
 	</ItemGroup>
 

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace Spector.View
 {
     /// <summary>
-    /// RecordingController.xaml の相互作用ロジック
+    /// Recorder.xaml の相互作用ロジック
     /// </summary>
-    public partial class RecordingController : UserControl
+    public partial class Recorder : UserControl
     {
-        public RecordingController()
+        public Recorder()
         {
             InitializeComponent();
         }

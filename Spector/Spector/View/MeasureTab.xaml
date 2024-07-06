@@ -16,7 +16,7 @@
             <RowDefinition Height="500"/>
         </Grid.RowDefinitions>
         
-        <local:RecordingController/>
+        <local:Recorder/>
 
         <local:DeviceList Grid.Row="1"/>
 
