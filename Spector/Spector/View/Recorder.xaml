@@ -75,18 +75,18 @@
         <Rectangle Width="20" />
 
         <TextBox Text="{Binding RecorderHost}"
-                     materialDesign:HintAssist.Hint="Connect Host Address"
-                     Width="150"
-                     Margin="50, 5, 5, 5"/>
+                 materialDesign:HintAssist.Hint="Connect Host Address"
+                 Width="150"
+                 Margin="50, 5, 5, 5"/>
 
         <Button Content="{materialDesign:PackIcon Kind=MicrophonePlus}"
-                    Style="{StaticResource MaterialDesignIconButton}"
-                    ToolTip="リモート収音デバイスを追加する"
-                    Command="{Binding ConnectCaptureDeviceCommand}"/>
+                Style="{StaticResource MaterialDesignIconButton}"
+                ToolTip="リモート収音デバイスを追加する"
+                Command="{Binding ConnectCaptureDeviceCommand}"/>
 
         <Button Content="{materialDesign:PackIcon Kind=Speaker}"
-                    Style="{StaticResource MaterialDesignIconButton}"
-                    ToolTip="リモート再生デバイスを追加する"/>
+                Style="{StaticResource MaterialDesignIconButton}"
+                ToolTip="リモート再生デバイスを追加する"/>
 
     </StackPanel>
 </UserControl>
