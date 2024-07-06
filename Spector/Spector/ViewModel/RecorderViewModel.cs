@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Security.Cryptography.Pkcs;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -55,6 +56,8 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private bool _isPlaying;
 
+    [ObservableProperty] private string _recorderHost;
+
     public async Task ActivateAsync()
     {
         PlaybackDevices.CollectionChanged += (_, _) =>
@@ -66,11 +69,13 @@ public partial class RecorderViewModel(
         RecordingSpan = settings.RecorderSettings.RecordingSpan;
         WithVoice = settings.RecorderSettings.WithVoice;
         WithBuzz = settings.RecorderSettings.WithBuzz;
+        RecorderHost = settings.RecorderHost;
 
 
         this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
+        this.ObserveProperty(x => x.RecorderHost).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
     }
 
@@ -160,6 +165,7 @@ public partial class RecorderViewModel(
         await settingsRepository.SaveAsync(
             settings with
             {
+                RecorderHost = RecorderHost,
                 RecorderSettings = new RecorderSettings(RecordingSpan, settings.RecorderSettings.OutputDirectory, WithVoice, WithBuzz)
             });
     }
