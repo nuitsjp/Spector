@@ -15,63 +15,8 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="500"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal" 
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    DataContext="{Binding RecorderViewModel}">
-            <ComboBox ItemsSource="{Binding Directions}"
-                      SelectedItem="{Binding SelectedDirection, Mode=TwoWay}"
-                      materialDesign:HintAssist.Hint="Direction"
-                      Width="200"/>
-
-            <CheckBox Content="With Voice" IsChecked="{Binding WithVoice}"
-                      Margin="5"/>
-
-            <CheckBox Content="With Buzz" IsChecked="{Binding WithBuzz}"
-                      Margin="5"/>  
-
-            <Button
-                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRecording}"
-                materialDesign:ButtonProgressAssist.Value="{Binding RecordingProgress}"
-                Command="{Binding StartRecordingCommand}"
-                ToolTip="録音">
-                <Button.Content>
-                    <materialDesign:PackIcon>
-                        <materialDesign:PackIcon.Style>
-                            <Style TargetType="{x:Type materialDesign:PackIcon}">
-                                <Setter Property="Kind" Value="Record"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsRecording}" Value="True">
-                                        <Setter Property="Kind" Value="Stop"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </materialDesign:PackIcon.Style>
-                    </materialDesign:PackIcon>
-                </Button.Content>
-            </Button>
-
-            <Rectangle Width="20" />
-
-            <ComboBox ItemsSource="{Binding PlaybackDevices}"
-                      SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
-                      DisplayMemberPath="Name"
-                      materialDesign:HintAssist.Hint="Playback Device"
-                      Width="300"/>
-            <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
-                          IsChecked="{Binding IsPlaying}"
-                          ToolTip="再生"/>
-
-            <Rectangle Width="20" />
-
-            <TextBox Text="{Binding RecordingSpan, Mode=TwoWay}" 
-                     materialDesign:HintAssist.Hint="Recording Span"
-                     Width="100"/>
-            <TextBox Text="{Binding RecorderHost}"
-                     materialDesign:HintAssist.Hint="Connect Host Address"
-                     Width="150"
-                     Margin="50, 5, 5, 5"/>
-        </StackPanel>
+        
+        <local:RecordingController/>
 
         <local:DeviceList Grid.Row="1"/>
 
