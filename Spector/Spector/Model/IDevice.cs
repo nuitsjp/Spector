@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
@@ -31,38 +30,4 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     void StopMeasure();
 
     void PlayLooping(CancellationToken token);
-}
-
-public partial class RemoteServerDevice : ObservableObject, IDevice
-{
-    public event EventHandler<WaveInEventArgs>? DataAvailable;
-    public DeviceId Id { get; }
-    public DataFlow DataFlow { get; }
-    public WaveFormat WaveFormat { get; }
-    public string Name { get; set; }
-    public string SystemName { get; }
-    public bool Measure { get; }
-    public bool Connect { get; set; }
-    public bool Connectable { get; }
-    public VolumeLevel VolumeLevel { get; set; }
-    public Decibel Level { get; }
-    public void StartMeasure()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void StopMeasure()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void PlayLooping(CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
 }

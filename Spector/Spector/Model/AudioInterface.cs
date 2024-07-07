@@ -124,7 +124,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         }
     }
 
-    private async Task HandleClientAsync(TcpClient client)
+    private Task HandleClientAsync(TcpClient client)
     {
         var networkStream = client.GetStream();
         var reader = new BinaryReader(networkStream);
@@ -136,14 +136,22 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         // データの受信と処理
         if (deviceType == "Capture")
         {
-            // ここにCaptureデバイスのデータを処理するコードを追加
-            byte[] buffer = new byte[9600];
-            var length = reader.Read(buffer, 0, buffer.Length);
+            RemoteServerDevice device = new(
+                DataFlow.Capture, 
+                deviceName, 
+                RecordingConfig.Default.WaveFormat, 
+                client,
+                reader,
+                networkStream);
+            device.StartMeasure();
+            _devices.Add(device);
         }
         else if (deviceType == "Render")
         {
             // ここにRenderデバイスのデータを処理するコードを追加
         }
+
+        return Task.CompletedTask;
     }
 
     public Task ConnectAsync(string address)
