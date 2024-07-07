@@ -124,34 +124,11 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         }
     }
 
-    private Task HandleClientAsync(TcpClient client)
+    private void HandleClientAsync(TcpClient client)
     {
-        var networkStream = client.GetStream();
-        var reader = new BinaryReader(networkStream);
-
-        // デバイス情報の受信
-        var deviceType = reader.ReadString();
-        var deviceName = reader.ReadString();
-
-        // データの受信と処理
-        if (deviceType == "Capture")
-        {
-            RemoteServerDevice device = new(
-                DataFlow.Capture, 
-                deviceName, 
-                RecordingConfig.Default.WaveFormat, 
-                client,
-                reader,
-                networkStream);
-            device.StartMeasure();
-            _devices.Add(device);
-        }
-        else if (deviceType == "Render")
-        {
-            // ここにRenderデバイスのデータを処理するコードを追加
-        }
-
-        return Task.CompletedTask;
+        RemoteServerDevice device = new(client, RecordingConfig.Default.WaveFormat);
+        device.StartMeasure();
+        _devices.Add(device);
     }
 
     public Task ConnectAsync(string address)
@@ -174,8 +151,14 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
     {
         Settings = Settings with
         {
-            DeviceSettings = Devices
-                .Select(x => new DeviceSettings(x.Id, x.Name, x.Measure, x.Connect))
+            DeviceSettings = Settings.DeviceSettings
+                .Select(x =>
+                {
+                    var device = Devices.SingleOrDefault(d => d.Id == x.Id);
+                    return device is null 
+                        ? x 
+                        : new DeviceSettings(device.Id, device.Name, device.Measure, device.Connect);
+                })
                 .ToArray()
         };
         await settingsRepository.SaveAsync(Settings);
