@@ -59,6 +59,8 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private string _recorderHost = string.Empty;
 
+    [ObservableProperty] private bool _isConnect;
+
     public async Task ActivateAsync()
     {
         PlaybackDevices.CollectionChanged += (_, _) =>
@@ -78,6 +80,7 @@ public partial class RecorderViewModel(
         this.ObserveProperty(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.RecorderHost).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
+        this.ObserveProperty(x => x.IsConnect).Skip(1).Subscribe(ConnectOnUpdated).AddTo(CompositeDisposable);
     }
 
     [RelayCommand]
@@ -160,10 +163,12 @@ public partial class RecorderViewModel(
 
     }
 
-    [RelayCommand]
-    private async Task ConnectCaptureDeviceAsync()
+    private async void ConnectOnUpdated(bool connect)
     {
-        await audioInterface.ConnectAsync(RecorderHost);
+        if (connect)
+        {
+            await audioInterface.ConnectAsync(RecorderHost);
+        }
     }
 
     private async void OnUpdated()

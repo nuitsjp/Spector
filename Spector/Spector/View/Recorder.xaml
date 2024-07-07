@@ -79,20 +79,24 @@
                  Width="150"
                  Margin="50, 5, 5, 5"/>
 
-        <ComboBox ItemsSource="{Binding Devices}"
-                  SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
-                  DisplayMemberPath="Name"
-                  materialDesign:HintAssist.Hint="Connect Device"
-                  Width="250"/>
+        <ToggleButton IsChecked="{Binding IsConnect}"
+                      ToolTip="接続">
+            <ToggleButton.Content>
+                <materialDesign:PackIcon>
+                    <materialDesign:PackIcon.Style>
+                        <Style TargetType="{x:Type materialDesign:PackIcon}">
+                            <Setter Property="Kind" Value="PowerPlug"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnect}" Value="True">
+                                    <Setter Property="Kind" Value="PowerPlugOff"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:PackIcon.Style>
+                </materialDesign:PackIcon>
+            </ToggleButton.Content>
 
-        <Button Content="{materialDesign:PackIcon Kind=MicrophonePlus}"
-                Style="{StaticResource MaterialDesignIconButton}"
-                ToolTip="リモート収音デバイスを追加する"
-                Command="{Binding ConnectCaptureDeviceCommand}"/>
-
-        <Button Content="{materialDesign:PackIcon Kind=Speaker}"
-                Style="{StaticResource MaterialDesignIconButton}"
-                ToolTip="リモート再生デバイスを追加する"/>
+        </ToggleButton>
 
     </StackPanel>
 </UserControl>

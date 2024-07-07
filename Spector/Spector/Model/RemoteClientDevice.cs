@@ -48,8 +48,8 @@ public partial class RemoteClientDevice(
 
         device.DataAvailable += (s, e) =>
         {
-            //NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
-            //NetworkStream.Flush();
+            NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
+            NetworkStream.Flush();
         };
     }
 
