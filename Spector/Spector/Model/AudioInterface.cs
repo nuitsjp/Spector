@@ -136,7 +136,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         foreach (var device in Devices.Where(x => x.Connect))
         {
             RemoteClientDevice remoteClientDevice = new(device, address);
-            remoteClientDevice.StartMeasure();
+            remoteClientDevice.ConnectAsync();
             _devices.Add(remoteClientDevice);
         }
         return Task.CompletedTask;
