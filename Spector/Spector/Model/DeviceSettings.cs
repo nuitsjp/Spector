@@ -3,7 +3,8 @@
 public class DeviceSettings(
     DeviceId id,
     string name,
-    bool measure)
+    bool measure,
+    bool connect)
 {
     /// <summary>
     /// ID
@@ -19,4 +20,9 @@ public class DeviceSettings(
     /// 計測するか、しないか取得する。
     /// </summary>
     public bool Measure { get; set; } = measure;
+
+    /// <summary>
+    /// 接続するか、しないか取得する。
+    /// </summary>
+    public bool Connect { get; set; } = connect;
 }

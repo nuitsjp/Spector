@@ -23,6 +23,8 @@ public partial class RemoteClientDevice(
     public string Name { get; set; } = @$"{device.Name}(Server:{Dns.GetHostName()})";
     public string SystemName { get; } = @$"{device.Name}(Server:{Dns.GetHostName()})";
     [ObservableProperty] private bool _measure = device.Measure;
+    public bool Connect { get; set; } = device.Connect;
+    public bool Connectable => false;
     public VolumeLevel VolumeLevel { get; set; } = device.VolumeLevel;
     [ObservableProperty] private Decibel _level = Decibel.Minimum;
     private TcpClient? TcpClient { get; set; }
@@ -46,14 +48,13 @@ public partial class RemoteClientDevice(
 
         device.DataAvailable += (s, e) =>
         {
-            NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
-            NetworkStream.Flush();
+            //NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
+            //NetworkStream.Flush();
         };
     }
 
     public void StopMeasure()
     {
-        throw new NotImplementedException();
     }
 
     public void PlayLooping(CancellationToken token)

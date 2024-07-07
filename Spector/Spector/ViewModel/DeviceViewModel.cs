@@ -52,6 +52,13 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
                 };
             })
             .AddTo(CompositeDisposable);
+
+        // Connectを同期する
+        Connect = Device.Connect;
+        this.ObserveProperty(x => x.Connect)
+            .Skip(1)// 上記の「Connect = Device.Connect;」の変更をスキップする。
+            .Subscribe(connect => device.Connect = connect)
+            .AddTo(CompositeDisposable);
     }
 
     public IDevice Device { get; }
@@ -64,6 +71,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _measure;
 
     [ObservableProperty] private float _volumeLevel;
+    [ObservableProperty] private bool _connect;
 
     public double[] LiveData { get; } = CreateEmptyData();
 

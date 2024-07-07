@@ -94,7 +94,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         // 新たに接続されたデバイスった場合
         if (Settings.TryGetDeviceSettings(deviceId, out var deviceSettings) is false)
         {
-            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
+            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true, false);
             var deviceConfigs = Settings.DeviceSettings.ToList();
             deviceConfigs.Add(deviceSettings);
             Settings = Settings with { DeviceSettings = deviceConfigs };
@@ -105,6 +105,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
             mmDevice,
             deviceSettings.Name,
             deviceSettings.Measure,
+            deviceSettings.Connect,
             RecordingConfig.Default.WaveFormat);
     }
 
@@ -145,11 +146,14 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         }
     }
 
-    public Task ConnectCaptureDeviceAsync(IDevice device, string address)
+    public Task ConnectAsync(string address)
     {
-        RemoteClientDevice remoteClientDevice = new(device, address);
-        remoteClientDevice.StartMeasure();
-        _devices.Add(remoteClientDevice);
+        foreach (var device in Devices.Where(x => x.Connect))
+        {
+            RemoteClientDevice remoteClientDevice = new(device, address);
+            remoteClientDevice.StartMeasure();
+            _devices.Add(remoteClientDevice);
+        }
         return Task.CompletedTask;
     }
 
@@ -160,7 +164,12 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private async void UpdateSettings()
     {
-        Settings = Settings with { DeviceSettings = Devices.Select(x => new DeviceSettings(x.Id, x.Name, x.Measure)).ToArray() };
+        Settings = Settings with
+        {
+            DeviceSettings = Devices
+                .Select(x => new DeviceSettings(x.Id, x.Name, x.Measure, x.Connect))
+                .ToArray()
+        };
         await settingsRepository.SaveAsync(Settings);
     }
 

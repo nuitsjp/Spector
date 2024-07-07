@@ -12,6 +12,7 @@ public partial class Device : ObservableObject, IDevice
         MMDevice mmDevice,
         string name,
         bool measure,
+        bool connect,
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
@@ -20,6 +21,7 @@ public partial class Device : ObservableObject, IDevice
         Name = name;
         SystemName = mmDevice.FriendlyName;
         Measure = measure;
+        Connect = connect;
 
         WasapiCapture = 
             MmDevice.DataFlow == DataFlow.Capture
@@ -58,6 +60,10 @@ public partial class Device : ObservableObject, IDevice
     /// </summary>
     [ObservableProperty] private bool _measure;
 
+    [ObservableProperty] private bool _connect;
+
+    public bool Connectable { get; } = true;
+
     /// <summary>
     /// 入出力レベル
     /// </summary>
@@ -74,7 +80,7 @@ public partial class Device : ObservableObject, IDevice
     /// <summary>
     /// 音量レベル
     /// </summary>
-    public Decibel Level { get; private set; } = Decibel.Minimum;
+    [ObservableProperty] private Decibel _level = Decibel.Minimum;
 
     private WasapiCapture WasapiCapture { get; }
     private BufferedWaveProvider BufferedWaveProvider { get; }
@@ -99,17 +105,17 @@ public partial class Device : ObservableObject, IDevice
     {
         BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 
-        float[] buffer = new float[e.BytesRecorded / 2];
-        int samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
+        var buffer = new float[e.BytesRecorded / 2];
+        var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
 
         // 音量計算（RMS値）
         double sum = 0;
-        for (int i = 0; i < samplesRead; i++)
+        for (var i = 0; i < samplesRead; i++)
         {
             sum += buffer[i] * buffer[i];
         }
-        double rms = Math.Sqrt(sum / samplesRead);
-        double db = 20 * Math.Log10(rms);
+        var rms = Math.Sqrt(sum / samplesRead);
+        var db = 20 * Math.Log10(rms);
 
         var level = (Decibel)db;
         Level = Decibel.Minimum <= level

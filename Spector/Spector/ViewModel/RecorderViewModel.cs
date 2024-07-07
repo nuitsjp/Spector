@@ -59,28 +59,12 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private string _recorderHost = string.Empty;
 
-    [ObservableProperty] private IReadOnlyCollection<IDevice> _devices = [];
-    [ObservableProperty] private IDevice? _selectedDevice;
-
     public async Task ActivateAsync()
     {
         PlaybackDevices.CollectionChanged += (_, _) =>
         {
             PlaybackDevice ??= PlaybackDevices.FirstOrDefault();
         };
-
-        Devices = audioInterface.Devices.ToArray();
-
-        audioInterfaceViewModel.Devices.ToCollectionChanged().Subscribe(changed =>
-        {
-            Devices = audioInterfaceViewModel.Devices
-                .Where(x => x.Measure)
-                .OrderByDescending(x => x.DataFlow)
-                .ThenBy(x => x.Name)
-                .Select(x => x.Device)
-                .ToArray();
-            SelectedDevice = Devices.FirstOrDefault();
-        });
 
         var settings = await settingsRepository.LoadAsync();
         RecordingSpan = settings.RecorderSettings.RecordingSpan;
@@ -179,9 +163,7 @@ public partial class RecorderViewModel(
     [RelayCommand]
     private async Task ConnectCaptureDeviceAsync()
     {
-        if(SelectedDevice is null) return;
-
-        await audioInterface.ConnectCaptureDeviceAsync(SelectedDevice, RecorderHost);
+        await audioInterface.ConnectAsync(RecorderHost);
     }
 
     private async void OnUpdated()

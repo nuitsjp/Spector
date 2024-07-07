@@ -28,7 +28,7 @@
             <DataGridTemplateColumn IsReadOnly="True" Header="Connect" Width="Auto">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                        <CheckBox IsChecked="{Binding Connected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        <CheckBox IsChecked="{Binding Connect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   IsEnabled="{Binding Connectable, Mode=OneWay}"
                                   HorizontalAlignment="Center" 
                                   VerticalAlignment="Center" />
