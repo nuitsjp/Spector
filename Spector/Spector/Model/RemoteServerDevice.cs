@@ -77,6 +77,11 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
         });
     }
 
+    public Task ConnectAsync(string address)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task DisconnectAsync()
     {
         throw new NotImplementedException();

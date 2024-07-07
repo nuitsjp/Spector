@@ -1,6 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using System.IO;
+using System.Net.Sockets;
+using System.Net;
+using Reactive.Bindings.Disposables;
+using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
@@ -16,7 +21,7 @@ public partial class Device : ObservableObject, IDevice
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
-        MmDevice = mmDevice;
+        MmDevice = mmDevice.AddTo(CompositeDisposable);
         DataFlow = mmDevice.DataFlow;
         Name = name;
         SystemName = mmDevice.FriendlyName;
@@ -24,9 +29,10 @@ public partial class Device : ObservableObject, IDevice
         Connect = connect;
 
         WasapiCapture = 
-            MmDevice.DataFlow == DataFlow.Capture
+            (MmDevice.DataFlow == DataFlow.Capture
                 ? new WasapiCapture(mmDevice)
-                : new WasapiLoopbackCapture(mmDevice);
+                : new WasapiLoopbackCapture(mmDevice))
+            .AddTo(CompositeDisposable);
                 
         WasapiCapture.WaveFormat = waveFormat;
 
@@ -39,6 +45,7 @@ public partial class Device : ObservableObject, IDevice
         if (Measure) StartMeasure();
     }
 
+    private CompositeDisposable CompositeDisposable { get; } = new();
     private MMDevice MmDevice { get; }
     public DeviceId Id { get; }
 
@@ -80,12 +87,47 @@ public partial class Device : ObservableObject, IDevice
     /// <summary>
     /// 音量レベル
     /// </summary>
-    [ObservableProperty] private Decibel _level = Decibel.Minimum;
+    public Decibel Level { get; private set; } = Decibel.Minimum;
 
     private WasapiCapture WasapiCapture { get; }
     private BufferedWaveProvider BufferedWaveProvider { get; }
 
     private AWeightingFilter AWeightingFilter { get; }
+    private TcpClient? TcpClient { get; set; }
+    private Stream? NetworkStream { get; set; }
+
+    public Task ConnectAsync(string address)
+    {
+        return Task.Run(() =>
+        {
+            TcpClient = new TcpClient().AddTo(CompositeDisposable);
+            TcpClient.Connect(address, AudioInterface.RemotePort);
+
+            NetworkStream = new BufferedStream(TcpClient.GetStream()).AddTo(CompositeDisposable);
+            var writer = new BinaryWriter(NetworkStream).AddTo(CompositeDisposable);
+
+            // デバイス情報を送信
+            writer.Write(nameof(DataFlow));
+            writer.Write(@$"{Name}(Client:{Dns.GetHostName()})");
+            writer.Flush();
+        });
+    }
+
+    public Task DisconnectAsync()
+    {
+        if (NetworkStream is not null)
+        {
+            CompositeDisposable.Remove(NetworkStream);
+            NetworkStream.Dispose();
+        }
+
+        if (TcpClient is not null)
+        {
+            CompositeDisposable.Remove(TcpClient);
+            TcpClient.Dispose();
+        }
+        return Task.CompletedTask;
+    }
 
     public void StartMeasure()
     {
@@ -104,6 +146,10 @@ public partial class Device : ObservableObject, IDevice
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
         BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+        if (NetworkStream is not null)
+        {
+            NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
+        }
 
         var buffer = new float[e.BytesRecorded / 2];
         var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
@@ -155,7 +201,6 @@ public partial class Device : ObservableObject, IDevice
 
     public void Dispose()
     {
-        MmDevice.Dispose();
-        WasapiCapture.Dispose();
+        CompositeDisposable.Dispose();
     }
 }
