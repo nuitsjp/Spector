@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reactive.Linq;
 using System.Security.Cryptography.Pkcs;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -58,12 +59,28 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private string _recorderHost = string.Empty;
 
+    [ObservableProperty] private IReadOnlyCollection<IDevice> _devices = [];
+    [ObservableProperty] private IDevice? _selectedDevice;
+
     public async Task ActivateAsync()
     {
         PlaybackDevices.CollectionChanged += (_, _) =>
         {
             PlaybackDevice ??= PlaybackDevices.FirstOrDefault();
         };
+
+        Devices = audioInterface.Devices.ToArray();
+
+        audioInterfaceViewModel.Devices.ToCollectionChanged().Subscribe(changed =>
+        {
+            Devices = audioInterfaceViewModel.Devices
+                .Where(x => x.Measure)
+                .OrderByDescending(x => x.DataFlow)
+                .ThenBy(x => x.Name)
+                .Select(x => x.Device)
+                .ToArray();
+            SelectedDevice = Devices.FirstOrDefault();
+        });
 
         var settings = await settingsRepository.LoadAsync();
         RecordingSpan = settings.RecorderSettings.RecordingSpan;

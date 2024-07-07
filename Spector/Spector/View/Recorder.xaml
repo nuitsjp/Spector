@@ -66,7 +66,7 @@
                       SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
                       DisplayMemberPath="Name"
                       materialDesign:HintAssist.Hint="Playback Device"
-                      Width="300"/>
+                      Width="250"/>
 
         <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
                           IsChecked="{Binding IsPlaying}"
@@ -78,6 +78,12 @@
                  materialDesign:HintAssist.Hint="Connect Host Address"
                  Width="150"
                  Margin="50, 5, 5, 5"/>
+
+        <ComboBox ItemsSource="{Binding Devices}"
+                  SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+                  DisplayMemberPath="Name"
+                  materialDesign:HintAssist.Hint="Connect Device"
+                  Width="250"/>
 
         <Button Content="{materialDesign:PackIcon Kind=MicrophonePlus}"
                 Style="{StaticResource MaterialDesignIconButton}"
