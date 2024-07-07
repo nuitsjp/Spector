@@ -125,8 +125,8 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private async Task HandleClientAsync(TcpClient client)
     {
-        await using var networkStream = client.GetStream();
-        using var reader = new BinaryReader(networkStream);
+        var networkStream = client.GetStream();
+        var reader = new BinaryReader(networkStream);
 
         // デバイス情報の受信
         var deviceType = reader.ReadString();
@@ -136,6 +136,8 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         if (deviceType == "Capture")
         {
             // ここにCaptureデバイスのデータを処理するコードを追加
+            byte[] buffer = new byte[9600];
+            var length = reader.Read(buffer, 0, buffer.Length);
         }
         else if (deviceType == "Render")
         {
@@ -143,26 +145,12 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         }
     }
 
-    public async Task ConnectCaptureDeviceAsync(string address)
+    public Task ConnectCaptureDeviceAsync(IDevice device, string address)
     {
-        var client = new TcpClient();
-        await client.ConnectAsync(address, RemotePort);
-
-        var networkStream = client.GetStream();
-        var writer = new BinaryWriter(networkStream);
-
-        // デバイス情報を送信
-        writer.Write(nameof(DataFlow.Capture));
-        writer.Write("FriendlyName");
-        writer.Flush();
-
-        //using var capture = new WasapiCapture(_device);
-        //capture.DataAvailable += (s, e) =>
-        //{
-        //    networkStream.Write(e.Buffer, 0, e.BytesRecorded);
-        //    networkStream.Flush();
-        //};
-        //capture.StartRecording();
+        RemoteClientDevice remoteClientDevice = new(device, address);
+        remoteClientDevice.StartMeasure();
+        _devices.Add(remoteClientDevice);
+        return Task.CompletedTask;
     }
 
     private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)

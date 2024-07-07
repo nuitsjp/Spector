@@ -179,7 +179,9 @@ public partial class RecorderViewModel(
     [RelayCommand]
     private async Task ConnectCaptureDeviceAsync()
     {
-        await audioInterface.ConnectCaptureDeviceAsync(RecorderHost);
+        if(SelectedDevice is null) return;
+
+        await audioInterface.ConnectCaptureDeviceAsync(SelectedDevice, RecorderHost);
     }
 
     private async void OnUpdated()
