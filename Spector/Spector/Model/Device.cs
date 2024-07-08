@@ -145,8 +145,6 @@ public partial class Device : ObservableObject, ILocalDevice
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
-        if(Measure is false) return;
-
         BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
         if (NetworkStream is not null)
         {
