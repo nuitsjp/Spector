@@ -126,14 +126,14 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private void HandleClientAsync(TcpClient client)
     {
-        //RemoteServerDevice device = new(client, RecordingConfig.Default.WaveFormat);
-        //device.StartMeasure();
-        //_devices.Add(device);
+        RemoteServerDevice device = new(client, RecordingConfig.Default.WaveFormat);
+        device.StartMeasure();
+        _devices.Add(device);
     }
 
     public Task ConnectAsync(string address)
     {
-        foreach (var device in Devices.Where(x => x.Connect))
+        foreach (var device in Devices.OfType<ILocalDevice>().Where(x => x.Connect))
         {
             device.ConnectAsync(address);
         }

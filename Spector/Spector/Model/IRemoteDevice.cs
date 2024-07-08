@@ -3,5 +3,9 @@
 public interface IRemoteDevice : IDevice
 {
     bool Connected { get; }
-    Task ConnectAsync();
+}
+
+public interface ILocalDevice : IDevice
+{
+    Task ConnectAsync(string address);
 }

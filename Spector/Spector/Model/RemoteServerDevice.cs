@@ -23,13 +23,11 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
         BinaryReader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
 
         // デバイス情報の受信
-        var dataFlow = BinaryReader.ReadString();
+        var dataFlow = BinaryReader.ReadInt32();
         var deviceName = BinaryReader.ReadString();
 
         Id = (DeviceId)deviceName;
-        DataFlow = dataFlow == "Capture" 
-            ? DataFlow.Capture 
-            : DataFlow.Render;
+        DataFlow = (DataFlow)dataFlow;
         WaveFormat = waveFormat;
         Name = deviceName;
         SystemName = deviceName;
@@ -44,11 +42,11 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
     public WaveFormat WaveFormat { get; }
     public string Name { get; set; }
     public string SystemName { get; }
-    public bool Measure { get; } = true;
+    public bool Measure { get; private set; }
     public bool Connect { get; set; } = true;
     public bool Connectable => true;
     public VolumeLevel VolumeLevel { get; set; }
-    public Decibel Level { get; private set; }
+    public Decibel Level { get; private set; } = Decibel.Minimum;
     private TcpClient TcpClient { get; }
     private BinaryReader BinaryReader { get; }
     private NetworkStream NetworkStream { get; }
@@ -61,27 +59,6 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
     private CancellationTokenSource CancellationTokenSource { get; } = new();
 
 
-    public Task ConnectAsync()
-    {
-        Connected = true;
-        return Task.Run(() =>
-        {
-
-            while (CancellationTokenSource.IsCancellationRequested is false)
-            {
-                // ここにCaptureデバイスのデータを処理するコードを追加
-                byte[] buffer = new byte[9600];
-                var length = BinaryReader.Read(buffer, 0, buffer.Length);
-                OnDataAvailable(buffer, length);
-            }
-        });
-    }
-
-    public Task ConnectAsync(string address)
-    {
-        throw new NotImplementedException();
-    }
-
     public Task DisconnectAsync()
     {
         throw new NotImplementedException();
@@ -89,14 +66,29 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
 
     public void StartMeasure()
     {
+        Task.Run(() =>
+        {
+            Measure = true;
+            while (CancellationTokenSource.IsCancellationRequested is false)
+            {
+                // ここにCaptureデバイスのデータを処理するコードを追加
+                var buffer = new byte[9600];
+                var length = BinaryReader.Read(buffer, 0, buffer.Length);
+                OnDataAvailable(buffer, length);
+            }
+        });
     }
 
     public void StopMeasure()
     {
+        Measure = false;
+        Level = Decibel.Minimum;
     }
 
     private void OnDataAvailable(byte[] bytes, int length)
     {
+        if (Measure is false) return;
+
         BufferedWaveProvider.AddSamples(bytes, 0, length);
 
         var buffer = new float[length / 2];

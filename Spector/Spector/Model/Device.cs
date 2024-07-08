@@ -9,7 +9,7 @@ using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
-public partial class Device : ObservableObject, IDevice
+public partial class Device : ObservableObject, ILocalDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
 
@@ -107,8 +107,8 @@ public partial class Device : ObservableObject, IDevice
             var writer = new BinaryWriter(NetworkStream).AddTo(CompositeDisposable);
 
             // デバイス情報を送信
-            writer.Write(nameof(DataFlow));
-            writer.Write(@$"{Name}(Client:{Dns.GetHostName()})");
+            writer.Write((int)DataFlow);
+            writer.Write(@$"{Name} - {Dns.GetHostName()}");
             writer.Flush();
         });
     }
@@ -145,6 +145,8 @@ public partial class Device : ObservableObject, IDevice
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
+        if(Measure is false) return;
+
         BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
         if (NetworkStream is not null)
         {
