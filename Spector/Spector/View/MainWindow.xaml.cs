@@ -1,21 +1,27 @@
 ﻿using System.Windows;
 using Spector.Model;
+using Spector.Model.IO;
+using Spector.ViewModel;
 
-namespace Spector.View
+namespace Spector.View;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            CurrentDispatcher.Dispatcher = Application.Current.Dispatcher;
-        }
+    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        CurrentDispatcher.Dispatcher = Application.Current.Dispatcher;
     }
 }
+
+public class DesignTimeMainWindowViewModel() : 
+    MainWindowViewModel(
+        default!,
+        default!);

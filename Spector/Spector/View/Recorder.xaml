@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:viewModel="clr-namespace:Spector.ViewModel"
+             xmlns:view="clr-namespace:Spector.View"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance {x:Type viewModel:MainWindowViewModel}, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -78,25 +78,6 @@
                  materialDesign:HintAssist.Hint="Connect Host Address"
                  Width="150"
                  Margin="50, 5, 5, 5"/>
-
-        <ToggleButton IsChecked="{Binding IsConnect}"
-                      ToolTip="接続">
-            <ToggleButton.Content>
-                <materialDesign:PackIcon>
-                    <materialDesign:PackIcon.Style>
-                        <Style TargetType="{x:Type materialDesign:PackIcon}">
-                            <Setter Property="Kind" Value="PowerPlug"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsConnect}" Value="True">
-                                    <Setter Property="Kind" Value="PowerPlugOff"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </materialDesign:PackIcon.Style>
-                </materialDesign:PackIcon>
-            </ToggleButton.Content>
-
-        </ToggleButton>
 
     </StackPanel>
 </UserControl>

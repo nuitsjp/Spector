@@ -65,8 +65,6 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     /// </summary>
     [ObservableProperty] private bool _measure;
 
-    [ObservableProperty] private bool _connect;
-
     public bool Connectable => true;
 
     /// <summary>
