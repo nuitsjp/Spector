@@ -1,7 +1,9 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
+using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
 
@@ -23,6 +25,9 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         // 計測状態を同期する
         Measure = Device.Measure;
+        EnableConnect = this.ObserveProperty(x => x.Measure)
+            .ToReadOnlyReactivePropertySlim()
+            .AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.Measure)
             .Skip(1) // 上記の「Measure = Device.Measure;」の変更をスキップする。
             .Subscribe(measure =>
@@ -85,7 +90,11 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private float _volumeLevel;
     [ObservableProperty] private bool _connect;
-    public bool Connectable => Device.Connectable;
+
+    public ReadOnlyReactivePropertySlim<bool> EnableConnect { get; }
+    public Visibility VisibleConnect => Device.Connectable 
+        ? Visibility.Visible 
+        : Visibility.Collapsed;
 
     public double[] LiveData { get; } = CreateEmptyData();
 

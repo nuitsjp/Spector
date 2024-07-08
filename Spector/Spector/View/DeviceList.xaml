@@ -29,7 +29,8 @@
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <CheckBox IsChecked="{Binding Connect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  IsEnabled="{Binding Connectable, Mode=OneWay}"
+                                  IsEnabled="{Binding EnableConnect.Value}"
+                                  Visibility="{Binding VisibleConnect}"
                                   HorizontalAlignment="Center" 
                                   VerticalAlignment="Center" />
                     </DataTemplate>
