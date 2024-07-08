@@ -126,8 +126,14 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
     private void HandleClientAsync(TcpClient client)
     {
         RemoteDevice device = new(client, RecordingConfig.Default.WaveFormat);
+        device.Disconnected += RemoteDeviceOnDisconnected;
         device.StartMeasure();
         _devices.Add(device);
+    }
+
+    private void RemoteDeviceOnDisconnected(object? sender, EventArgs e)
+    {
+        _devices.Remove((IDevice)sender!);
     }
 
     private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)

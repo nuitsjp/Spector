@@ -67,7 +67,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
 
     [ObservableProperty] private bool _connect;
 
-    public bool Connectable { get; } = true;
+    public bool Connectable => true;
 
     /// <summary>
     /// 入出力レベル
@@ -117,12 +117,14 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         {
             CompositeDisposable.Remove(NetworkStream);
             NetworkStream.Dispose();
+            NetworkStream = null;
         }
 
         if (TcpClient is not null)
         {
             CompositeDisposable.Remove(TcpClient);
             TcpClient.Dispose();
+            TcpClient = null;
         }
         return Task.CompletedTask;
     }
@@ -144,9 +146,13 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
         BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
-        if (NetworkStream is not null)
+        try
         {
-            NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
+            NetworkStream?.Write(e.Buffer, 0, e.BytesRecorded);
+        }
+        catch
+        {
+            // ignore
         }
 
         var buffer = new float[e.BytesRecorded / 2];

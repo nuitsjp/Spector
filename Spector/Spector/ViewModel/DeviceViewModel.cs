@@ -84,6 +84,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private float _volumeLevel;
     [ObservableProperty] private bool _connect;
+    public bool Connectable => Device.Connectable;
 
     public double[] LiveData { get; } = CreateEmptyData();
 

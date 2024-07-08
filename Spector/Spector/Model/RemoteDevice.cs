@@ -13,6 +13,7 @@ namespace Spector.Model;
 public partial class RemoteDevice : ObservableObject, IRemoteDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
+    public event EventHandler? Disconnected;
     public RemoteDevice(
         TcpClient tcpClient,
         WaveFormat waveFormat)
@@ -43,7 +44,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     public string SystemName { get; }
     public bool Measure { get; private set; }
     public bool Connect { get; set; } = true;
-    public bool Connectable => true;
+    public bool Connectable => false;
     public VolumeLevel VolumeLevel { get; set; }
     public Decibel Level { get; private set; } = Decibel.Minimum;
     private TcpClient TcpClient { get; }
@@ -53,19 +54,20 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
     private AWeightingFilter AWeightingFilter { get; set; }
 
-    public bool Connected { get; private set; }
     private Task MeasureTask { get; set; } = Task.CompletedTask;
     private CancellationTokenSource CancellationTokenSource { get; } = new();
 
 
     public Task DisconnectAsync()
     {
-        throw new NotImplementedException();
+        CancellationTokenSource.Cancel();
+        Dispose();
+        return Task.CompletedTask;
     }
 
     public void StartMeasure()
     {
-        Task.Run(() =>
+        MeasureTask = Task.Run(() =>
         {
             Measure = true;
             while (CancellationTokenSource.IsCancellationRequested is false)
@@ -73,6 +75,10 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
                 // ここにCaptureデバイスのデータを処理するコードを追加
                 var buffer = new byte[9600];
                 var length = BinaryReader.Read(buffer, 0, buffer.Length);
+                if (length == 0)
+                {
+                    DisconnectAsync();
+                }
                 OnDataAvailable(buffer, length);
             }
         });
@@ -114,5 +120,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
     public void Dispose()
     {
+        CompositeDisposable.Dispose();
+        Disconnected?.Invoke(this, EventArgs.Empty);
     }
 }
