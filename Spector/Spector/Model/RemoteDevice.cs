@@ -77,6 +77,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
                 var length = BinaryReader.Read(buffer, 0, buffer.Length);
                 if (length == 0)
                 {
+                    // 接続が切れた場合、読み込みが0になる
                     DisconnectAsync();
                 }
                 OnDataAvailable(buffer, length);
