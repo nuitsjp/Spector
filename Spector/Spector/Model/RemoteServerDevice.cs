@@ -17,7 +17,6 @@ public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
         TcpClient tcpClient,
         WaveFormat waveFormat)
     {
-
         TcpClient = tcpClient.AddTo(CompositeDisposable);
         NetworkStream = TcpClient.GetStream().AddTo(CompositeDisposable);
         BinaryReader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);

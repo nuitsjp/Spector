@@ -94,7 +94,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         // 新たに接続されたデバイスった場合
         if (Settings.TryGetDeviceSettings(deviceId, out var deviceSettings) is false)
         {
-            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true, false);
+            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
             var deviceConfigs = Settings.DeviceSettings.ToList();
             deviceConfigs.Add(deviceSettings);
             Settings = Settings with { DeviceSettings = deviceConfigs };
@@ -105,7 +105,6 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
             mmDevice,
             deviceSettings.Name,
             deviceSettings.Measure,
-            deviceSettings.Connect,
             RecordingConfig.Default.WaveFormat);
     }
 
@@ -131,15 +130,6 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         _devices.Add(device);
     }
 
-    public Task ConnectAsync(string address)
-    {
-        foreach (var device in Devices.OfType<ILocalDevice>().Where(x => x.Connect))
-        {
-            device.ConnectAsync(address);
-        }
-        return Task.CompletedTask;
-    }
-
     private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         UpdateSettings();
@@ -155,7 +145,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
                     var device = Devices.SingleOrDefault(d => d.Id == x.Id);
                     return device is null 
                         ? x 
-                        : new DeviceSettings(device.Id, device.Name, device.Measure, device.Connect);
+                        : new DeviceSettings(device.Id, device.Name, device.Measure);
                 })
                 .ToArray()
         };

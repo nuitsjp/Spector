@@ -17,7 +17,6 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         MMDevice mmDevice,
         string name,
         bool measure,
-        bool connect,
         WaveFormat waveFormat)
     {
         Id = (DeviceId)mmDevice.ID;
@@ -26,7 +25,6 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         Name = name;
         SystemName = mmDevice.FriendlyName;
         Measure = measure;
-        Connect = connect;
 
         WasapiCapture = 
             (MmDevice.DataFlow == DataFlow.Capture

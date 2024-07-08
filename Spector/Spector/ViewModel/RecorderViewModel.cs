@@ -59,7 +59,10 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private string _recorderHost = string.Empty;
 
-    [ObservableProperty] private bool _isConnect;
+    /// <summary>
+    /// Staticなのは本当は良くないけどとりあえず・・・
+    /// </summary>
+    public static string RemoteHost { get; private set; }
 
     public async Task ActivateAsync()
     {
@@ -78,9 +81,12 @@ public partial class RecorderViewModel(
         this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.RecorderHost).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.IsConnect).Skip(1).Subscribe(ConnectOnUpdated).AddTo(CompositeDisposable);
+        this.ObserveProperty(x => x.RecorderHost).Subscribe(_ =>
+        {
+            RemoteHost = RecorderHost;
+            OnUpdated();
+        }).AddTo(CompositeDisposable);
     }
 
     [RelayCommand]
@@ -161,14 +167,6 @@ public partial class RecorderViewModel(
             PlayBackCancellationTokenSource.Cancel();
         }
 
-    }
-
-    private async void ConnectOnUpdated(bool connect)
-    {
-        if (connect)
-        {
-            await audioInterface.ConnectAsync(RecorderHost);
-        }
     }
 
     private async void OnUpdated()

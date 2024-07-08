@@ -54,11 +54,23 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
 
         // Connectを同期する
-        Connect = Device.Connect;
         this.ObserveProperty(x => x.Connect)
-            .Skip(1)// 上記の「Connect = Device.Connect;」の変更をスキップする。
-            .Subscribe(connect => device.Connect = connect)
+            .Subscribe(ConnectOnUpdated)
             .AddTo(CompositeDisposable);
+    }
+
+    private void ConnectOnUpdated(bool connect)
+    {
+        if (Device is not ILocalDevice localDevice) return;
+
+        if (connect)
+        {
+            localDevice.ConnectAsync(RecorderViewModel.RemoteHost);
+        }
+        else
+        {
+            localDevice.DisconnectAsync();
+        }
     }
 
     public IDevice Device { get; }
