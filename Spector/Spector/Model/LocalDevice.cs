@@ -9,11 +9,11 @@ using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
-public partial class Device : ObservableObject, ILocalDevice
+public partial class LocalDevice : ObservableObject, ILocalDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
 
-    public Device(
+    public LocalDevice(
         MMDevice mmDevice,
         string name,
         bool measure,

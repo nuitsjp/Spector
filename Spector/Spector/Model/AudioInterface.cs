@@ -101,7 +101,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
             await settingsRepository.SaveAsync(Settings);
         }
 
-        return new Device(
+        return new LocalDevice(
             mmDevice,
             deviceSettings.Name,
             deviceSettings.Measure,
