@@ -10,10 +10,10 @@ using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
-public partial class RemoteServerDevice : ObservableObject, IRemoteDevice
+public partial class RemoteDevice : ObservableObject, IRemoteDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
-    public RemoteServerDevice(
+    public RemoteDevice(
         TcpClient tcpClient,
         WaveFormat waveFormat)
     {
