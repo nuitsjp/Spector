@@ -34,6 +34,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
                 else
                 {
                     Device.StopMeasure();
+                    Connect = false;
                 }
             })
             .AddTo(CompositeDisposable);

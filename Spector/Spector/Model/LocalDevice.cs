@@ -139,6 +139,8 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         Measure = false;
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
+
+        DisconnectAsync();
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)

@@ -160,7 +160,8 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     public void Dispose()
     {
-        foreach (var device in _devices)
+        // ToArray()しておかないと同時に他から操作されていると例外が発生する
+        foreach (var device in _devices.ToArray()) 
         {
             device.Dispose();
         }
