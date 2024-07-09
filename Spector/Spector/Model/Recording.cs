@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
+using NAudio.Utils;
 using NAudio.Wave;
 
 namespace Spector.Model;
@@ -8,6 +9,7 @@ public class Recording
 {
     internal Recording(
         DirectoryInfo recordRootDirectory, 
+        Direction direction, 
         bool withVoice, 
         bool withBuzz,
         IEnumerable<IDevice> devices)
@@ -15,7 +17,8 @@ public class Recording
         // ReSharper disable once StringLiteralTypo
         CurrentRecordDirectory =
             new DirectoryInfo(Path.Combine(recordRootDirectory.FullName, DateTime.Now.ToString("yyyyMMdd-HHmmss")))
-                .CreateIfNotExists(); 
+                .CreateIfNotExists();
+        Direction = direction;
         WithVoice = withVoice;
         WithBuzz = withBuzz;
         RecorderByDevices = devices
@@ -24,6 +27,7 @@ public class Recording
     }
 
     private DirectoryInfo CurrentRecordDirectory { get; }
+    private Direction Direction { get; }
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
     private CancellationTokenSource CancellationTokenSource { get; } = new();
@@ -33,17 +37,37 @@ public class Recording
     /// </summary>
     private IReadOnlyList<RecordingByDevice> RecorderByDevices { get; }
 
+    private DateTime StartTime { get; set; }
+
     internal void StartRecording()
     {
+        StartTime = DateTime.Now;
         foreach (var device in RecorderByDevices)
         {
             device.StartRecording();
         }
+
+        Task.Run(() =>
+            {
+                foreach (var device in RecorderByDevices)
+                {
+                    device.MarkLevel();
+                }
+            },
+            CancellationTokenSource.Token);
     }
 
     public void StopRecording()
     {
         CancellationTokenSource.Cancel();
+        var record = new Record(
+            Direction,
+            WithVoice,
+            WithBuzz,
+            StartTime,
+            DateTime.Now, 
+            RecorderByDevices.Select(x => x.ToRecord()).ToArray());
+
     }
 
     private class RecordingByDevice(
@@ -55,6 +79,8 @@ public class Recording
 
         private WaveFileWriter? Writer { get; set; }
 
+        private List<Decibel> Decibels { get; } = [];
+
 
         public void StartRecording()
         {
@@ -62,7 +88,7 @@ public class Recording
 
             Writer = new WaveFileWriter(GetRecordFileInfo().FullName, device.WaveFormat);
 
-            device.DataAvailable += (s, e) =>
+            device.DataAvailable += (_, e) =>
             {
                 byte[] buffer = new byte[e.BytesRecorded];
                 Array.Copy(e.Buffer, buffer, e.BytesRecorded);
@@ -80,6 +106,11 @@ public class Recording
             };
 
             Task.Run(ProcessQueue);
+        }
+
+        public void MarkLevel()
+        {
+            Decibels.Add(device.Level);
         }
 
         private void StopRecording()
@@ -104,6 +135,20 @@ public class Recording
             }
         }
 
+        public RecordByDevice ToRecord()
+        {
+            return new RecordByDevice(
+                device.Id,
+                device.Name,
+                device.SystemName,
+                Decibels.Min(),
+                new Decibel(Decibels.Average(x => x.AsPrimitive())),
+                Decibels.Max(),
+                (double)Decibels.Count(x => -30d < x.AsPrimitive()) / Decibels.Count,
+                (double)Decibels.Count(x => -40d < x.AsPrimitive()) / Decibels.Count,
+                (double)Decibels.Count(x => -50d < x.AsPrimitive()) / Decibels.Count);
+        }
+
         public void Dispose()
         {
         }
@@ -122,3 +167,22 @@ public class Recording
         }
     }
 }
+
+public record Record(
+    Direction Direction,
+    bool WithVoice,
+    bool WithBuzz,
+    DateTime StartTime,
+    DateTime StopTime,
+    IReadOnlyList<RecordByDevice> RecordByDevices);
+
+public record RecordByDevice(
+    DeviceId Id,
+    string Name,
+    string SystemName,
+    Decibel Min,
+    Decibel Avg,
+    Decibel Max,
+    double Minus30db,
+    double Minus40db,
+    double Minus50db);

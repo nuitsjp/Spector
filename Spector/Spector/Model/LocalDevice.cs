@@ -38,7 +38,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
 
         WasapiCapture.DataAvailable += OnDataAvailable;
-        WasapiCapture.DataAvailable += (sender, args) => DataAvailable?.Invoke(this, args);
+        WasapiCapture.DataAvailable += (_, args) => DataAvailable?.Invoke(this, args);
 
         if (Measure) StartMeasure();
     }
