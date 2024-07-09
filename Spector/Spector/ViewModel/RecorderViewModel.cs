@@ -19,7 +19,7 @@ public partial class RecorderViewModel(
     : ObservableObject, IDisposable
 {
     public CompositeDisposable CompositeDisposable { get; } = new();
-    private Recorder? Recorder { get; set; }
+    private Recording? Recording { get; set; }
     public IReadOnlyCollection<Direction> Directions { get; } = Enum.GetValues<Direction>();
     public IFilteredReadOnlyObservableCollection<IDevice> PlaybackDevices { get; } = audioInterface
         .Devices
@@ -105,7 +105,7 @@ public partial class RecorderViewModel(
     {
         var settings = await settingsRepository.LoadAsync();
 
-        Recorder = audioInterface.StartRecording(
+        Recording = audioInterface.StartRecording(
             new DirectoryInfo("Record"),
             WithVoice,
             WithBuzz);
@@ -132,9 +132,9 @@ public partial class RecorderViewModel(
 
     private void StopRecording()
     {
-        if(Recorder is null) return;
+        if(Recording is null) return;
 
-        Recorder.StopRecording();
+        Recording.StopRecording();
 
         // 進捗更新タイマーを停止する
         UpdateProgressTimer.Stop();

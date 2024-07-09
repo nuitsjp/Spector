@@ -5,9 +5,9 @@ using NAudio.Wave;
 
 namespace Spector.Model;
 
-public class Recorder
+public class Recording
 {
-    internal Recorder(
+    internal Recording(
         DirectoryInfo recordRootDirectory, 
         bool withVoice, 
         bool withBuzz,
@@ -20,7 +20,7 @@ public class Recorder
         WithVoice = withVoice;
         WithBuzz = withBuzz;
         RecorderByDevices = devices
-            .Select(x => new RecorderByDevice(x, GetRecordFileInfo(CurrentRecordDirectory, x)))
+            .Select(x => new RecordingByDevice(x, GetRecordFileInfo(CurrentRecordDirectory, x)))
             .ToArray();
     }
 
@@ -31,7 +31,7 @@ public class Recorder
     /// <summary>
     /// 録音中のデバイス
     /// </summary>
-    private IReadOnlyList<RecorderByDevice> RecorderByDevices { get; }
+    private IReadOnlyList<RecordingByDevice> RecorderByDevices { get; }
 
     internal void StartRecording()
     {
@@ -63,7 +63,7 @@ public class Recorder
     }
 
 
-    private class RecorderByDevice(IDevice device, FileInfo file) : IDisposable
+    private class RecordingByDevice(IDevice device, FileInfo file) : IDisposable
     {
         private BlockingCollection<byte[]> BufferQueue { get; } = [];
         private bool IsRecording { get; set; }

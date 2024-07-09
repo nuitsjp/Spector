@@ -158,9 +158,9 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         await settingsRepository.SaveAsync(Settings);
     }
 
-    public Recorder StartRecording(DirectoryInfo directory, bool withVoice, bool withBuzz)
+    public Recording StartRecording(DirectoryInfo directory, bool withVoice, bool withBuzz)
     {
-        var recorder = new Recorder(
+        var recorder = new Recording(
             directory, 
             withVoice,
             withBuzz,
