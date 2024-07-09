@@ -158,6 +158,17 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         await settingsRepository.SaveAsync(Settings);
     }
 
+    public Recorder StartRecording(DirectoryInfo directory, bool withVoice, bool withBuzz)
+    {
+        var recorder = new Recorder(
+            directory, 
+            withVoice,
+            withBuzz,
+            Devices.Where(x => x.Measure));
+        recorder.StartRecording();
+        return recorder;
+    }
+
     public void Dispose()
     {
         // ToArray()しておかないと同時に他から操作されていると例外が発生する

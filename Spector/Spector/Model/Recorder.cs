@@ -7,23 +7,37 @@ namespace Spector.Model;
 
 public class Recorder
 {
+    internal Recorder(
+        DirectoryInfo recordRootDirectory, 
+        bool withVoice, 
+        bool withBuzz,
+        IEnumerable<IDevice> devices)
+    {
+        // ReSharper disable once StringLiteralTypo
+        CurrentRecordDirectory =
+            new DirectoryInfo(Path.Combine(recordRootDirectory.FullName, DateTime.Now.ToString("yyyyMMdd-HHmmss")))
+                .CreateIfNotExists(); 
+        WithVoice = withVoice;
+        WithBuzz = withBuzz;
+        RecorderByDevices = devices
+            .Select(x => new RecorderByDevice(x, GetRecordFileInfo(CurrentRecordDirectory, x)))
+            .ToArray();
+    }
+
+    private DirectoryInfo CurrentRecordDirectory { get; }
+    private bool WithVoice { get; }
+    private bool WithBuzz { get; }
+
     /// <summary>
     /// 録音中のデバイス
     /// </summary>
-    private List<RecorderByDevice> RecorderByDevices { get; } = [];
+    private IReadOnlyList<RecorderByDevice> RecorderByDevices { get; }
 
-    public void StartRecording(DirectoryInfo directoryInfo, IEnumerable<IDevice> devices)
+    internal void StartRecording()
     {
-        // ReSharper disable once StringLiteralTypo
-        var currentRecordDirectory =
-            new DirectoryInfo(Path.Combine(directoryInfo.FullName, DateTime.Now.ToString("yyyyMMdd-HHmmss")))
-                .CreateIfNotExists();
-
-        foreach (var device in devices)
+        foreach (var device in RecorderByDevices)
         {
-            RecorderByDevice recorder = new(device);
-            recorder.StartRecording(GetRecordFileInfo(currentRecordDirectory, device));
-            RecorderByDevices.Add(recorder);
+            device.StartRecording();
         }
     }
 
@@ -33,7 +47,6 @@ public class Recorder
         {
             device.StopRecording();
         }
-        RecorderByDevices.Clear();
     }
 
     static FileInfo GetRecordFileInfo(DirectoryInfo directoryInfo, IDevice device)
@@ -50,7 +63,7 @@ public class Recorder
     }
 
 
-    private class RecorderByDevice(IDevice device) : IDisposable
+    private class RecorderByDevice(IDevice device, FileInfo file) : IDisposable
     {
         private BlockingCollection<byte[]> BufferQueue { get; } = [];
         private bool IsRecording { get; set; }
@@ -58,7 +71,7 @@ public class Recorder
         private WaveFileWriter? Writer { get; set; }
 
 
-        public void StartRecording(FileInfo file)
+        public void StartRecording()
         {
             if (IsRecording) return;
 
