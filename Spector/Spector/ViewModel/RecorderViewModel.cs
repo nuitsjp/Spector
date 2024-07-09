@@ -12,11 +12,11 @@ namespace Spector.ViewModel;
 
 public partial class RecorderViewModel(
     AudioInterface audioInterface,
+    Recorder recorder,
     ISettingsRepository settingsRepository)
     : ObservableObject, IDisposable
 {
     public CompositeDisposable CompositeDisposable { get; } = new();
-    private Recording? Recording { get; set; }
     public IReadOnlyCollection<Direction> Directions { get; } = Enum.GetValues<Direction>();
     public IFilteredReadOnlyObservableCollection<IDevice> PlaybackDevices { get; } = audioInterface
         .Devices
@@ -102,11 +102,12 @@ public partial class RecorderViewModel(
     {
         var settings = await settingsRepository.LoadAsync();
 
-        Recording = audioInterface.StartRecording(
+        recorder.StartRecording(
             new DirectoryInfo("Record"),
             SelectedDirection,
             WithVoice,
-            WithBuzz);
+            WithBuzz,
+            audioInterface.Devices.Where(x => x.Measure));
 
         // 録音開始時刻を記録する
         StartRecordingTime = DateTime.Now;
@@ -130,9 +131,7 @@ public partial class RecorderViewModel(
 
     private void StopRecording()
     {
-        if(Recording is null) return;
-
-        Recording.StopRecording();
+        recorder.StopRecording();
 
         // 進捗更新タイマーを停止する
         UpdateProgressTimer.Stop();

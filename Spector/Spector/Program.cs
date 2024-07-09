@@ -6,6 +6,7 @@ using Spector.Model;
 using Spector.Model.IO;
 using Spector.View;
 using Spector.ViewModel;
+using Recorder = Spector.Model.Recorder;
 
 // Create a builder by specifying the application and main window.
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
@@ -19,6 +20,7 @@ builder.Services.AddSingleton<RecorderViewModel>();
 
 // Model
 builder.Services.AddSingleton<AudioInterface>();
+builder.Services.AddSingleton<Recorder>();
 
 // Repository
 builder.Services.AddTransient<ISettingsRepository, SettingsRepository>();

@@ -132,7 +132,11 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private void RemoteDeviceOnDisconnected(object? sender, EventArgs e)
     {
-        _devices.Remove((IDevice)sender!);
+        var device = (IDevice)sender!;
+        if (_devices.Contains(device))
+        {
+            _devices.Remove((IDevice)sender!);
+        }
     }
 
     private void CaptureDeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -155,18 +159,6 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
                 .ToArray()
         };
         await settingsRepository.SaveAsync(Settings);
-    }
-
-    public Recording StartRecording(DirectoryInfo directory, Direction direction, bool withVoice, bool withBuzz)
-    {
-        var recorder = new Recording(
-            directory, 
-            direction,
-            withVoice,
-            withBuzz,
-            Devices.Where(x => x.Measure));
-        recorder.StartRecording();
-        return recorder;
     }
 
     public void Dispose()
