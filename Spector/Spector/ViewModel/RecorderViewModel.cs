@@ -1,11 +1,8 @@
 ﻿using System.IO;
-using System.Reactive.Linq;
-using System.Security.Cryptography.Pkcs;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NAudio.CoreAudioApi;
-using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 using Reactive.Bindings.Helpers;

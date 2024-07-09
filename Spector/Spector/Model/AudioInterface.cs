@@ -4,7 +4,6 @@ using System.Management;
 using System.Net;
 using System.Net.Sockets;
 using NAudio.CoreAudioApi;
-using NAudio.Wave;
 using Reactive.Bindings;
 
 namespace Spector.Model;

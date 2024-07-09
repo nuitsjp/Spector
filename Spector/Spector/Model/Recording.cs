@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.InteropServices;
 using NAudio.Wave;
 
 namespace Spector.Model;
@@ -20,13 +19,14 @@ public class Recording
         WithVoice = withVoice;
         WithBuzz = withBuzz;
         RecorderByDevices = devices
-            .Select(x => new RecordingByDevice(x, GetRecordFileInfo(CurrentRecordDirectory, x)))
+            .Select(x => new RecordingByDevice(x, CurrentRecordDirectory, CancellationTokenSource.Token))
             .ToArray();
     }
 
     private DirectoryInfo CurrentRecordDirectory { get; }
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
+    private CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <summary>
     /// 録音中のデバイス
@@ -63,28 +63,28 @@ public class Recording
     }
 
 
-    private class RecordingByDevice(IDevice device, FileInfo file) : IDisposable
+    private class RecordingByDevice(
+        IDevice device, 
+        DirectoryInfo directory,
+        CancellationToken cancellationToken) : IDisposable
     {
         private BlockingCollection<byte[]> BufferQueue { get; } = [];
-        private bool IsRecording { get; set; }
 
         private WaveFileWriter? Writer { get; set; }
 
 
         public void StartRecording()
         {
-            if (IsRecording) return;
+            cancellationToken.Register(StopRecording);
 
-            IsRecording = true;
-
-            Writer = new WaveFileWriter(file.FullName, device.WaveFormat);
+            Writer = new WaveFileWriter(GetRecordFileInfo().FullName, device.WaveFormat);
 
             device.DataAvailable += (s, e) =>
             {
                 byte[] buffer = new byte[e.BytesRecorded];
                 Array.Copy(e.Buffer, buffer, e.BytesRecorded);
 
-                if (IsRecording is false) return;
+                if (cancellationToken.IsCancellationRequested) return;
 
                 try
                 {
@@ -101,9 +101,6 @@ public class Recording
 
         public void StopRecording()
         {
-            if (IsRecording is false) return;
-
-            IsRecording = false;
             BufferQueue.CompleteAdding();
         }
 
@@ -126,6 +123,19 @@ public class Recording
 
         public void Dispose()
         {
+        }
+
+        FileInfo GetRecordFileInfo()
+        {
+            // ファイル名に利用できない文字を取得
+            var invalidChars = Path.GetInvalidFileNameChars();
+
+            var fileName = device.Name + ".wav";
+            // ファイル名の無効な文字をアンダースコアに置き換える
+            fileName = invalidChars
+                .Aggregate(fileName, (current, c) => current.Replace(c, '_'));
+
+            return new FileInfo(Path.Combine(directory.FullName, fileName));
         }
     }
 }

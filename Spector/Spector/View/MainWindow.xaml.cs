@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using Spector.Model;
-using Spector.Model.IO;
 using Spector.ViewModel;
 
 namespace Spector.View;
