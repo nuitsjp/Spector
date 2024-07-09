@@ -98,6 +98,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         if (Measure is false) return;
 
         BufferedWaveProvider.AddSamples(bytes, 0, length);
+        DataAvailable?.Invoke(this, new WaveInEventArgs(bytes, length));
 
         var buffer = new float[length / 2];
         var samplesRead = AWeightingFilter!.Read(buffer, 0, buffer.Length);
