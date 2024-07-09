@@ -57,17 +57,16 @@ public class Recording
             CancellationTokenSource.Token);
     }
 
-    public void StopRecording()
+    public Record StopRecording()
     {
         CancellationTokenSource.Cancel();
-        var record = new Record(
+        return new Record(
             Direction,
             WithVoice,
             WithBuzz,
             StartTime,
             DateTime.Now, 
             RecorderByDevices.Select(x => x.ToRecord()).ToArray());
-
     }
 
     private class RecordingByDevice(
