@@ -104,6 +104,7 @@ public partial class RecorderViewModel(
 
         Recording = audioInterface.StartRecording(
             new DirectoryInfo("Record"),
+            SelectedDirection,
             WithVoice,
             WithBuzz);
 
