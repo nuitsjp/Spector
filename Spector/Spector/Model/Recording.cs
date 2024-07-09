@@ -43,25 +43,8 @@ public class Recording
 
     public void StopRecording()
     {
-        foreach (var device in RecorderByDevices)
-        {
-            device.StopRecording();
-        }
+        CancellationTokenSource.Cancel();
     }
-
-    static FileInfo GetRecordFileInfo(DirectoryInfo directoryInfo, IDevice device)
-    {
-        // ファイル名に利用できない文字を取得
-        var invalidChars = Path.GetInvalidFileNameChars();
-
-        var fileName = device.Name + ".wav";
-        // ファイル名の無効な文字をアンダースコアに置き換える
-        fileName = invalidChars
-            .Aggregate(fileName, (current, c) => current.Replace(c, '_'));
-
-        return new FileInfo(Path.Combine(directoryInfo.FullName, fileName));
-    }
-
 
     private class RecordingByDevice(
         IDevice device, 
@@ -99,7 +82,7 @@ public class Recording
             Task.Run(ProcessQueue);
         }
 
-        public void StopRecording()
+        private void StopRecording()
         {
             BufferQueue.CompleteAdding();
         }
@@ -125,7 +108,7 @@ public class Recording
         {
         }
 
-        FileInfo GetRecordFileInfo()
+        private FileInfo GetRecordFileInfo()
         {
             // ファイル名に利用できない文字を取得
             var invalidChars = Path.GetInvalidFileNameChars();
