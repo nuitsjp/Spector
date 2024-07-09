@@ -21,6 +21,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         TcpClient = tcpClient.AddTo(CompositeDisposable);
         NetworkStream = TcpClient.GetStream().AddTo(CompositeDisposable);
         BinaryReader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
+        BinaryWriter = new BinaryWriter(NetworkStream).AddTo(CompositeDisposable);
 
         // デバイス情報の受信
         var dataFlow = BinaryReader.ReadInt32();
@@ -49,6 +50,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     public Decibel Level { get; private set; } = Decibel.Minimum;
     private TcpClient TcpClient { get; }
     private BinaryReader BinaryReader { get; }
+    private BinaryWriter BinaryWriter { get; }
     private NetworkStream NetworkStream { get; }
     private BufferedWaveProvider BufferedWaveProvider { get; }
 
@@ -117,6 +119,11 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
     public void PlayLooping(CancellationToken token)
     {
+        BinaryWriter.Write((int)RemoteCommand.StartPlayLooping);
+        token.Register(() =>
+        {
+            BinaryWriter.Write((int)RemoteCommand.StopPlayLooping);
+        });
     }
 
     public void Dispose()

@@ -92,6 +92,8 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     private TcpClient? TcpClient { get; set; }
     private Stream? NetworkStream { get; set; }
 
+    private CancellationTokenSource PlayLoopingCancellationTokenSource { get; set; } = new();
+
     public Task ConnectAsync(string address)
     {
         return Task.Run(() =>
@@ -106,6 +108,32 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
             writer.Write((int)DataFlow);
             writer.Write(@$"{Name} - {Dns.GetHostName()}");
             writer.Flush();
+            var reader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
+
+            try
+            {
+                while (TcpClient is not null)
+                {
+                    var command = (RemoteCommand)reader.ReadInt32();
+                    switch (command)
+                    {
+                        case RemoteCommand.StartPlayLooping:
+                            PlayLoopingCancellationTokenSource = new CancellationTokenSource();
+                            PlayLooping(PlayLoopingCancellationTokenSource.Token);
+                            break;
+                        case RemoteCommand.StopPlayLooping:
+                            PlayLoopingCancellationTokenSource.Cancel();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                }
+            }
+            catch (IOException)
+            {
+                // リモート接続が切断された場合
+            }
         });
     }
 
