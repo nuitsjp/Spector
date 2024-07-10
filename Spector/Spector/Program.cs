@@ -6,10 +6,8 @@ using Spector.Model;
 using Spector.Model.IO;
 using Spector.View;
 using Spector.ViewModel;
+using Spector.ViewModel.AnalysisTab;
 using Spector.ViewModel.MeasureTab;
-using AnalysisTabViewModel = Spector.ViewModel.AnalysisTab.AnalysisTabViewModel;
-using Recorder = Spector.Model.Recorder;
-using RecorderViewModel = Spector.ViewModel.MeasureTab.RecorderViewModel;
 
 // Create a builder by specifying the application and main window.
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
@@ -20,13 +18,14 @@ builder.Services.AddPresentation<LoadingPage, LoadingPageViewModel>();
 builder.Services.AddPresentation<MainPage, MainPageViewModel>();
 
 // ViewModel
+builder.Services.AddSingleton<MeasureTabViewModel>();
+builder.Services.AddSingleton<AnalysisTabViewModel>();
 builder.Services.AddSingleton<AudioInterfaceViewModel>();
 builder.Services.AddSingleton<RecorderViewModel>();
-builder.Services.AddSingleton<AnalysisTabViewModel>();
 
 // Model
 builder.Services.AddSingleton<AudioInterface>();
-builder.Services.AddSingleton<Recorder>();
+builder.Services.AddSingleton<Spector.Model.Recorder>();
 
 // Repository
 builder.Services.AddTransient<ISettingsRepository, SettingsRepository>();
