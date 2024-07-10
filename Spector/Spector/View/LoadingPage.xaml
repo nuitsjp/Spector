@@ -7,7 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <Grid>
-
-    </Grid>
+    <StackPanel HorizontalAlignment="Center" 
+                VerticalAlignment="Center" >
+        <TextBlock Text="Now Loading..."
+                   Style="{StaticResource MaterialDesignHeadline2TextBlock}"/>
+    </StackPanel>
 </UserControl>

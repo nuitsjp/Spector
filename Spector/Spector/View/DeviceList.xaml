@@ -7,35 +7,37 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
-    <DataGrid x:Name="AudioDataGrid" ItemsSource="{Binding AudioInterfaceViewModel.Devices}" 
-              AutoGenerateColumns="False"
-              ScrollViewer.VerticalScrollBarVisibility="Auto"
-              Background="Transparent">
-        <DataGrid.Columns>
-            <DataGridTextColumn Header="DataFlow" Binding="{Binding DataFlow}" IsReadOnly="True"/>
-            <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-            <DataGridTextColumn Header="(SystemName)" Binding="{Binding SystemName}" IsReadOnly="True"/>
-            <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <CheckBox IsChecked="{Binding Measure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                  HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                  Margin="0"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <DataGridTextColumn Header="Volume Level" Binding="{Binding VolumeLevel}"/>
-            <DataGridTemplateColumn IsReadOnly="True" Header="Connect" Width="Auto">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <CheckBox IsChecked="{Binding Connect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  IsEnabled="{Binding EnableConnect.Value}"
-                                  Visibility="{Binding VisibleConnect}"
-                                  HorizontalAlignment="Center" 
-                                  VerticalAlignment="Center" />
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+    <Grid DataContext="{Binding MeasureTabViewModel.AudioInterfaceViewModel}">
+        <DataGrid x:Name="AudioDataGrid" ItemsSource="{Binding .Devices}" 
+                  AutoGenerateColumns="False"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  Background="Transparent">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="DataFlow" Binding="{Binding DataFlow}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="(SystemName)" Binding="{Binding SystemName}" IsReadOnly="True"/>
+                <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Measure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                      HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                      Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Volume Level" Binding="{Binding VolumeLevel}"/>
+                <DataGridTemplateColumn IsReadOnly="True" Header="Connect" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Connect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEnabled="{Binding EnableConnect.Value}"
+                                      Visibility="{Binding VisibleConnect}"
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
 </UserControl>

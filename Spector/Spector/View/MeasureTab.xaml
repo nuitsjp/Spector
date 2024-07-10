@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
-    <Grid DataContext="{Binding MeasureTabViewModel}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
@@ -19,6 +19,6 @@
         <local:DeviceList Grid.Row="1"/>
 
         <local:AudioInterfaceChart Grid.Row="2"
-                                  AudioInterface="{Binding AudioInterfaceViewModel}"/>
+                                  AudioInterface="{Binding MeasureTabViewModel.AudioInterfaceViewModel}"/>
     </Grid>
 </UserControl>
