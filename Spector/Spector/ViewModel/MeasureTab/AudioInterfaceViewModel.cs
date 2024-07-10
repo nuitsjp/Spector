@@ -6,7 +6,7 @@ using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.MeasureTab;
 
 public class AudioInterfaceViewModel : IDisposable
 {

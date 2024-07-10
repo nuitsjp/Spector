@@ -1,5 +1,4 @@
-﻿using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
-using System.IO;
+﻿using System.IO;
 using Reactive.Bindings;
 
 namespace Spector.Model;

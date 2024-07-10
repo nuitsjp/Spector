@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Kamishibai;
-using Spector.View;
+﻿using Kamishibai;
 
 namespace Spector.ViewModel;
 

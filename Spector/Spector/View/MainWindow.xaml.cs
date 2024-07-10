@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using Spector.Model;
-using Spector.ViewModel;
 
 namespace Spector.View;
 
@@ -19,6 +18,3 @@ public partial class MainWindow
         CurrentDispatcher.Dispatcher = Application.Current.Dispatcher;
     }
 }
-
-public class DesignTimeMainPageViewModel() : 
-    MainWindowViewModel(default!);

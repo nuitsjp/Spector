@@ -6,7 +6,10 @@ using Spector.Model;
 using Spector.Model.IO;
 using Spector.View;
 using Spector.ViewModel;
+using Spector.ViewModel.MeasureTab;
+using AnalysisTabViewModel = Spector.ViewModel.AnalysisTab.AnalysisTabViewModel;
 using Recorder = Spector.Model.Recorder;
+using RecorderViewModel = Spector.ViewModel.MeasureTab.RecorderViewModel;
 
 // Create a builder by specifying the application and main window.
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();

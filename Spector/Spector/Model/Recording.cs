@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
-using NAudio.Utils;
 using NAudio.Wave;
 
 namespace Spector.Model;

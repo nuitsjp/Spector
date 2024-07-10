@@ -2,7 +2,7 @@
 using Reactive.Bindings;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.AnalysisTab;
 
 public partial class AnalysisTabViewModel(Recorder recorder) : ObservableObject
 {

@@ -8,7 +8,7 @@ using Reactive.Bindings.Extensions;
 using Reactive.Bindings.Helpers;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.MeasureTab;
 
 public partial class RecorderViewModel(
     AudioInterface audioInterface,
@@ -74,11 +74,11 @@ public partial class RecorderViewModel(
         RecorderHost = settings.RecorderHost;
 
 
-        this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.RecorderHost).Subscribe(_ =>
+        this.ObserveProperty<RecorderViewModel, TimeSpan>(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
+        this.ObserveProperty<RecorderViewModel, bool>(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
+        this.ObserveProperty<RecorderViewModel, bool>(x => x.WithBuzz).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
+        this.ObserveProperty<RecorderViewModel, bool>(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
+        this.ObserveProperty<RecorderViewModel, string>(x => x.RecorderHost).Subscribe(_ =>
         {
             RemoteHost = RecorderHost;
             OnUpdated();

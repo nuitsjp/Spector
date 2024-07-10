@@ -3,7 +3,7 @@ using ScottPlot;
 using Spector.Model;
 using System.Windows;
 using Reactive.Bindings.Extensions;
-using Spector.ViewModel;
+using Spector.ViewModel.MeasureTab;
 
 namespace Spector.View;
 
@@ -33,13 +33,16 @@ public partial class AudioInterfaceChart
         if (e.NewValue as AudioInterfaceViewModel is { } audioInterface)
         {
             var audioInterfaceChart = (AudioInterfaceChart)d;
-            audioInterface.MeasureDevices.CollectionChangedAsObservable()
+            audioInterface.MeasureDevices
+                .CollectionChangedAsObservable()
                 .Subscribe(audioInterfaceChart.DevicesOnChanged);
             audioInterface.LiveDataUpdated += audioInterfaceChart.Render;
+
+            audioInterfaceChart.DevicesOnChanged(null);
         }
     }
 
-    private void DevicesOnChanged(NotifyCollectionChangedEventArgs obj)
+    private void DevicesOnChanged(NotifyCollectionChangedEventArgs? _)
     {
         AudioInterfacePlot.Plot.Clear();
 
