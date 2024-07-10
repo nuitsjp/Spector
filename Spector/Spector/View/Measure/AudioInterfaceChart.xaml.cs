@@ -4,6 +4,7 @@ using Reactive.Bindings.Extensions;
 using ScottPlot;
 using Spector.Model;
 using Spector.ViewModel;
+using Spector.ViewModel.Measure;
 
 namespace Spector.View.Measure;
 

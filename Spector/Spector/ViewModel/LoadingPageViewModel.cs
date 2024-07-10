@@ -1,12 +1,12 @@
 ﻿using Kamishibai;
-using Spector.ViewModel.MeasureTab;
+using Spector.ViewModel.Measure;
 
 namespace Spector.ViewModel;
 
 [Navigate]
 public class LoadingPageViewModel(
     [Inject] AudioInterfaceViewModel audioInterfaceViewModel,
-    [Inject] RecorderViewModel recorderViewModel,
+    [Inject] Measure.RecorderViewModel recorderViewModel,
     [Inject] IPresentationService presentationService) : INavigatedAsyncAware
 {
     public async Task OnNavigatedAsync(PostForwardEventArgs args)

@@ -7,7 +7,7 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.Measure;
 
 public partial class DeviceViewModel : ObservableObject, IDisposable
 {
@@ -18,17 +18,17 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         // デバイス名を同期する
         Name = Device.Name;
-        this.ObserveProperty(x => x.Name)
+        this.ObserveProperty<DeviceViewModel, string>(x => x.Name)
             .Skip(1) // 上記の「Name = Device.Name;」の変更をスキップする。
             .Subscribe(name => Device.Name = name)
             .AddTo(CompositeDisposable);
 
         // 計測状態を同期する
         Measure = Device.Measure;
-        EnableConnect = this.ObserveProperty(x => x.Measure)
+        EnableConnect = this.ObserveProperty<DeviceViewModel, bool>(x => x.Measure)
             .ToReadOnlyReactivePropertySlim()
             .AddTo(CompositeDisposable);
-        this.ObserveProperty(x => x.Measure)
+        this.ObserveProperty<DeviceViewModel, bool>(x => x.Measure)
             .Skip(1) // 上記の「Measure = Device.Measure;」の変更をスキップする。
             .Subscribe(measure =>
             {
@@ -46,7 +46,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         // 入出力レベルを同期する
         VolumeLevel = Device.VolumeLevel.AsPrimitive() * 100;
-        this.ObserveProperty(x => x.VolumeLevel)
+        this.ObserveProperty<DeviceViewModel, float>(x => x.VolumeLevel)
             .Skip(1) // 上記の「VolumeLevel = Device.VolumeLevel;」の変更をスキップする。
             .Subscribe(volumeLevel =>
             {
@@ -60,7 +60,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
 
         // Connectを同期する
-        this.ObserveProperty(x => x.Connect)
+        this.ObserveProperty<DeviceViewModel, bool>(x => x.Connect)
             .Subscribe(ConnectOnUpdated)
             .AddTo(CompositeDisposable);
     }

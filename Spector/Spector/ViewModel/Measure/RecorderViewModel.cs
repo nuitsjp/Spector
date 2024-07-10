@@ -8,7 +8,7 @@ using Reactive.Bindings.Extensions;
 using Reactive.Bindings.Helpers;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.Measure;
 
 public partial class RecorderViewModel(
     AudioInterface audioInterface,

@@ -6,7 +6,7 @@ using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
 
-namespace Spector.ViewModel;
+namespace Spector.ViewModel.Measure;
 
 public class AudioInterfaceViewModel : IDisposable
 {
@@ -111,7 +111,7 @@ public class AudioInterfaceViewModel : IDisposable
     private void Device_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         // Measureプロパティ以外が変更された場合は無視する
-        if (e.PropertyName != nameof(DeviceViewModel.Measure)) return;
+        if (e.PropertyName != nameof(ViewModel.DeviceViewModel.Measure)) return;
 
         // Measureプロパティが変更された場合はMeasureDevicesに追加または削除する
         var device = (DeviceViewModel)sender!;

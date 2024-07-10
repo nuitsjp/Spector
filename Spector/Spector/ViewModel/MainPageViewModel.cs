@@ -1,6 +1,7 @@
 ﻿using Kamishibai;
 using Spector.ViewModel.AnalysisTab;
-using Spector.ViewModel.MeasureTab;
+using Spector.ViewModel.Measure;
+using AnalysisTabViewModel = Spector.ViewModel.Analysis.AnalysisTabViewModel;
 
 namespace Spector.ViewModel;
 

@@ -1,9 +1,9 @@
-﻿namespace Spector.ViewModel.MeasureTab;
+﻿namespace Spector.ViewModel.Measure;
 
 public class MeasureTabViewModel(
     AudioInterfaceViewModel audioInterfaceViewModel,
-    ViewModel.RecorderViewModel recorderViewModel)
+    RecorderViewModel recorderViewModel)
 {
     public AudioInterfaceViewModel AudioInterfaceViewModel { get; } = audioInterfaceViewModel;
-    public ViewModel.RecorderViewModel RecorderViewModel { get; } = recorderViewModel;
+    public RecorderViewModel RecorderViewModel { get; } = recorderViewModel;
 }
