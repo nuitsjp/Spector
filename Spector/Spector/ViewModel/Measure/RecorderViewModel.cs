@@ -2,6 +2,7 @@
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MaterialDesignThemes.Wpf;
 using NAudio.CoreAudioApi;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
@@ -30,6 +31,7 @@ public partial class RecorderViewModel(
     [ObservableProperty] private bool _withBuzz;
     [ObservableProperty] private TimeSpan _recordingSpan;
     [ObservableProperty] private bool _isRecording;
+    [ObservableProperty] private PackIconKind _recordingIcon = PackIconKind.Record;
 
     /// <summary>
     /// 録音開始時刻

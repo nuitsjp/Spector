@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:view="clr-namespace:Spector.View"
+             xmlns:converter="clr-namespace:Spector.View.Converter"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
@@ -39,19 +40,11 @@
                 materialDesign:ButtonProgressAssist.Value="{Binding RecordingProgress}"
                 Command="{Binding StartRecordingCommand}"
                 ToolTip="録音">
+            <Button.Resources>
+                <converter:RecordingButtonConverter x:Key="ButtonContentConverter"/>
+            </Button.Resources>
             <Button.Content>
-                <materialDesign:PackIcon>
-                    <materialDesign:PackIcon.Style>
-                        <Style TargetType="{x:Type materialDesign:PackIcon}">
-                            <Setter Property="Kind" Value="Record"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRecording}" Value="True">
-                                    <Setter Property="Kind" Value="Stop"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </materialDesign:PackIcon.Style>
-                </materialDesign:PackIcon>
+                <materialDesign:PackIcon Kind="{Binding IsRecording, Converter={StaticResource ButtonContentConverter}}"/>
             </Button.Content>
         </Button>
 
