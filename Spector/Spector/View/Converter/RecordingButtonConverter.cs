@@ -5,6 +5,7 @@ using System.Windows.Data;
 namespace Spector.View.Converter;
 
 public class RecordingButtonConverter : IValueConverter
+
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
