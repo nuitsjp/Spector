@@ -10,6 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="View\AnalysisTab.xaml" />
 	  <None Remove="View\DeviceList.xaml" />
 	  <None Remove="View\MeasureTab.xaml" />
 	  <None Remove="View\Recorder.xaml" />

@@ -23,4 +23,5 @@ public partial class MainWindow
 public class DesignTimeMainWindowViewModel() : 
     MainWindowViewModel(
         default!,
+        default!,
         default!);

@@ -7,13 +7,13 @@ namespace Spector.Model;
 public class Recorder
 {
     private Recording? Recording { get; set; }
-    private ReactiveCollection<Record> Records { get; } = new();
-    public ReadOnlyReactiveCollection<Record> ReadOnlyRecords { get; }
+    private readonly ReactiveCollection<Record> _records = new();
+    public ReadOnlyReactiveCollection<Record> Records { get; }
 
 
     public Recorder()
     {
-        ReadOnlyRecords = Records.ToReadOnlyReactiveCollection();
+        Records = _records.ToReadOnlyReactiveCollection();
     }
 
     public void StartRecording(
@@ -37,6 +37,6 @@ public class Recorder
     public void StopRecording()
     {
         if(Recording is null) throw new InvalidOperationException("Recording is not started.");
-        Records.Add(Recording.StopRecording());
+        _records.Add(Recording.StopRecording());
     }
 }

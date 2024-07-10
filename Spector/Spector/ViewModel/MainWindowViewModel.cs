@@ -5,10 +5,13 @@ namespace Spector.ViewModel;
 
 public class MainWindowViewModel(
     AudioInterfaceViewModel audioInterfaceViewModel, 
-    RecorderViewModel recorderViewModel) : ObservableObject, INavigatedAsyncAware, IDisposable
+    RecorderViewModel recorderViewModel,
+    AnalysisTabViewModel analysisTabViewModel) : ObservableObject, INavigatedAsyncAware, IDisposable
 {
     public AudioInterfaceViewModel AudioInterfaceViewModel { get; } = audioInterfaceViewModel;
     public RecorderViewModel RecorderViewModel { get; } = recorderViewModel;
+
+    public AnalysisTabViewModel AnalysisTabViewModel { get; } = analysisTabViewModel;
 
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {

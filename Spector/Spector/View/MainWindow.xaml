@@ -17,6 +17,7 @@
             <view:MeasureTab/>
         </TabItem>
         <TabItem Header="Analysis">
+            <view:AnalysisTab/>
         </TabItem>
         <TabItem Header="Settings">
         </TabItem>

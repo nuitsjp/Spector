@@ -17,6 +17,7 @@ builder.Services.AddPresentation<MainWindow, MainWindowViewModel>();
 // ViewModel
 builder.Services.AddSingleton<AudioInterfaceViewModel>();
 builder.Services.AddSingleton<RecorderViewModel>();
+builder.Services.AddSingleton<AnalysisTabViewModel>();
 
 // Model
 builder.Services.AddSingleton<AudioInterface>();
