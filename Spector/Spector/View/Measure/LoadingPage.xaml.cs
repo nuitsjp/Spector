@@ -1,4 +1,4 @@
-﻿namespace Spector.View
+﻿namespace Spector.View.Measure
 {
     /// <summary>
     /// LoadingPage.xaml の相互作用ロジック

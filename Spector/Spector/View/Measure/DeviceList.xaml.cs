@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace Spector.View
+namespace Spector.View.Measure
 {
     /// <summary>
     /// DeviceList.xaml の相互作用ロジック

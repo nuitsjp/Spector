@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Spector.View
+namespace Spector.View.Analysis
 {
     /// <summary>
     /// AnalysisTab.xaml の相互作用ロジック

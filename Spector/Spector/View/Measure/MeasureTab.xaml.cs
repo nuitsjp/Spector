@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Spector.View
+namespace Spector.View.Measure
 {
     /// <summary>
     /// MeasureTab.xaml の相互作用ロジック

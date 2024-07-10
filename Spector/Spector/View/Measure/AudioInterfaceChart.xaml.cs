@@ -1,11 +1,11 @@
 ﻿using System.Collections.Specialized;
-using ScottPlot;
-using Spector.Model;
 using System.Windows;
 using Reactive.Bindings.Extensions;
-using Spector.ViewModel.MeasureTab;
+using ScottPlot;
+using Spector.Model;
+using Spector.ViewModel;
 
-namespace Spector.View;
+namespace Spector.View.Measure;
 
 /// <summary>
 /// AudioInterfacesChart.xaml の相互作用ロジック

@@ -71,7 +71,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         if (connect)
         {
-            localDevice.ConnectAsync(MeasureTab.RecorderViewModel.RemoteHost);
+            localDevice.ConnectAsync(RecorderViewModel.RemoteHost);
         }
         else
         {

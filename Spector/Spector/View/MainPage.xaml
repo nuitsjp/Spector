@@ -4,16 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spector.View"
+             xmlns:measure="clr-namespace:Spector.View.Measure"
+             xmlns:analysis="clr-namespace:Spector.View.Analysis"
              mc:Ignorable="d" 
              Height="1024" Width="1600"
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
     <TabControl HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                 Style="{StaticResource MaterialDesignFilledTabControl}">
         <TabItem Header="Measure">
-            <local:MeasureTab/>
+            <measure:MeasureTab/>
         </TabItem>
         <TabItem Header="Analysis">
-            <local:AnalysisTab/>
+            <analysis:AnalysisTab/>
         </TabItem>
         <TabItem Header="Settings">
         </TabItem>

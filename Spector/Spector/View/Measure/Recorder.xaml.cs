@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Spector.View
+namespace Spector.View.Measure
 {
     /// <summary>
     /// Recorder.xaml の相互作用ロジック
