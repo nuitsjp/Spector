@@ -6,7 +6,7 @@
              xmlns:view="clr-namespace:Spector.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}">
+             d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
     <DataGrid x:Name="AudioDataGrid" ItemsSource="{Binding AudioInterfaceViewModel.Devices}" 
               AutoGenerateColumns="False"
               ScrollViewer.VerticalScrollBarVisibility="Auto"

@@ -6,7 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:view="clr-namespace:Spector.View"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
     <UserControl.Resources>
         <ResourceDictionary>

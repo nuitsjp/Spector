@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spector.View"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              d:DesignHeight="1024" d:DesignWidth="1600">
     <Grid>
         <Grid.RowDefinitions>

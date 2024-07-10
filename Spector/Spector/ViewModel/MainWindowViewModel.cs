@@ -1,26 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Kamishibai;
+using Spector.View;
 
 namespace Spector.ViewModel;
 
-public class MainWindowViewModel(
-    AudioInterfaceViewModel audioInterfaceViewModel, 
-    RecorderViewModel recorderViewModel,
-    AnalysisTabViewModel analysisTabViewModel) : ObservableObject, INavigatedAsyncAware, IDisposable
+public class MainWindowViewModel(IPresentationService presentationService) : INavigatedAsyncAware
 {
-    public AudioInterfaceViewModel AudioInterfaceViewModel { get; } = audioInterfaceViewModel;
-    public RecorderViewModel RecorderViewModel { get; } = recorderViewModel;
-
-    public AnalysisTabViewModel AnalysisTabViewModel { get; } = analysisTabViewModel;
-
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
     {
-        await AudioInterfaceViewModel.ActivateAsync();
-        await RecorderViewModel.ActivateAsync();
-    }
-
-    public void Dispose()
-    {
-        AudioInterfaceViewModel.Dispose();
+        await presentationService.NavigateToLoadingPageAsync();
     }
 }

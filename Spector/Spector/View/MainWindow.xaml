@@ -3,23 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:view="clr-namespace:Spector.View"
+        xmlns:kamishibai="clr-namespace:Kamishibai;assembly=Kamishibai.View"
         mc:Ignorable="d"
         Style="{StaticResource MaterialDesignWindow}"
         Background="White"
         FontFamily="{DynamicResource MaterialDesignFont}"
         Title="Specter" Height="1024" Width="1600"
-        d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}"
         Loaded="MainWindow_OnLoaded">
-    <TabControl HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                Style="{StaticResource MaterialDesignFilledTabControl}">
-        <TabItem Header="Measure">
-            <view:MeasureTab/>
-        </TabItem>
-        <TabItem Header="Analysis">
-            <view:AnalysisTab/>
-        </TabItem>
-        <TabItem Header="Settings">
-        </TabItem>
-    </TabControl>
+    <kamishibai:NavigationFrame/>
 </Window>

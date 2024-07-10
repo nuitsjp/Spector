@@ -20,8 +20,5 @@ public partial class MainWindow
     }
 }
 
-public class DesignTimeMainWindowViewModel() : 
-    MainWindowViewModel(
-        default!,
-        default!,
-        default!);
+public class DesignTimeMainPageViewModel() : 
+    MainWindowViewModel(default!);

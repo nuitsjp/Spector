@@ -13,6 +13,8 @@ var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 
 // View, ViewModel
 builder.Services.AddPresentation<MainWindow, MainWindowViewModel>();
+builder.Services.AddPresentation<LoadingPage, LoadingPageViewModel>();
+builder.Services.AddPresentation<MainPage, MainPageViewModel>();
 
 // ViewModel
 builder.Services.AddSingleton<AudioInterfaceViewModel>();

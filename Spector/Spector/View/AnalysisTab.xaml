@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Spector.View"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainWindowViewModel}, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              Height="1024" Width="1600">
     <Grid DataContext="{Binding AnalysisTabViewModel}">
         <Grid.RowDefinitions>
