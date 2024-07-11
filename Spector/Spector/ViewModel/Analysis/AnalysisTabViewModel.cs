@@ -88,8 +88,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         var device = (RecordByDeviceViewModel)sender!;
         if (device.IsAnalysis)
         {
-            var record = Records.Single(x => x.RecordByDevices.Contains(device));
-            AnalysisDevices.Add(new AnalysisDeviceViewModel(record, device));
+            // IsAnalysisがtrueになった場合、外套のDeviceが存在するRecordは必ずSelectedRecordになっている
+            AnalysisDevices.Add(new AnalysisDeviceViewModel(SelectedRecord!, device));
         }
         else
         {
