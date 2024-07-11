@@ -44,12 +44,19 @@
     </Style>
 
     <!-- ToggleButton -->
-    <Style x:Key="DefaultToggleButton" 
+    <Style x:Key="ToggleButtonBase" 
            TargetType="ToggleButton"
            BasedOn="{StaticResource MaterialDesignFlatPrimaryToggleButton}">
         <Setter Property="Margin" Value="5, 0" />
     </Style>
 
-    <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButton}"/>
+    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBase}"/>
+
+    <!-- DataGrid -->
+    <Style x:Key="DataGridBase" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridBase}"/>
 
 </ResourceDictionary>

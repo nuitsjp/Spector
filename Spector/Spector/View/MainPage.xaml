@@ -7,7 +7,6 @@
              xmlns:measure="clr-namespace:Spector.View.Measure"
              xmlns:analysis="clr-namespace:Spector.View.Analysis"
              mc:Ignorable="d" 
-             Height="1024" Width="1600"
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
     <TabControl HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                 Style="{StaticResource MaterialDesignFilledTabControl}">
