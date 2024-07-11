@@ -88,7 +88,7 @@ public class Recording
 
             device.DataAvailable += (_, e) =>
             {
-                byte[] buffer = new byte[e.BytesRecorded];
+                var buffer = new byte[e.BytesRecorded];
                 Array.Copy(e.Buffer, buffer, e.BytesRecorded);
 
                 if (cancellationToken.IsCancellationRequested) return;

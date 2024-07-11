@@ -3,7 +3,6 @@ using System.Windows;
 using Reactive.Bindings.Extensions;
 using ScottPlot;
 using Spector.Model;
-using Spector.ViewModel;
 using Spector.ViewModel.Measure;
 
 namespace Spector.View.Measure;
@@ -54,7 +53,7 @@ public partial class AudioInterfaceChart
                 .AddSignal(device.LiveData, label: device.Name);
         }
 
-        RecordingConfig config = RecordingConfig.Default;
+        var config = RecordingConfig.Default;
         // データの全長から、デフォルトの表示幅分を引いた値をデフォルトのx軸の最小値とする
         var xMin =
             // データの全長

@@ -17,7 +17,6 @@
         <TabItem Header="Analysis">
             <analysis:AnalysisTab/>
         </TabItem>
-        <TabItem Header="Settings">
-        </TabItem>
+        <TabItem Header="Settings" />
     </TabControl>
 </UserControl>

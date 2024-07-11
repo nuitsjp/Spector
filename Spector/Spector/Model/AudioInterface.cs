@@ -11,7 +11,6 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 {
     public static readonly int RemotePort = 5432;
     private TcpListener Listener { get; } = new TcpListener(IPAddress.Any, RemotePort);
-    private Task? ListenerTask { get; set; }
     private CancellationTokenSource CancellationTokenSource { get; } = new();
     private Settings Settings { get; set; } = default!;
     private readonly ReactiveCollection<IDevice> _devices = new();
@@ -33,7 +32,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         Watcher.Start();
         await LoadDevicesAsync();
         Listener.Start();
-        ListenerTask = Task.Run(async () => await ListenClientConnectAsync());
+        _ = Task.Run(ListenClientConnectAsync);
     }
 
     private void WatcherEventArrived(object sender, EventArrivedEventArgs e)
@@ -169,5 +168,6 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         }
         _devices.Dispose();
         Watcher.Dispose();
+        CancellationTokenSource.Cancel();
     }
 }

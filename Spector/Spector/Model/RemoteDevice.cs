@@ -51,10 +51,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     private BinaryWriter BinaryWriter { get; }
     private NetworkStream NetworkStream { get; }
     private BufferedWaveProvider BufferedWaveProvider { get; }
-
-    private AWeightingFilter AWeightingFilter { get; set; }
-
-    private Task MeasureTask { get; set; } = Task.CompletedTask;
+    private AWeightingFilter AWeightingFilter { get; }
     private CancellationTokenSource CancellationTokenSource { get; } = new();
 
 
@@ -67,7 +64,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
     public void StartMeasure()
     {
-        MeasureTask = Task.Run(() =>
+        Task.Run(() =>
         {
             Measure = true;
             while (CancellationTokenSource.IsCancellationRequested is false)
@@ -99,7 +96,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         DataAvailable?.Invoke(this, new WaveInEventArgs(bytes, length));
 
         var buffer = new float[length / 2];
-        var samplesRead = AWeightingFilter!.Read(buffer, 0, buffer.Length);
+        var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
 
         // 音量計算（RMS値）
         double sum = 0;

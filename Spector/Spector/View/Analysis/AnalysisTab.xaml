@@ -174,8 +174,6 @@
                     Command="{Binding SaveRecordCommand}"
                     VerticalAlignment="Top"/>
         </Grid>
-        <WpfPlot Grid.Row="2" x:Name="WpfPlot1" >
-
-        </WpfPlot>
+        <WpfPlot Grid.Row="2" x:Name="WpfPlot1" />
     </Grid>
 </UserControl>

@@ -30,8 +30,7 @@
         <Setter Property="Margin" Value="5" />
     </Style>
 
-    <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxBase}">
-    </Style>
+    <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxBase}" />
 
     <!-- Button -->
     <Style x:Key="ButtonBase" TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">

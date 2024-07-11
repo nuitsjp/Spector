@@ -6,7 +6,7 @@ namespace Spector.ViewModel;
 [Navigate]
 public class LoadingPageViewModel(
     [Inject] AudioInterfaceViewModel audioInterfaceViewModel,
-    [Inject] Measure.RecorderViewModel recorderViewModel,
+    [Inject] RecorderViewModel recorderViewModel,
     [Inject] IPresentationService presentationService) : INavigatedAsyncAware
 {
     public async Task OnNavigatedAsync(PostForwardEventArgs args)
