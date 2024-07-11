@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Reactive.Bindings;
@@ -82,6 +83,18 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 
     private void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName != nameof(RecordByDeviceViewModel.IsAnalysis)) return;
+
+        var device = (RecordByDeviceViewModel)sender!;
+        if (device.IsAnalysis)
+        {
+            var record = Records.Single(x => x.RecordByDevices.Contains(device));
+            AnalysisDevices.Add(new AnalysisDeviceViewModel(record, device));
+        }
+        else
+        {
+            AnalysisDevices.Remove(AnalysisDevices.Single(x => x.DeviceRecord == device));
+        }
     }
 
     private CompositeDisposable CompositeDisposable { get; } = new();
@@ -91,6 +104,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private IReadOnlyCollection<RecordByDeviceViewModel> _devices = [];
     [ObservableProperty] private RecordByDeviceViewModel? _selectedDevice;
+
+    public ObservableCollection<AnalysisDeviceViewModel> AnalysisDevices { get; } = [];
 
     public void Dispose()
     {
