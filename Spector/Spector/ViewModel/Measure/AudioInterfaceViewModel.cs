@@ -104,7 +104,7 @@ public class AudioInterfaceViewModel : IDisposable
             case NotifyCollectionChangedAction.Reset:
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(changed));
         }
     }
 
@@ -137,5 +137,6 @@ public class AudioInterfaceViewModel : IDisposable
     public void Dispose()
     {
         CompositeDisposable.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

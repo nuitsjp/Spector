@@ -39,5 +39,6 @@ public class Recorder
     {
         if(Recording is null) throw new InvalidOperationException("Recording is not started.");
         _records.Add(Recording.StopRecording());
+        Recording = null;
     }
 }

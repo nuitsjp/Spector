@@ -10,11 +10,11 @@ public record Settings(
     bool EnableAWeighting,
     bool EnableFastTimeWeighting,
     Settings.RecorderSettings Recorder,
-    IReadOnlyList<Settings.DeviceSettings> Device)
+    IReadOnlyList<Settings.DeviceSettings> Devices)
 {
     public bool TryGetDeviceSettings(DeviceId id, out DeviceSettings deviceSettings)
     {
-        var config = Device.SingleOrDefault(x => x.Id == id);
+        var config = Devices.SingleOrDefault(x => x.Id == id);
         deviceSettings = config!;
         return config is not null;
     }

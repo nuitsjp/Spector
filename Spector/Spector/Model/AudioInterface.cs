@@ -92,9 +92,9 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         if (Settings.TryGetDeviceSettings(deviceId, out var deviceSettings) is false)
         {
             deviceSettings = new Settings.DeviceSettings(deviceId, mmDevice.FriendlyName, true);
-            var deviceConfigs = Settings.Device.ToList();
+            var deviceConfigs = Settings.Devices.ToList();
             deviceConfigs.Add(deviceSettings);
-            Settings = Settings with { Device = deviceConfigs };
+            Settings = Settings with { Devices = deviceConfigs };
             await settingsRepository.SaveAsync(Settings);
         }
 
@@ -146,7 +146,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
     {
         Settings = Settings with
         {
-            Device = Settings.Device
+            Devices = Settings.Devices
                 .Select(x =>
                 {
                     var device = Devices.SingleOrDefault(d => d.Id == x.Id);

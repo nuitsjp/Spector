@@ -119,5 +119,6 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         CompositeDisposable.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

@@ -72,7 +72,7 @@
         <ComboBox ItemsSource="{Binding PlaybackDevices}"
                   SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
                   DisplayMemberPath="Name"
-                  materialDesign:HintAssist.Hint="Playback Device"
+                  materialDesign:HintAssist.Hint="Playback Devices"
                   Width="250"/>
 
         <!-- 騒音再生ボタン -->

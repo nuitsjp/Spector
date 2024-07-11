@@ -30,7 +30,7 @@
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Time" Binding="{Binding StartTime, StringFormat=yyyy/MM/dd HH:mm}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Device" Binding="{Binding Device}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Device" Binding="{Binding DeviceName}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" IsReadOnly="True"/>
                     <DataGridTemplateColumn IsReadOnly="True" Header="Voice" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
