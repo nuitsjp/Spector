@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.ComponentModel;
+using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -13,6 +14,9 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         ISettingsRepository settingsRepository,
         Recorder recorder)
     {
+        base.PropertyChanging += OnPropertyChanging;
+        PropertyChanged += OnPropertyChanged;
+
         recorder.Records.ToCollectionChanged()
             .Select(_ => Observable.FromAsync(async () =>
             {
@@ -27,7 +31,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                         record.StartTime,
                         record.StopTime,
                         record.RecordByDevices
-                            .Select(recordByDevice => new RecordViewModel.RecordByDeviceViewModel(
+                            .Select(recordByDevice => new RecordByDeviceViewModel(
                                 recordByDevice.Id,
                                 recordByDevice.Name,
                                 recordByDevice.SystemName,
@@ -50,38 +54,46 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
     }
 
+    private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)
+    {
+        if (e.PropertyName != nameof(Records)) return;
+
+        foreach (var record in Records)
+        {
+            foreach (var device in record.RecordByDevices)
+            {
+                device.PropertyChanged -= DeviceOnPropertyChanged;
+            }
+        }
+    }
+
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(Records)) return;
+
+        foreach (var record in Records)
+        {
+            foreach (var device in record.RecordByDevices)
+            {
+                device.PropertyChanged += DeviceOnPropertyChanged;
+            }
+        }
+    }
+
+    private void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+    }
+
     private CompositeDisposable CompositeDisposable { get; } = new();
     [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
 
     [ObservableProperty] private RecordViewModel? _selectedRecord;
 
-    [ObservableProperty] private IReadOnlyCollection<RecordViewModel.RecordByDeviceViewModel> _devices = [];
-    [ObservableProperty] private RecordViewModel.RecordByDeviceViewModel? _selectedDevice;
+    [ObservableProperty] private IReadOnlyCollection<RecordByDeviceViewModel> _devices = [];
+    [ObservableProperty] private RecordByDeviceViewModel? _selectedDevice;
 
     public void Dispose()
     {
         CompositeDisposable.Dispose();
     }
-}
-
-public record RecordViewModel(
-    DeviceId MeasureDeviceId,
-    string DeviceName,
-    Direction Direction,
-    bool WithVoice,
-    bool WithBuzz,
-    DateTime StartTime,
-    DateTime StopTime,
-    IReadOnlyList<RecordViewModel.RecordByDeviceViewModel> RecordByDevices)
-{
-    public record RecordByDeviceViewModel(
-        DeviceId Id,
-        string Name,
-        string SystemName,
-        Decibel Min,
-        Decibel Avg,
-        Decibel Max,
-        double Minus30db,
-        double Minus40db,
-        double Minus50db);
 }

@@ -5,8 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Spector.View"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converter="clr-namespace:Spector.View.Converter"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
+    <UserControl.Resources>
+        <converter:DecibelConverter x:Key="DecibelConverter"/>
+    </UserControl.Resources>
     <Grid DataContext="{Binding AnalysisTabViewModel}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -77,16 +81,16 @@
                        ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Min" Binding="{Binding Min, ConverterParameter='{}{0:0.00}'}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Avg" Binding="{Binding Avg, ConverterParameter='{}{0:0.00}'}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Max" Binding="{Binding Max, ConverterParameter='{}{0:0.00}'}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Min" Binding="{Binding Min, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Avg" Binding="{Binding Avg, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Max" Binding="{Binding Max, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="-30db" Binding="{Binding Minus30db, StringFormat=0.00%}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="-40db" Binding="{Binding Minus40db, StringFormat=0.00%}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="-50db" Binding="{Binding Minus50db, StringFormat=0.00%}" IsReadOnly="True"/>
                     <DataGridTemplateColumn IsReadOnly="True" Header="Analysis" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox IsChecked="{Binding Analysis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                <CheckBox IsChecked="{Binding IsAnalysis, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                           HorizontalAlignment="Center" 
                                           VerticalAlignment="Center" />
                             </DataTemplate>
