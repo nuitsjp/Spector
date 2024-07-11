@@ -25,17 +25,30 @@
                 Margin="5"
                 HorizontalAlignment="Stretch"
                 DataContext="{Binding MeasureTabViewModel.RecorderViewModel}">
-        <ComboBox ItemsSource="{Binding Directions}"
-                      SelectedItem="{Binding SelectedDirection, Mode=TwoWay}"
-                      materialDesign:HintAssist.Hint="Direction"
-                      Width="200"/>
 
+        <!-- メインの計測デバイス -->
+        <ComboBox ItemsSource="{Binding MeasureDevices}"
+                  SelectedItem="{Binding MeasureDevice, Mode=TwoWay}"
+                  DisplayMemberPath="Name"
+                  materialDesign:HintAssist.Hint="Measure Device"
+                  ToolTip="メインの計測デバイス。分析時に一覧から探すための目安に利用する。"
+                  Width="250"/>
+
+        <!-- 方向 -->
+        <ComboBox ItemsSource="{Binding Directions}"
+                  SelectedItem="{Binding SelectedDirection, Mode=TwoWay}"
+                  materialDesign:HintAssist.Hint="Direction"
+                  Width="200"/>
+
+        <!-- 音声 -->
         <CheckBox Content="With Voice" IsChecked="{Binding WithVoice}"
                       Margin="5"/>
 
+        <!-- 騒音 -->
         <CheckBox Content="With Buzz" IsChecked="{Binding WithBuzz}"
                       Margin="5"/>
 
+        <!-- 録音ボタン -->
         <Button materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRecording}"
                 materialDesign:ButtonProgressAssist.Value="{Binding RecordingProgress}"
                 Command="{Binding StartRecordingCommand}"
@@ -48,24 +61,28 @@
             </Button.Content>
         </Button>
 
+        <!-- 録音時間 -->
         <TextBox Text="{Binding RecordingSpan, Mode=TwoWay}" 
                      materialDesign:HintAssist.Hint="Recording Span"
                      Width="100"/>
 
         <Rectangle Width="20" />
 
+        <!-- 騒音再生デバイス -->
         <ComboBox ItemsSource="{Binding PlaybackDevices}"
-                      SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
-                      DisplayMemberPath="Name"
-                      materialDesign:HintAssist.Hint="Playback Device"
-                      Width="250"/>
+                  SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
+                  DisplayMemberPath="Name"
+                  materialDesign:HintAssist.Hint="Playback Device"
+                  Width="250"/>
 
-        <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
+        <!-- 騒音再生ボタン -->
+            <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
                           IsChecked="{Binding IsPlaying}"
                           ToolTip="再生"/>
 
         <Rectangle Width="20" />
 
+        <!-- リモート接続先アドレス -->
         <TextBox Text="{Binding RecorderHost}"
                  materialDesign:HintAssist.Hint="Connect Host Address"
                  Width="150"
