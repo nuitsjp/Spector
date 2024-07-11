@@ -70,8 +70,8 @@
             </DataGrid>
 
             <DataGrid  Grid.Column="1"
-                       ItemsSource="{Binding SelectedAudioRecord.Devices}" 
-                       SelectedItem="{Binding SelectedAudioRecord.SelectedDevice}"
+                       ItemsSource="{Binding Devices}" 
+                       SelectedItem="{Binding SelectedDevice}"
                        AutoGenerateColumns="False"
                        Height="200"
                        Margin="5"

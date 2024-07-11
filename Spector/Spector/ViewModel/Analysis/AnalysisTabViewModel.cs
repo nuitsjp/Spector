@@ -1,11 +1,13 @@
 ﻿using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Reactive.Bindings;
+using Reactive.Bindings.Disposables;
+using Reactive.Bindings.Extensions;
 using Spector.Model;
 
 namespace Spector.ViewModel.Analysis;
 
-public partial class AnalysisTabViewModel : ObservableObject
+public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 {
     public AnalysisTabViewModel(
         ISettingsRepository settingsRepository,
@@ -43,11 +45,23 @@ public partial class AnalysisTabViewModel : ObservableObject
             {
                 Records = records;
             });
+        this.ObserveProperty(x => x.SelectedRecord)
+            .Subscribe(x => Devices = x?.RecordByDevices ?? [])
+            .AddTo(CompositeDisposable);
     }
 
+    private CompositeDisposable CompositeDisposable { get; } = new();
     [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
 
     [ObservableProperty] private RecordViewModel? _selectedRecord;
+
+    [ObservableProperty] private IReadOnlyCollection<RecordViewModel.RecordByDeviceViewModel> _devices = [];
+    [ObservableProperty] private RecordViewModel.RecordByDeviceViewModel? _selectedDevice;
+
+    public void Dispose()
+    {
+        CompositeDisposable.Dispose();
+    }
 }
 
 public record RecordViewModel(
