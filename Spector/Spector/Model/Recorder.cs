@@ -16,7 +16,8 @@ public class Recorder
     }
 
     public void StartRecording(
-        DirectoryInfo directory, 
+        DirectoryInfo directory,
+        DeviceId measureDeviceId,
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
@@ -26,6 +27,7 @@ public class Recorder
 
         Recording = new Recording(
             directory,
+            measureDeviceId,
             direction,
             withVoice,
             withBuzz,

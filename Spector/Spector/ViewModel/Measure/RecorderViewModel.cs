@@ -69,7 +69,18 @@ public partial class RecorderViewModel(
 
     public async Task ActivateAsync()
     {
-        MeasureDevices.CollectionChanged += (_, _) => { MeasureDevice ??= MeasureDevices.FirstOrDefault(); };
+        MeasureDevices.CollectionChanged += (_, _) =>
+        {
+            if (MeasureDevices.Any())
+            {
+                MeasureDevice ??= MeasureDevices.FirstOrDefault();
+            }
+            else
+            {
+                MeasureDevice = null;
+            }
+            StartRecordingCommand.NotifyCanExecuteChanged();
+        };
         PlaybackDevices.CollectionChanged += (_, _) => { PlaybackDevice ??= PlaybackDevices.FirstOrDefault(); };
 
         var settings = await settingsRepository.LoadAsync();
@@ -90,7 +101,9 @@ public partial class RecorderViewModel(
         }).AddTo(CompositeDisposable);
     }
 
-    [RelayCommand]
+    private bool CanStartRecording() => IsRecording || MeasureDevice is not null;
+
+    [RelayCommand(CanExecute = nameof(CanStartRecording))]
     private async Task StartRecordingAsync()
     {
         if (IsRecording is false)
@@ -109,6 +122,7 @@ public partial class RecorderViewModel(
 
         recorder.StartRecording(
             new DirectoryInfo("Record"),
+            MeasureDevice!.Id,
             SelectedDirection,
             WithVoice,
             WithBuzz,

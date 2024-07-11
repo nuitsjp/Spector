@@ -8,6 +8,7 @@ public class Recording
 {
     internal Recording(
         DirectoryInfo recordRootDirectory, 
+        DeviceId measureDeviceId, 
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
@@ -20,12 +21,14 @@ public class Recording
         Direction = direction;
         WithVoice = withVoice;
         WithBuzz = withBuzz;
+        MeasureDeviceId = measureDeviceId;
         RecorderByDevices = devices
             .Select(x => new RecordingByDevice(x, CurrentRecordDirectory, CancellationTokenSource.Token))
             .ToArray();
     }
 
     private DirectoryInfo CurrentRecordDirectory { get; }
+    private DeviceId MeasureDeviceId { get; }
     private Direction Direction { get; }
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
@@ -60,6 +63,7 @@ public class Recording
     {
         CancellationTokenSource.Cancel();
         return new Record(
+            MeasureDeviceId,
             Direction,
             WithVoice,
             WithBuzz,
@@ -167,6 +171,7 @@ public class Recording
 }
 
 public record Record(
+    DeviceId MeasureDeviceId,
     Direction Direction,
     bool WithVoice,
     bool WithBuzz,
