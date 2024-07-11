@@ -43,7 +43,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         if (Measure) StartMeasure();
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
+    private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
     public DeviceId Id { get; }
 

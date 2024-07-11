@@ -13,7 +13,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
     private TcpListener Listener { get; } = new TcpListener(IPAddress.Any, RemotePort);
     private CancellationTokenSource CancellationTokenSource { get; } = new();
     private Settings Settings { get; set; } = default!;
-    private readonly ReactiveCollection<IDevice> _devices = new();
+    private readonly ReactiveCollection<IDevice> _devices = [];
 
     public ReadOnlyReactiveCollection<IDevice> Devices => _devices.ToReadOnlyReactiveCollection();
     
@@ -91,10 +91,10 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         // 新たに接続されたデバイスった場合
         if (Settings.TryGetDeviceSettings(deviceId, out var deviceSettings) is false)
         {
-            deviceSettings = new DeviceSettings(deviceId, mmDevice.FriendlyName, true);
-            var deviceConfigs = Settings.DeviceSettings.ToList();
+            deviceSettings = new Settings.DeviceSettings(deviceId, mmDevice.FriendlyName, true);
+            var deviceConfigs = Settings.Device.ToList();
             deviceConfigs.Add(deviceSettings);
-            Settings = Settings with { DeviceSettings = deviceConfigs };
+            Settings = Settings with { Device = deviceConfigs };
             await settingsRepository.SaveAsync(Settings);
         }
 
@@ -146,13 +146,13 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
     {
         Settings = Settings with
         {
-            DeviceSettings = Settings.DeviceSettings
+            Device = Settings.Device
                 .Select(x =>
                 {
                     var device = Devices.SingleOrDefault(d => d.Id == x.Id);
                     return device is null 
                         ? x 
-                        : new DeviceSettings(device.Id, device.Name, device.Measure);
+                        : new Settings.DeviceSettings(device.Id, device.Name, device.Measure);
                 })
                 .ToArray()
         };

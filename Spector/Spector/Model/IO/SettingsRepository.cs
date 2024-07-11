@@ -23,12 +23,12 @@ public class SettingsRepository : RepositoryBase<Settings>, ISettingsRepository
                     null,
                     true,
                     true,
-                    new RecorderSettings(
+                    new(
                         TimeSpan.FromSeconds(30),
                         "Record",
                         false, 
                         true),
-                    new List<DeviceSettings>()));
+                    []));
 
     /// <summary>
     /// Settingsを保存する。

@@ -17,7 +17,7 @@ public partial class RecorderViewModel(
     ISettingsRepository settingsRepository)
     : ObservableObject, IDisposable
 {
-    public CompositeDisposable CompositeDisposable { get; } = new();
+    public CompositeDisposable CompositeDisposable { get; } = [];
     public IFilteredReadOnlyObservableCollection<IDevice> MeasureDevices { get; } = audioInterface
         .Devices
         .ToFilteredReadOnlyObservableCollection(x => x.Measure);
@@ -84,9 +84,9 @@ public partial class RecorderViewModel(
         PlaybackDevices.CollectionChanged += (_, _) => { PlaybackDevice ??= PlaybackDevices.FirstOrDefault(); };
 
         var settings = await settingsRepository.LoadAsync();
-        RecordingSpan = settings.RecorderSettings.RecordingSpan;
-        WithVoice = settings.RecorderSettings.WithVoice;
-        WithBuzz = settings.RecorderSettings.WithBuzz;
+        RecordingSpan = settings.Recorder.RecordingSpan;
+        WithVoice = settings.Recorder.WithVoice;
+        WithBuzz = settings.Recorder.WithBuzz;
         RecorderHost = settings.RecorderHost;
 
 
@@ -191,7 +191,7 @@ public partial class RecorderViewModel(
             settings with
             {
                 RecorderHost = RecorderHost,
-                RecorderSettings = new RecorderSettings(RecordingSpan, settings.RecorderSettings.OutputDirectory, WithVoice, WithBuzz)
+                Recorder = new Settings.RecorderSettings(RecordingSpan, settings.Recorder.OutputDirectory, WithVoice, WithBuzz)
             });
     }
 

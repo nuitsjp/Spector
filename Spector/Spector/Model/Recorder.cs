@@ -6,7 +6,7 @@ namespace Spector.Model;
 public class Recorder
 {
     private Recording? Recording { get; set; }
-    private readonly ReactiveCollection<Record> _records = new();
+    private readonly ReactiveCollection<Record> _records = [];
     public ReadOnlyReactiveCollection<Record> Records { get; }
 
 

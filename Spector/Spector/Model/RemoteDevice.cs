@@ -35,7 +35,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
+    private CompositeDisposable CompositeDisposable { get; } = [];
     public DeviceId Id { get; }
     public DataFlow DataFlow { get; }
     public WaveFormat WaveFormat { get; }

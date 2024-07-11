@@ -32,7 +32,7 @@ public class AudioInterfaceViewModel : IDisposable
         DispatcherTimer.Tick += Update;
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
+    private CompositeDisposable CompositeDisposable { get; } = [];
     private AudioInterface AudioInterface { get; }
 
     /// <summary>

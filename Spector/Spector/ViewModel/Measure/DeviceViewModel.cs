@@ -98,7 +98,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
     public double[] LiveData { get; } = CreateEmptyData();
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
+    private CompositeDisposable CompositeDisposable { get; } = [];
 
     private static double[] CreateEmptyData()
     {
