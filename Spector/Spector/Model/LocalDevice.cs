@@ -115,19 +115,15 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
                 while (TcpClient is not null)
                 {
                     var command = (RemoteCommand)reader.ReadInt32();
-                    switch (command)
+                    if (command == RemoteCommand.StartPlayLooping)
                     {
-                        case RemoteCommand.StartPlayLooping:
-                            PlayLoopingCancellationTokenSource = new CancellationTokenSource();
-                            PlayLooping(PlayLoopingCancellationTokenSource.Token);
-                            break;
-                        case RemoteCommand.StopPlayLooping:
-                            PlayLoopingCancellationTokenSource.Cancel();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        PlayLoopingCancellationTokenSource = new CancellationTokenSource();
+                        PlayLooping(PlayLoopingCancellationTokenSource.Token);
                     }
-
+                    else if (command == RemoteCommand.StopPlayLooping)
+                    {
+                        PlayLoopingCancellationTokenSource.Cancel();
+                    }
                 }
             }
             catch (IOException)
@@ -211,7 +207,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         // スピーカーからNAudioで再生するためのプレイヤーを生成する。
         using var enumerator = new MMDeviceEnumerator();
         var mmDevice = enumerator.GetDevice(Id.AsPrimitive());
-        IWavePlayer wavePlayer = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 0);
+        var wavePlayer = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 0);
 
         // ループ音源を作成する。
         WaveStream waveStream = new LoopStream(new WaveFileReader(Properties.Resources.吾輩は猫である));
@@ -234,5 +230,6 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     public void Dispose()
     {
         CompositeDisposable.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

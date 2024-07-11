@@ -71,13 +71,13 @@ public partial class RecorderViewModel(
     {
         MeasureDevices.CollectionChanged += (_, _) =>
         {
-            if (MeasureDevices.Any())
+            if (MeasureDevices.Count == 0)
             {
-                MeasureDevice ??= MeasureDevices.FirstOrDefault();
+                MeasureDevice = null;
             }
             else
             {
-                MeasureDevice = null;
+                MeasureDevice ??= MeasureDevices.FirstOrDefault();
             }
             StartRecordingCommand.NotifyCanExecuteChanged();
         };
@@ -199,5 +199,6 @@ public partial class RecorderViewModel(
     {
         audioInterface.Dispose();
         CompositeDisposable.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

@@ -126,5 +126,6 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     {
         CompositeDisposable.Dispose();
         Disconnected?.Invoke(this, EventArgs.Empty);
+        GC.SuppressFinalize(this);
     }
 }

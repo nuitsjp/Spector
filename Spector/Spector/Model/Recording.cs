@@ -137,9 +137,9 @@ public class Recording
             }
         }
 
-        public RecordByDevice ToRecord()
+        public Record.RecordByDevice ToRecord()
         {
-            return new RecordByDevice(
+            return new Record.RecordByDevice(
                 device.Id,
                 device.Name,
                 device.SystemName,

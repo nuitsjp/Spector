@@ -122,7 +122,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private void HandleClientAsync(TcpClient client)
     {
-        IRemoteDevice device = new RemoteDevice(client, RecordingConfig.Default.WaveFormat);
+        var device = new RemoteDevice(client, RecordingConfig.Default.WaveFormat);
         device.Disconnected += RemoteDeviceOnDisconnected;
         device.StartMeasure();
         _devices.Add(device);
@@ -169,5 +169,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         _devices.Dispose();
         Watcher.Dispose();
         CancellationTokenSource.Cancel();
+
+        GC.SuppressFinalize(this);
     }
 }
