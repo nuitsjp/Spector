@@ -85,6 +85,9 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     /// </summary>
     public Decibel Level { get; private set; } = Decibel.Minimum;
 
+    private readonly List<Decibel> _levels = [];
+    public IReadOnlyList<Decibel> Levels => _levels;
+
     private WasapiCapture WasapiCapture { get; }
     private BufferedWaveProvider BufferedWaveProvider { get; }
 
@@ -153,6 +156,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
 
     public void StartMeasure()
     {
+        _levels.Clear();
         WasapiCapture.StartRecording();
         Measure = true;
     }
@@ -195,6 +199,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         Level = Decibel.Minimum <= level
             ? level
             : Decibel.Minimum;
+        _levels.Add(Level);
     }
 
     /// <summary>

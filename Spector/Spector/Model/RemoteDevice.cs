@@ -46,6 +46,9 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     public bool Connectable => false;
     public VolumeLevel VolumeLevel { get; set; }
     public Decibel Level { get; private set; } = Decibel.Minimum;
+
+    private readonly List<Decibel> _levels = [];
+    public IReadOnlyList<Decibel> Levels => _levels;
     private TcpClient TcpClient { get; }
     private BinaryReader BinaryReader { get; }
     private BinaryWriter BinaryWriter { get; }
@@ -64,6 +67,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
     public void StartMeasure()
     {
+        _levels.Clear();
         Task.Run(() =>
         {
             Measure = true;
@@ -111,6 +115,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         Level = Decibel.Minimum <= level
             ? level
             : Decibel.Minimum;
+        _levels.Add(Level);
     }
 
     public void PlayLooping(CancellationToken token)

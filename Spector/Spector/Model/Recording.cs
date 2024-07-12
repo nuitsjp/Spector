@@ -49,15 +49,6 @@ public class Recording
         {
             device.StartRecording();
         }
-
-        Task.Run(() =>
-            {
-                foreach (var device in RecorderByDevices)
-                {
-                    device.MarkLevel();
-                }
-            },
-            CancellationTokenSource.Token);
     }
 
     public Record StopRecording()
@@ -88,9 +79,6 @@ public class Recording
 
         private WaveFileWriter? Writer { get; set; }
 
-        private List<Decibel> Decibels { get; } = [];
-
-
         public void StartRecording()
         {
             cancellationToken.Register(StopRecording);
@@ -115,11 +103,6 @@ public class Recording
             };
 
             Task.Run(ProcessQueue);
-        }
-
-        public void MarkLevel()
-        {
-            Decibels.Add(device.Level);
         }
 
         private void StopRecording()
@@ -150,12 +133,12 @@ public class Recording
                 device.Id,
                 device.Name,
                 device.SystemName,
-                Decibels.Min(),
-                new Decibel(Decibels.Average(x => x.AsPrimitive())),
-                Decibels.Max(),
-                (double)Decibels.Count(x => -30d < x.AsPrimitive()) / Decibels.Count,
-                (double)Decibels.Count(x => -40d < x.AsPrimitive()) / Decibels.Count,
-                (double)Decibels.Count(x => -50d < x.AsPrimitive()) / Decibels.Count);
+                device.Levels.Min(),
+                new Decibel(device.Levels.Average(x => x.AsPrimitive())),
+                device.Levels.Max(),
+                (double)device.Levels.Count(x => -30d < x.AsPrimitive()) / device.Levels.Count,
+                (double)device.Levels.Count(x => -40d < x.AsPrimitive()) / device.Levels.Count,
+                (double)device.Levels.Count(x => -50d < x.AsPrimitive()) / device.Levels.Count);
         }
 
         public void Dispose()

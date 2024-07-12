@@ -28,6 +28,7 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     /// 音量レベル
     /// </summary>
     Decibel Level { get; }
+    IReadOnlyList<Decibel> Levels { get; }
 
     Task DisconnectAsync();
 
