@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
+using System.Text.Json;
 using NAudio.Wave;
 
 namespace Spector.Model;
@@ -62,7 +63,7 @@ public class Recording
     public Record StopRecording()
     {
         CancellationTokenSource.Cancel();
-        return new Record(
+        var record = new Record(
             MeasureDeviceId,
             Direction,
             WithVoice,
@@ -70,6 +71,12 @@ public class Recording
             StartTime,
             DateTime.Now, 
             RecorderByDevices.Select(x => x.ToRecord()).ToArray());
+
+        using var stream = new FileStream(Path.Combine(CurrentRecordDirectory.FullName, "record.json"), FileMode.Create);
+        // JSON形式で保存
+        JsonSerializer.Serialize(stream, record, JsonEnvironments.Options);
+
+        return record;
     }
 
     private class RecordingByDevice(
