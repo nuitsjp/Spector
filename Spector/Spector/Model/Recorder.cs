@@ -58,47 +58,30 @@ public class Recorder
         Recording = null;
     }
 
-    public async IAsyncEnumerable<Decibel> LoadInputLevelsAsync(Record record, Record.RecordByDevice device)
+    public List<Decibel> AnalyzeWaveFile(Record record, Record.RecordByDevice device)
     {
-        var volumeLevels = new List<Decibel>();
+        var levels = new List<Decibel>();
 
         var file = Path.Combine(RootDirectory.FullName, record.DirectoryName, device.FileName);
-        await using var reader = new AudioFileReader(file);
+        using var reader = new WaveFileReader(file);
+        var waveFormat = reader.WaveFormat;
+        var aWeightingFilter = new AWeightingFilter(reader.ToSampleProvider());
 
-        var bufferedWaveProvider = new BufferedWaveProvider(reader.WaveFormat);
-        var aWeightingFilter = new AWeightingFilter(bufferedWaveProvider.ToSampleProvider());
+        var samplesPerWindow = (int)(waveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
+        var buffer = new float[samplesPerWindow];
 
-
-        var bytes = new byte[reader.WaveFormat.SampleRate * 2 / 10];
-        var floats = new float[bytes.Length / 2];
-        int samplesRead;
-
-        while ((samplesRead = reader.Read(bytes, 0, bytes.Length)) > 0)
+        while (true)
         {
-            bufferedWaveProvider.AddSamples(bytes, 0, samplesRead);
-            var floatRead = aWeightingFilter.Read(floats, 0, floats.Length);
+            var samplesRead = aWeightingFilter.Read(buffer, 0, buffer.Length);
+            if (samplesRead == 0) break;
 
-            // 音量計算（RMS値）
-            double sum = 0;
-            for (var i = 0; i < floatRead; i++)
-            {
-                sum += floats[i] * floats[i];
-            }
-            var rms = Math.Sqrt(sum / samplesRead);
+            var rms = Math.Sqrt(buffer.Take(samplesRead).Select(s => s * s).Average());
             var db = 20 * Math.Log10(rms);
-            volumeLevels.Add((Decibel)db);
+
+            var level = Math.Max(db, Decibel.MinimumValue);
+            levels.Add((Decibel)level);
         }
 
-        var settings = await SettingsRepository.LoadAsync();
-
-        var samplingStep = (int)(reader.WaveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
-
-        for (var i = 0; i < volumeLevels.Count; i += 1)
-        {
-            if (i < volumeLevels.Count)
-            {
-                yield return volumeLevels[i];
-            }
-        }
+        return levels;
     }
 }

@@ -56,18 +56,15 @@ public partial class AnalysisChart
         }
 
         var config = RecordingConfig.Default;
-        // データの全長から、デフォルトの表示幅分を引いた値をデフォルトのx軸の最小値とする
-        var xMin =
-            // データの全長
-            config.RecordingLength
-            // 表示時間を表示間隔で割ることで、表示幅を計算する
-            - (int)(DisplayWidth / config.RefreshRate.Interval);
+        var xMax = AnalysisDevices.Any()
+            ? AnalysisDevices.Max(x => x.InputLevels.Count)
+            : 10;
         AudioInterfacePlot.Plot.SetAxisLimits(
-            xMin: xMin, xMax: config.RecordingLength,
+            xMin: 0, xMax: xMax,
             yMin: -90, yMax: 0);
-        AudioInterfacePlot.Plot.XAxis.SetBoundary(0, config.RecordingLength);
+        AudioInterfacePlot.Plot.XAxis.SetBoundary(0, xMax);
         AudioInterfacePlot.Plot.YAxis.SetBoundary(-90, 0);
-        AudioInterfacePlot.Plot.XAxis.TickLabelFormat(x => $"{(((config.RecordingLength - x) * -1 * config.RefreshRate.Interval.TotalMilliseconds) / 1000d):#0.0[s]}");
+        AudioInterfacePlot.Plot.XAxis.TickLabelFormat(x => $"{x * config.RefreshRate.Interval.TotalMilliseconds / 1000d:#0.0[s]}");
         AudioInterfacePlot.Configuration.LockVerticalAxis = true;
         AudioInterfacePlot.Plot.Legend(location: Alignment.UpperLeft);
         AudioInterfacePlot.Refresh();

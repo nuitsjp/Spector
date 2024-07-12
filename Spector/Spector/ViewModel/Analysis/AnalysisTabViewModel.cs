@@ -104,7 +104,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         var device = (RecordByDeviceViewModel)sender!;
         if (device.IsAnalysis)
         {
-            var inputLevels = await Recorder.LoadInputLevelsAsync(SelectedRecord!.Record, device.Device).ToListAsync();
+            var inputLevels = Recorder.AnalyzeWaveFile(SelectedRecord!.Record, device.Device);
             // IsAnalysisがtrueになった場合、外套のDeviceが存在するRecordは必ずSelectedRecordになっている
             AnalysisDevices.Add(
                 new AnalysisDeviceViewModel(
@@ -115,35 +115,6 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         else
         {
             AnalysisDevices.Remove(AnalysisDevices.Single(x => x.DeviceRecord == device));
-        }
-    }
-
-    private void ReadInputLevels(RecordByDeviceViewModel deviceViewModel)
-    {
-        string inputFilePath = @"D:\Spector\Spector\Spector\bin\Debug\net8.0-windows\Record\20240713-045141\ヘッドホン (Sound Blaster Play! 4).wav";
-        List<float> volumeLevels = new List<float>();
-
-        using (var reader = new AudioFileReader(inputFilePath))
-        {
-            ISampleProvider sampleProvider = new AWeightingFilter(reader.ToSampleProvider());
-            float[] buffer = new float[reader.WaveFormat.SampleRate];
-            int samplesRead;
-
-            while ((samplesRead = sampleProvider.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                for (int i = 0; i < samplesRead; i++)
-                {
-                    volumeLevels.Add(buffer[i]);
-                }
-            }
-        }
-
-        // 音量レベルをdBに変換
-        List<double> decibelLevels = new List<double>();
-        foreach (var level in volumeLevels)
-        {
-            double decibels = 20 * Math.Log10(Math.Max(Math.Abs(level), 1e-10)); // Log10(0)を避けるための処理
-            decibelLevels.Add(decibels);
         }
     }
 
