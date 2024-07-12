@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Reactive.Bindings;
 
@@ -63,18 +64,25 @@ public class Recorder
 
         var file = Path.Combine(RootDirectory.FullName, record.DirectoryName, device.FileName);
         await using var reader = new AudioFileReader(file);
-        ISampleProvider aWeightingFilter = new AWeightingFilter(reader.ToSampleProvider());
-        var buffer = new float[reader.WaveFormat.SampleRate];
+
+        var bufferedWaveProvider = new BufferedWaveProvider(reader.WaveFormat);
+        var aWeightingFilter = new AWeightingFilter(bufferedWaveProvider.ToSampleProvider());
+
+
+        var bytes = new byte[reader.WaveFormat.SampleRate * 2 / 10];
+        var floats = new float[bytes.Length / 2];
         int samplesRead;
 
-        while ((samplesRead = aWeightingFilter.Read(buffer, 0, buffer.Length)) > 0)
+        while ((samplesRead = reader.Read(bytes, 0, bytes.Length)) > 0)
         {
+            bufferedWaveProvider.AddSamples(bytes, 0, samplesRead);
+            var floatRead = aWeightingFilter.Read(floats, 0, floats.Length);
 
             // 音量計算（RMS値）
             double sum = 0;
-            for (var i = 0; i < samplesRead; i++)
+            for (var i = 0; i < floatRead; i++)
             {
-                sum += buffer[i] * buffer[i];
+                sum += floats[i] * floats[i];
             }
             var rms = Math.Sqrt(sum / samplesRead);
             var db = 20 * Math.Log10(rms);
@@ -83,9 +91,9 @@ public class Recorder
 
         var settings = await SettingsRepository.LoadAsync();
 
-        var samplingStep = (int)(reader.WaveFormat.SampleRate * settings.Recorder.RecordingSpan.TotalSeconds);
+        var samplingStep = (int)(reader.WaveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
 
-        for (var i = 0; i < volumeLevels.Count; i += samplingStep)
+        for (var i = 0; i < volumeLevels.Count; i += 1)
         {
             if (i < volumeLevels.Count)
             {
