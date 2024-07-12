@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Spector.View"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:converter="clr-namespace:Spector.View.Converter"
+             xmlns:analysis="clr-namespace:Spector.View.Analysis"
              mc:Ignorable="d" 
              d:DesignHeight="1024" d:DesignWidth="1600"
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
@@ -172,6 +173,6 @@
                     Command="{Binding SaveRecordCommand}"
                     VerticalAlignment="Top"/>
         </Grid>
-        <WpfPlot Grid.Row="2" x:Name="WpfPlot1" />
+        <analysis:AnalysisChart Grid.Row="2" AnalysisDevices="{Binding AnalysisDevices}"/>
     </Grid>
 </UserControl>

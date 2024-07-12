@@ -4,7 +4,8 @@ namespace Spector.ViewModel.Analysis;
 
 public class AnalysisDeviceViewModel(
     RecordViewModel audioRecord,
-    RecordByDeviceViewModel deviceRecord)
+    RecordByDeviceViewModel deviceRecord,
+    IReadOnlyList<Decibel> inputLevels)
 {
     public RecordViewModel AudioRecord { get; } = audioRecord;
     public RecordByDeviceViewModel DeviceRecord { get; } = deviceRecord;
@@ -19,6 +20,7 @@ public class AnalysisDeviceViewModel(
     public double Minus30db => DeviceRecord.Minus30db;
     public double Minus40db => DeviceRecord.Minus40db;
     public double Minus50db => DeviceRecord.Minus50db;
+    public IReadOnlyList<Decibel> InputLevels { get; } = inputLevels;
 
     public bool Analysis
     {

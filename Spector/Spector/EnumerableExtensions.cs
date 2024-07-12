@@ -13,4 +13,14 @@ public static class EnumerableExtensions
     {
         return source.Any(predicate) is false;
     }
+
+    public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> items)
+    {
+        var list = new List<T>();
+        await foreach (var item in items)
+        {
+            list.Add(item);
+        }
+        return list;
+    }
 }

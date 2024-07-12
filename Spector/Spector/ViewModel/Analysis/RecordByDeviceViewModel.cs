@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Spector.Model;
+using static Spector.Model.Record;
 
 namespace Spector.ViewModel.Analysis;
 
 public partial class RecordByDeviceViewModel(
+    RecordByDevice device,
     DeviceId id,
     string name,
     string systemName,
@@ -14,6 +16,7 @@ public partial class RecordByDeviceViewModel(
     double minus40db,
     double minus50db) : ObservableObject
 {
+    public RecordByDevice Device { get; } = device;
     public DeviceId Id { get; init; } = id;
     public string Name { get; init; } = name;
     public string SystemName { get; init; } = systemName;
@@ -25,5 +28,3 @@ public partial class RecordByDeviceViewModel(
     public double Minus50db { get; init; } = minus50db;
     [ObservableProperty] private bool _isAnalysis;
 }
-
-// Decibelに対するIValueConverter

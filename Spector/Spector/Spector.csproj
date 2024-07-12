@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 	  <None Remove="View\AnalysisTab.xaml" />
+	  <None Remove="View\Analysis\AnalysisChart.xaml" />
 	  <None Remove="View\DeviceList.xaml" />
 	  <None Remove="View\LoadingPage.xaml" />
 	  <None Remove="View\MainPage.xaml" />

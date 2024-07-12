@@ -8,43 +8,47 @@ namespace Spector.Model;
 public class Recording
 {
     internal Recording(
-        DirectoryInfo recordRootDirectory, 
+        DirectoryInfo rootDirectory, 
         DeviceId measureDeviceId, 
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
         IEnumerable<IDevice> devices)
     {
-        // ReSharper disable once StringLiteralTypo
-        CurrentRecordDirectory =
-            new DirectoryInfo(Path.Combine(recordRootDirectory.FullName, DateTime.Now.ToString("yyyyMMdd-HHmmss")))
-                .CreateIfNotExists();
+        RootDirectory = rootDirectory;
         Direction = direction;
         WithVoice = withVoice;
         WithBuzz = withBuzz;
+        Devices = devices.ToArray();
         MeasureDeviceId = measureDeviceId;
-        RecorderByDevices = devices
-            .Select(x => new RecordingByDevice(x, CurrentRecordDirectory, CancellationTokenSource.Token))
-            .ToArray();
     }
 
-    private DirectoryInfo CurrentRecordDirectory { get; }
+    private DirectoryInfo RootDirectory { get; }
+    private DirectoryInfo CurrentRecordDirectory { get; set; } = default!;
     private DeviceId MeasureDeviceId { get; }
     private Direction Direction { get; }
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
+    private IReadOnlyList<IDevice> Devices { get; }
     private CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <summary>
     /// 録音中のデバイス
     /// </summary>
-    private IReadOnlyList<RecordingByDevice> RecorderByDevices { get; }
+    private IReadOnlyList<RecordingByDevice> RecorderByDevices { get; set; } = [];
 
     private DateTime StartTime { get; set; }
 
     internal void StartRecording()
     {
         StartTime = DateTime.Now;
+        // ReSharper disable once StringLiteralTypo
+        CurrentRecordDirectory =
+            new DirectoryInfo(Path.Combine(RootDirectory.FullName, Record.ToDirectoryName(StartTime)))
+                .CreateIfNotExists();
+        RecorderByDevices = Devices
+            .Select(x => new RecordingByDevice(x, CurrentRecordDirectory, CancellationTokenSource.Token))
+            .ToArray();
         foreach (var device in RecorderByDevices)
         {
             device.StartRecording();
@@ -83,7 +87,7 @@ public class Recording
         {
             cancellationToken.Register(StopRecording);
 
-            Writer = new WaveFileWriter(GetRecordFileInfo().FullName, device.WaveFormat);
+            Writer = new WaveFileWriter(Path.Combine(directory.FullName, Record.RecordByDevice.ToFileName(device.Name)), device.WaveFormat);
 
             device.DataAvailable += (_, e) =>
             {
@@ -143,19 +147,6 @@ public class Recording
 
         public void Dispose()
         {
-        }
-
-        private FileInfo GetRecordFileInfo()
-        {
-            // ファイル名に利用できない文字を取得
-            var invalidChars = Path.GetInvalidFileNameChars();
-
-            var fileName = device.Name + ".wav";
-            // ファイル名の無効な文字をアンダースコアに置き換える
-            fileName = invalidChars
-                .Aggregate(fileName, (current, c) => current.Replace(c, '_'));
-
-            return new FileInfo(Path.Combine(directory.FullName, fileName));
         }
     }
 }

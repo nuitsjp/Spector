@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using NAudio.Wave;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
@@ -27,7 +28,16 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
     }
 
+    private CompositeDisposable CompositeDisposable { get; } = new();
     private Recorder Recorder { get; }
+    [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
+
+    [ObservableProperty] private RecordViewModel? _selectedRecord;
+
+    [ObservableProperty] private IReadOnlyCollection<RecordByDeviceViewModel> _devices = [];
+    [ObservableProperty] private RecordByDeviceViewModel? _selectedDevice;
+
+    public ObservableCollection<AnalysisDeviceViewModel> AnalysisDevices { get; } = [];
 
     private void UpdateRecords()
     {
@@ -35,6 +45,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             .Select(record =>
             {
                 return new RecordViewModel(
+                    record,
                     record.MeasureDeviceId,
                     record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
                     record.MeasureDeviceId.ToString(),
@@ -45,6 +56,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                     record.StopTime,
                     record.RecordByDevices
                         .Select(recordByDevice => new RecordByDeviceViewModel(
+                            recordByDevice,
                             recordByDevice.Id,
                             recordByDevice.Name,
                             recordByDevice.SystemName,
@@ -85,15 +97,20 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(RecordByDeviceViewModel.IsAnalysis)) return;
 
         var device = (RecordByDeviceViewModel)sender!;
         if (device.IsAnalysis)
         {
+            var inputLevels = await Recorder.LoadInputLevelsAsync(SelectedRecord!.Record, device.Device).ToListAsync();
             // IsAnalysisがtrueになった場合、外套のDeviceが存在するRecordは必ずSelectedRecordになっている
-            AnalysisDevices.Add(new AnalysisDeviceViewModel(SelectedRecord!, device));
+            AnalysisDevices.Add(
+                new AnalysisDeviceViewModel(
+                    SelectedRecord!, 
+                    device, 
+                    inputLevels));
         }
         else
         {
@@ -101,15 +118,35 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         }
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
-    [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
+    private void ReadInputLevels(RecordByDeviceViewModel deviceViewModel)
+    {
+        string inputFilePath = @"D:\Spector\Spector\Spector\bin\Debug\net8.0-windows\Record\20240713-045141\ヘッドホン (Sound Blaster Play! 4).wav";
+        List<float> volumeLevels = new List<float>();
 
-    [ObservableProperty] private RecordViewModel? _selectedRecord;
+        using (var reader = new AudioFileReader(inputFilePath))
+        {
+            ISampleProvider sampleProvider = new AWeightingFilter(reader.ToSampleProvider());
+            float[] buffer = new float[reader.WaveFormat.SampleRate];
+            int samplesRead;
 
-    [ObservableProperty] private IReadOnlyCollection<RecordByDeviceViewModel> _devices = [];
-    [ObservableProperty] private RecordByDeviceViewModel? _selectedDevice;
+            while ((samplesRead = sampleProvider.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                for (int i = 0; i < samplesRead; i++)
+                {
+                    volumeLevels.Add(buffer[i]);
+                }
+            }
+        }
 
-    public ObservableCollection<AnalysisDeviceViewModel> AnalysisDevices { get; } = [];
+        // 音量レベルをdBに変換
+        List<double> decibelLevels = new List<double>();
+        foreach (var level in volumeLevels)
+        {
+            double decibels = 20 * Math.Log10(Math.Max(Math.Abs(level), 1e-10)); // Log10(0)を避けるための処理
+            decibelLevels.Add(decibels);
+        }
+    }
+
 
     public void Dispose()
     {

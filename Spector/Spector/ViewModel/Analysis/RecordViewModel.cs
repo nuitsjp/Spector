@@ -3,6 +3,7 @@
 namespace Spector.ViewModel.Analysis;
 
 public record RecordViewModel(
+    Record Record,
     DeviceId MeasureDeviceId,
     string DeviceName,
     Direction Direction,
