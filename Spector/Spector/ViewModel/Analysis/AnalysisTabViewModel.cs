@@ -14,39 +14,49 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     public AnalysisTabViewModel(
         Recorder recorder)
     {
+        Recorder = recorder;
         base.PropertyChanging += OnPropertyChanging;
         PropertyChanged += OnPropertyChanged;
 
+        UpdateRecords();
         recorder.Records.ToCollectionChanged()
-            .Subscribe(_ =>
-            {
-                Records = recorder.Records
-                    .Select(record => new RecordViewModel(
-                        record.MeasureDeviceId,
-                        record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ?? record.MeasureDeviceId.ToString(),
-                        record.Direction,
-                        record.WithVoice,
-                        record.WithBuzz,
-                        record.StartTime,
-                        record.StopTime,
-                        record.RecordByDevices
-                            .Select(recordByDevice => new RecordByDeviceViewModel(
-                                recordByDevice.Id,
-                                recordByDevice.Name,
-                                recordByDevice.SystemName,
-                                recordByDevice.Min,
-                                recordByDevice.Avg,
-                                recordByDevice.Max,
-                                recordByDevice.Minus30db,
-                                recordByDevice.Minus40db,
-                                recordByDevice.Minus50db))
-                            .ToArray()))
-                    .ToArray();
-            })
+            .Subscribe(_ => UpdateRecords())
             .AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.SelectedRecord)
             .Subscribe(x => Devices = x?.RecordByDevices ?? [])
             .AddTo(CompositeDisposable);
+    }
+
+    private Recorder Recorder { get; }
+
+    private void UpdateRecords()
+    {
+        Records = Recorder.Records
+            .Select(record =>
+            {
+                return new RecordViewModel(
+                    record.MeasureDeviceId,
+                    record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
+                    record.MeasureDeviceId.ToString(),
+                    record.Direction,
+                    record.WithVoice,
+                    record.WithBuzz,
+                    record.StartTime,
+                    record.StopTime,
+                    record.RecordByDevices
+                        .Select(recordByDevice => new RecordByDeviceViewModel(
+                            recordByDevice.Id,
+                            recordByDevice.Name,
+                            recordByDevice.SystemName,
+                            recordByDevice.Min,
+                            recordByDevice.Avg,
+                            recordByDevice.Max,
+                            recordByDevice.Minus30db,
+                            recordByDevice.Minus40db,
+                            recordByDevice.Minus50db))
+                        .ToArray());
+            })
+            .ToArray();
     }
 
     private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)

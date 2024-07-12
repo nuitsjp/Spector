@@ -69,6 +69,7 @@ public partial class RecorderViewModel(
 
     public async Task ActivateAsync()
     {
+        await recorder.ActivateAsync();
         MeasureDevices.CollectionChanged += (_, _) =>
         {
             if (MeasureDevices.Count == 0)
@@ -121,7 +122,6 @@ public partial class RecorderViewModel(
         var settings = await settingsRepository.LoadAsync();
 
         recorder.StartRecording(
-            new DirectoryInfo("Record"),
             MeasureDevice!.Id,
             SelectedDirection,
             WithVoice,
