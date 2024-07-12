@@ -12,20 +12,18 @@ namespace Spector.ViewModel.Analysis;
 public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 {
     public AnalysisTabViewModel(
-        ISettingsRepository settingsRepository,
         Recorder recorder)
     {
         base.PropertyChanging += OnPropertyChanging;
         PropertyChanged += OnPropertyChanged;
 
         recorder.Records.ToCollectionChanged()
-            .Select(_ => Observable.FromAsync(async () =>
+            .Subscribe(_ =>
             {
-                var settings = await settingsRepository.LoadAsync();
-                return recorder.Records
+                Records = recorder.Records
                     .Select(record => new RecordViewModel(
                         record.MeasureDeviceId,
-                        settings.Devices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ?? record.MeasureDeviceId.ToString(),
+                        record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ?? record.MeasureDeviceId.ToString(),
                         record.Direction,
                         record.WithVoice,
                         record.WithBuzz,
@@ -44,12 +42,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                                 recordByDevice.Minus50db))
                             .ToArray()))
                     .ToArray();
-            }))
-            .Concat()
-            .Subscribe(records =>
-            {
-                Records = records;
-            });
+            })
+            .AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.SelectedRecord)
             .Subscribe(x => Devices = x?.RecordByDevices ?? [])
             .AddTo(CompositeDisposable);
