@@ -1,9 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FluentTextTable;
+using Kamishibai;
 using NAudio.Wave;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -15,8 +19,10 @@ namespace Spector.ViewModel.Analysis;
 public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 {
     public AnalysisTabViewModel(
+        [Inject] IPresentationService presentationService,
         Recorder recorder)
     {
+        PresentationService = presentationService;
         Recorder = recorder;
         base.PropertyChanging += OnPropertyChanging;
         PropertyChanged += OnPropertyChanged;
@@ -35,6 +41,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     }
 
     private CompositeDisposable CompositeDisposable { get; } = new();
+    private IPresentationService PresentationService { get; }
     private Recorder Recorder { get; }
     [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
 
@@ -139,7 +146,48 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task SaveRecordAsync(IPlot plot)
     {
-        using var bitmap = plot.Render();
+        var context = new SaveFileDialogContext()
+        {
+            Title = "分析結果ファイルを指定してください",
+            DefaultFileName = $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.md"
+        };
+        context.Filters.Add(new FileDialogFilter("Markdown", "md"));
+        if (PresentationService.SaveFile(context) == DialogResult.Ok)
+        {
+            var file = new FileInfo(context.FileName);
+
+            // 拡張子を除いたファイル名を取得
+            var fileName = Path.GetFileNameWithoutExtension(file.Name);
+            // プロットを画像に変換して保存
+            using var bitmap = plot.Render();
+            var bitmapFileName = $"{fileName}.png";
+            bitmap.Save(Path.Combine(file.DirectoryName!, bitmapFileName), ImageFormat.Png);
+
+
+            // マークダウンファイルを作成
+            await using var writer = new StreamWriter(file.FullName);
+            Build
+                .MarkdownTable<AnalysisDeviceViewModel>(builder =>
+                {
+                    builder
+                        .Columns.Add(x => x.Device)
+                        .Columns.Add(x => x.Direction)
+                        .Columns.Add(x => x.WithBuzz)
+                        .Columns.Add(x => x.WithVoice)
+                        .Columns.Add(x => x.Min).FormatAs("{0:0.000}")
+                        .Columns.Add(x => x.Avg).FormatAs("{0:0.000}")
+                        .Columns.Add(x => x.Max).FormatAs("{0:0.000}")
+                        .Columns.Add(x => x.Minus30db).FormatAs("{0:0.000}")
+                        .Columns.Add(x => x.Minus40db).FormatAs("{0:0.000}")
+                        .Columns.Add(x => x.Minus50db).FormatAs("{0:0.000}");
+                })
+                .Write(writer, AnalysisDevices);
+
+            await writer.WriteLineAsync();
+            await writer.WriteAsync($"![]({bitmapFileName})");
+            await writer.FlushAsync();
+
+        }
     }
 
     public void Dispose()

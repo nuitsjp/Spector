@@ -3,7 +3,7 @@
 namespace Spector.Model;
 
 #region Decibel
-[UnitOf<double>(UnitGenerateOptions.Comparable)]
+[UnitOf<double>(UnitGenerateOptions.Comparable | UnitGenerateOptions.JsonConverter)]
 public partial struct Decibel
 {
     public static readonly double MinimumValue = -84d;

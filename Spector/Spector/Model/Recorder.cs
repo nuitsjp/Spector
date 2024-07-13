@@ -23,6 +23,7 @@ public class Recorder
 
     public async Task ActivateAsync()
     {
+        RootDirectory.CreateIfNotExists();
         // RootDirectoryの下の拡張子がjsonのファイルをすべて読み込む
         foreach (var file in RootDirectory.GetFiles("*.json", SearchOption.AllDirectories))
         {
