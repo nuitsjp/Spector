@@ -102,7 +102,7 @@
             </DataGrid>
             <Button Grid.Column="2" Content="{materialDesign:PackIcon Kind=Delete}"
                     Command="{Binding DeleteRecordCommand}"
-                    CommandParameter="{Binding SelectedAudioRecord}"
+                    CommandParameter="{Binding SelectedRecord}"
                     Style="{StaticResource AccentButton}"
                     VerticalAlignment="Top"/>
         </Grid>

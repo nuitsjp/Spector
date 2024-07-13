@@ -84,4 +84,11 @@ public class Recorder
 
         return levels;
     }
+
+    public void DeleteRecord(Record record)
+    {
+        var directory = new DirectoryInfo(Path.Combine(RootDirectory.FullName, record.DirectoryName));
+        if(directory.Exists) directory.Delete(true);
+        _records.Remove(record);
+    }
 }

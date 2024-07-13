@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NAudio.Wave;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -24,7 +25,11 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             .Subscribe(_ => UpdateRecords())
             .AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.SelectedRecord)
-            .Subscribe(x => Devices = x?.RecordByDevices ?? [])
+            .Subscribe(x =>
+            {
+                Devices = x?.RecordByDevices ?? [];
+                DeleteRecordCommand.NotifyCanExecuteChanged();
+            })
             .AddTo(CompositeDisposable);
     }
 
@@ -82,6 +87,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                 device.PropertyChanged -= DeviceOnPropertyChanged;
             }
         }
+        AnalysisDevices.Clear();
     }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -97,15 +103,15 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         }
     }
 
-    private async void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(RecordByDeviceViewModel.IsAnalysis)) return;
 
         var device = (RecordByDeviceViewModel)sender!;
         if (device.IsAnalysis)
         {
-            var inputLevels = Recorder.AnalyzeWaveFile(SelectedRecord!.Record, device.Device);
             // IsAnalysisがtrueになった場合、外套のDeviceが存在するRecordは必ずSelectedRecordになっている
+            var inputLevels = Recorder.AnalyzeWaveFile(SelectedRecord!.Record, device.Device);
             AnalysisDevices.Add(
                 new AnalysisDeviceViewModel(
                     SelectedRecord!, 
@@ -118,6 +124,16 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         }
     }
 
+    private bool CanDeleteRecord() => SelectedRecord is not null;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteRecord))]
+    private void DeleteRecord(RecordViewModel? recordViewModel)
+    {
+        // チェックとすれ違いでイベントが発行する可能性があるため、nullチェックを行う。
+        if(recordViewModel is null) return;
+
+        Recorder.DeleteRecord(recordViewModel.Record);
+    }
 
     public void Dispose()
     {
