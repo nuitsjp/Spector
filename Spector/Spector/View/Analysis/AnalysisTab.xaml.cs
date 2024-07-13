@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace Spector.View.Analysis
 {
@@ -10,6 +12,21 @@ namespace Spector.View.Analysis
         public AnalysisTab()
         {
             InitializeComponent();
+        }
+
+        private void RecordGrid_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var dataGrid = (DataGrid)sender;
+            var dataFlow = dataGrid.Columns[0]; // 0番目の列（DataFlow列）を指定
+            dataGrid.Items.SortDescriptions.Clear();
+            dataGrid.Items.SortDescriptions.Add(new SortDescription(dataFlow.SortMemberPath, ListSortDirection.Descending));
+
+            foreach (var col in dataGrid.Columns)
+            {
+                col.SortDirection = null;
+            }
+            dataFlow.SortDirection = ListSortDirection.Descending;
+            dataGrid.Items.Refresh();
         }
     }
 }
