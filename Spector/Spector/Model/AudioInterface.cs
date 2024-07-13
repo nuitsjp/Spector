@@ -101,8 +101,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
         return new LocalDevice(
             mmDevice,
             deviceSettings.Name,
-            deviceSettings.Measure,
-            RecordingConfig.Default.WaveFormat);
+            deviceSettings.Measure);
     }
 
     private async Task ListenClientConnectAsync()
@@ -122,7 +121,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private void HandleClientAsync(TcpClient client)
     {
-        var device = new RemoteDevice(client, RecordingConfig.Default.WaveFormat);
+        var device = new RemoteDevice(client);
         device.Disconnected += RemoteDeviceOnDisconnected;
         device.StartMeasure();
         _devices.Add(device);

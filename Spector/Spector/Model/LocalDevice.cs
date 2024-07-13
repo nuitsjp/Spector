@@ -16,8 +16,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     public LocalDevice(
         MMDevice mmDevice,
         string name,
-        bool measure,
-        WaveFormat waveFormat)
+        bool measure)
     {
         Id = (DeviceId)mmDevice.ID;
         MmDevice = mmDevice.AddTo(CompositeDisposable);
@@ -32,7 +31,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
                 : new WasapiLoopbackCapture(mmDevice))
             .AddTo(CompositeDisposable);
                 
-        WasapiCapture.WaveFormat = waveFormat;
+        WasapiCapture.WaveFormat = mmDevice.AudioClient.MixFormat;
 
         BufferedWaveProvider = new BufferedWaveProvider(WasapiCapture.WaveFormat);
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
@@ -109,6 +108,9 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
 
             // デバイス情報を送信
             writer.Write((int)DataFlow);
+            writer.Write(WaveFormat.SampleRate);
+            writer.Write(WaveFormat.BitsPerSample);
+            writer.Write(WaveFormat.Channels);
             writer.Write(@$"{Name} - {Dns.GetHostName()}");
             writer.Flush();
             var reader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
@@ -136,6 +138,32 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         });
     }
 
+    public IEnumerable<WaveFormat> GetAvailableWaveFormats()
+    {
+        // 一般的なサンプルレートとビット深度の組み合わせをチェック
+        int[] sampleRates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 96000];
+        int[] bitDepths = [8, 16, 24, 32];
+
+        foreach (int sampleRate in sampleRates)
+        {
+            foreach (int bitDepth in bitDepths)
+            {
+                var format = new WaveFormat(sampleRate, bitDepth, MmDevice.AudioClient.MixFormat.Channels);
+
+                // AudioClientを使用してフォーマットがサポートされているかチェック
+                using var audioClient = MmDevice.AudioClient;
+                var isSupported = audioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out var closestMatch);
+                if (isSupported)
+                {
+                    yield return format;
+                }
+                else if (closestMatch != null)
+                {
+                    yield return format;
+                }
+            }
+        }
+    }
     public Task DisconnectAsync()
     {
         if (NetworkStream is not null)

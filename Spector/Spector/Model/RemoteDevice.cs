@@ -12,9 +12,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
     public event EventHandler? Disconnected;
-    public RemoteDevice(
-        TcpClient tcpClient,
-        WaveFormat waveFormat)
+    public RemoteDevice(TcpClient tcpClient)
     {
         TcpClient = tcpClient.AddTo(CompositeDisposable);
         NetworkStream = TcpClient.GetStream().AddTo(CompositeDisposable);
@@ -23,15 +21,18 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
 
         // デバイス情報の受信
         var dataFlow = BinaryReader.ReadInt32();
+        var rate = BinaryReader.ReadInt32();
+        var bits = BinaryReader.ReadInt32();
+        var channels = BinaryReader.ReadInt32();
         var deviceName = BinaryReader.ReadString();
 
         Id = (DeviceId)deviceName;
         DataFlow = (DataFlow)dataFlow;
-        WaveFormat = waveFormat;
+        WaveFormat = new WaveFormat(rate, bits, channels);
         Name = deviceName;
         SystemName = deviceName;
 
-        BufferedWaveProvider = new BufferedWaveProvider(waveFormat);
+        BufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
         AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
     }
 
