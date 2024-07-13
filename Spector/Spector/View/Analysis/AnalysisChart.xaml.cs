@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Drawing;
 using System.Windows;
 using Reactive.Bindings.Extensions;
 using ScottPlot;
 using Spector.Model;
+using Spector.ViewModel;
 using Spector.ViewModel.Analysis;
 using Spector.ViewModel.Measure;
 
@@ -12,7 +14,7 @@ namespace Spector.View.Analysis;
 /// <summary>
 /// AudioInterfacesChart.xaml の相互作用ロジック
 /// </summary>
-public partial class AnalysisChart
+public partial class AnalysisChart : IPlot
 {
     private static readonly TimeSpan DisplayWidth = TimeSpan.FromSeconds(20);
 
@@ -24,6 +26,8 @@ public partial class AnalysisChart
         get => (ObservableCollection<AnalysisDeviceViewModel>)GetValue(AnalysisDevicesProperty);
         set => SetValue(AnalysisDevicesProperty, value);
     }
+
+    public WpfPlot WpfPlot => AnalysisPlot;
 
     public AnalysisChart()
     {
@@ -46,11 +50,11 @@ public partial class AnalysisChart
 
     private void DevicesOnChanged(NotifyCollectionChangedEventArgs? _)
     {
-        AudioInterfacePlot.Plot.Clear();
+        AnalysisPlot.Plot.Clear();
 
         foreach (var device in AnalysisDevices)
         {
-            AudioInterfacePlot
+            AnalysisPlot
                 .Plot
                 .AddSignal(device.InputLevels.Select(x => x.AsPrimitive()).ToArray(), label: device.Device);
         }
@@ -59,14 +63,19 @@ public partial class AnalysisChart
         var xMax = AnalysisDevices.Any()
             ? AnalysisDevices.Max(x => x.InputLevels.Count)
             : 10;
-        AudioInterfacePlot.Plot.SetAxisLimits(
+        AnalysisPlot.Plot.SetAxisLimits(
             xMin: 0, xMax: xMax,
             yMin: -90, yMax: 0);
-        AudioInterfacePlot.Plot.XAxis.SetBoundary(0, xMax);
-        AudioInterfacePlot.Plot.YAxis.SetBoundary(-90, 0);
-        AudioInterfacePlot.Plot.XAxis.TickLabelFormat(x => $"{x * config.RefreshRate.Interval.TotalMilliseconds / 1000d:#0.0[s]}");
-        AudioInterfacePlot.Configuration.LockVerticalAxis = true;
-        AudioInterfacePlot.Plot.Legend(location: Alignment.UpperLeft);
-        AudioInterfacePlot.Refresh();
+        AnalysisPlot.Plot.XAxis.SetBoundary(0, xMax);
+        AnalysisPlot.Plot.YAxis.SetBoundary(-90, 0);
+        AnalysisPlot.Plot.XAxis.TickLabelFormat(x => $"{x * config.RefreshRate.Interval.TotalMilliseconds / 1000d:#0.0[s]}");
+        AnalysisPlot.Configuration.LockVerticalAxis = true;
+        AnalysisPlot.Plot.Legend(location: Alignment.UpperLeft);
+        AnalysisPlot.Refresh();
+    }
+
+    public Bitmap Render()
+    {
+        return AnalysisPlot.Plot.Render();
     }
 }

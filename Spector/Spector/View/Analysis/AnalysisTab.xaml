@@ -172,8 +172,11 @@
 
             <Button Grid.Column="1" Content="{materialDesign:PackIcon Kind=ContentSave}"
                     Command="{Binding SaveRecordCommand}"
+                    CommandParameter="{Binding ElementName=AnalysisChart}"
                     VerticalAlignment="Top"/>
         </Grid>
-        <analysis:AnalysisChart Grid.Row="2" AnalysisDevices="{Binding AnalysisDevices}"/>
+        <analysis:AnalysisChart Grid.Row="2" 
+                                x:Name="AnalysisChart"
+                                AnalysisDevices="{Binding AnalysisDevices}"/>
     </Grid>
 </UserControl>

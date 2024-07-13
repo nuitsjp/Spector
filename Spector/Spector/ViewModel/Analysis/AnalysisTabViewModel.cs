@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -133,6 +134,12 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         if(recordViewModel is null) return;
 
         Recorder.DeleteRecord(recordViewModel.Record);
+    }
+
+    [RelayCommand]
+    private async Task SaveRecordAsync(IPlot plot)
+    {
+        using var bitmap = plot.Render();
     }
 
     public void Dispose()
