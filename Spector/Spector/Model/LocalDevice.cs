@@ -183,23 +183,100 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
             // ignore
         }
 
-        var buffer = new float[e.BytesRecorded / 2];
-        var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
+        // WaveFormatを取得
+        var waveFormat = BufferedWaveProvider.WaveFormat;
 
-        // 音量計算（RMS値）
-        double sum = 0;
-        for (var i = 0; i < samplesRead; i++)
+        // フォーマットに応じてバッファを float[] に変換
+        float[] floatBuffer = ConvertToFloat(e.Buffer, waveFormat);
+
+        // チャンネルごとに分離
+        float[][] channels = SeparateChannels(floatBuffer, waveFormat.Channels);
+
+        // 各チャンネルで処理
+        List<Decibel> channelLevels = new List<Decibel>();
+        foreach (var channel in channels)
         {
-            sum += buffer[i] * buffer[i];
-        }
-        var rms = Math.Sqrt(sum / samplesRead);
-        var db = 20 * Math.Log10(rms);
+            var samplesRead = AWeightingFilter.Read(channel, 0, channel.Length);
 
-        var level = (Decibel)db;
-        Level = Decibel.Minimum <= level
-            ? level
-            : Decibel.Minimum;
+            // 音量計算（RMS値）
+            double sum = 0;
+            for (var i = 0; i < samplesRead; i++)
+            {
+                sum += channel[i] * channel[i];
+            }
+            var rms = Math.Sqrt(sum / samplesRead);
+            var db = 20 * Math.Log10(rms);
+            var level = (Decibel)db;
+            channelLevels.Add(Decibel.Minimum <= level ? level : Decibel.Minimum);
+        }
+
+        // チャンネルの平均レベルを計算
+        Level = (Decibel)(channelLevels.Average(l => (double)l));
         _levels.Add(Level);
+    }
+
+    private float[] ConvertToFloat(byte[] input, WaveFormat waveFormat)
+    {
+        int bytesPerSample = waveFormat.BitsPerSample / 8;
+        int samplesCount = input.Length / bytesPerSample;
+        float[] output = new float[samplesCount];
+
+        for (int i = 0; i < samplesCount; i++)
+        {
+            int sampleStart = i * bytesPerSample;
+            switch (waveFormat.BitsPerSample)
+            {
+                case 8:
+                    output[i] = (input[sampleStart] - 128) / 128f;
+                    break;
+                case 16:
+                    short sample16 = (short)((input[sampleStart + 1] << 8) | input[sampleStart]);
+                    output[i] = sample16 / 32768f;
+                    break;
+                case 24:
+                    int sample24 = (input[sampleStart + 2] << 16) | (input[sampleStart + 1] << 8) | input[sampleStart];
+                    // 符号拡張を行う
+                    if ((sample24 & 0x800000) != 0)
+                    {
+                        sample24 |= unchecked((int)0xFF000000);
+                    }
+                    output[i] = sample24 / 8388608f;
+                    break;
+                case 32:
+                    if (waveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
+                    {
+                        output[i] = BitConverter.ToSingle(input, sampleStart);
+                    }
+                    else
+                    {
+                        int sample32 = BitConverter.ToInt32(input, sampleStart);
+                        output[i] = sample32 / 2147483648f;
+                    }
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported bits per sample: {waveFormat.BitsPerSample}");
+            }
+        }
+
+        return output;
+    }
+
+    private float[][] SeparateChannels(float[] interleavedSamples, int channels)
+    {
+        float[][] separatedChannels = new float[channels][];
+        for (int i = 0; i < channels; i++)
+        {
+            separatedChannels[i] = new float[interleavedSamples.Length / channels];
+        }
+
+        for (int i = 0; i < interleavedSamples.Length; i++)
+        {
+            int channelIndex = i % channels;
+            int sampleIndex = i / channels;
+            separatedChannels[channelIndex][sampleIndex] = interleavedSamples[i];
+        }
+
+        return separatedChannels;
     }
 
     /// <summary>
