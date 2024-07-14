@@ -33,9 +33,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
                 
         WasapiCapture.WaveFormat = mmDevice.AudioClient.MixFormat;
 
-        BufferedWaveProvider = new BufferedWaveProvider(WasapiCapture.WaveFormat);
-        AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
-
+        LevelMeter = new AudioLevelMeter(WasapiCapture.WaveFormat);
         WasapiCapture.DataAvailable += OnDataAvailable;
         WasapiCapture.DataAvailable += (_, args) => DataAvailable?.Invoke(this, args);
 
@@ -47,6 +45,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     public DeviceId Id { get; }
 
     public DataFlow DataFlow { get; }
+
     public WaveFormat WaveFormat => WasapiCapture.WaveFormat;
 
     /// <summary>
@@ -84,13 +83,11 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     /// </summary>
     public Decibel Level { get; private set; } = Decibel.Minimum;
 
+    private AudioLevelMeter LevelMeter { get; }
     private readonly List<Decibel> _levels = [];
     public IReadOnlyList<Decibel> Levels => _levels;
 
     private WasapiCapture WasapiCapture { get; }
-    private BufferedWaveProvider BufferedWaveProvider { get; }
-
-    private AWeightingFilter AWeightingFilter { get; }
     private TcpClient? TcpClient { get; set; }
     private Stream? NetworkStream { get; set; }
 
@@ -109,6 +106,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
             // デバイス情報を送信
             writer.Write((int)DataFlow);
             writer.Write(WaveFormat.SampleRate);
+            writer.Write((ushort)WaveFormat.Encoding);
             writer.Write(WaveFormat.BitsPerSample);
             writer.Write(WaveFormat.Channels);
             writer.Write(@$"{Name} - {Dns.GetHostName()}");
@@ -144,9 +142,9 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         int[] sampleRates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 96000];
         int[] bitDepths = [8, 16, 24, 32];
 
-        foreach (int sampleRate in sampleRates)
+        foreach (var sampleRate in sampleRates)
         {
-            foreach (int bitDepth in bitDepths)
+            foreach (var bitDepth in bitDepths)
             {
                 var format = new WaveFormat(sampleRate, bitDepth, MmDevice.AudioClient.MixFormat.Channels);
 
@@ -201,110 +199,20 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
-        BufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
         try
         {
-            NetworkStream?.Write(e.Buffer, 0, e.BytesRecorded);
+            if(NetworkStream is not null)
+            {
+                NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
+            }
         }
         catch
         {
             // ignore
         }
 
-        // WaveFormatを取得
-        var waveFormat = BufferedWaveProvider.WaveFormat;
-
-        // フォーマットに応じてバッファを float[] に変換
-        float[] floatBuffer = ConvertToFloat(e.Buffer, waveFormat);
-
-        // チャンネルごとに分離
-        float[][] channels = SeparateChannels(floatBuffer, waveFormat.Channels);
-
-        // 各チャンネルで処理
-        List<Decibel> channelLevels = new List<Decibel>();
-        foreach (var channel in channels)
-        {
-            var samplesRead = AWeightingFilter.Read(channel, 0, channel.Length);
-
-            // 音量計算（RMS値）
-            double sum = 0;
-            for (var i = 0; i < samplesRead; i++)
-            {
-                sum += channel[i] * channel[i];
-            }
-            var rms = Math.Sqrt(sum / samplesRead);
-            var db = 20 * Math.Log10(rms);
-            var level = (Decibel)db;
-            channelLevels.Add(Decibel.Minimum <= level ? level : Decibel.Minimum);
-        }
-
-        // チャンネルの平均レベルを計算
-        Level = (Decibel)(channelLevels.Average(l => (double)l));
+        Level = LevelMeter.CalculateLevel(e.Buffer, e.BytesRecorded);
         _levels.Add(Level);
-    }
-
-    private float[] ConvertToFloat(byte[] input, WaveFormat waveFormat)
-    {
-        int bytesPerSample = waveFormat.BitsPerSample / 8;
-        int samplesCount = input.Length / bytesPerSample;
-        float[] output = new float[samplesCount];
-
-        for (int i = 0; i < samplesCount; i++)
-        {
-            int sampleStart = i * bytesPerSample;
-            switch (waveFormat.BitsPerSample)
-            {
-                case 8:
-                    output[i] = (input[sampleStart] - 128) / 128f;
-                    break;
-                case 16:
-                    short sample16 = (short)((input[sampleStart + 1] << 8) | input[sampleStart]);
-                    output[i] = sample16 / 32768f;
-                    break;
-                case 24:
-                    int sample24 = (input[sampleStart + 2] << 16) | (input[sampleStart + 1] << 8) | input[sampleStart];
-                    // 符号拡張を行う
-                    if ((sample24 & 0x800000) != 0)
-                    {
-                        sample24 |= unchecked((int)0xFF000000);
-                    }
-                    output[i] = sample24 / 8388608f;
-                    break;
-                case 32:
-                    if (waveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
-                    {
-                        output[i] = BitConverter.ToSingle(input, sampleStart);
-                    }
-                    else
-                    {
-                        int sample32 = BitConverter.ToInt32(input, sampleStart);
-                        output[i] = sample32 / 2147483648f;
-                    }
-                    break;
-                default:
-                    throw new NotSupportedException($"Unsupported bits per sample: {waveFormat.BitsPerSample}");
-            }
-        }
-
-        return output;
-    }
-
-    private float[][] SeparateChannels(float[] interleavedSamples, int channels)
-    {
-        float[][] separatedChannels = new float[channels][];
-        for (int i = 0; i < channels; i++)
-        {
-            separatedChannels[i] = new float[interleavedSamples.Length / channels];
-        }
-
-        for (int i = 0; i < interleavedSamples.Length; i++)
-        {
-            int channelIndex = i % channels;
-            int sampleIndex = i / channels;
-            separatedChannels[channelIndex][sampleIndex] = interleavedSamples[i];
-        }
-
-        return separatedChannels;
     }
 
     /// <summary>

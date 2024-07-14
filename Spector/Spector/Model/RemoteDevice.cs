@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net.Sockets;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.VisualBasic;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Reactive.Bindings.Disposables;
@@ -22,18 +23,21 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         // デバイス情報の受信
         var dataFlow = BinaryReader.ReadInt32();
         var rate = BinaryReader.ReadInt32();
+        var encoding = (WaveFormatEncoding)BinaryReader.ReadUInt16();
         var bits = BinaryReader.ReadInt32();
         var channels = BinaryReader.ReadInt32();
         var deviceName = BinaryReader.ReadString();
 
         Id = (DeviceId)deviceName;
         DataFlow = (DataFlow)dataFlow;
-        WaveFormat = new WaveFormat(rate, bits, channels);
+        WaveFormat = 
+            encoding == WaveFormatEncoding.IeeeFloat
+                ? WaveFormat.CreateIeeeFloatWaveFormat(rate, channels)
+                : new WaveFormat(rate, bits, channels);
         Name = deviceName;
         SystemName = deviceName;
 
-        BufferedWaveProvider = new BufferedWaveProvider(WaveFormat);
-        AWeightingFilter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
+        LevelMeter = new AudioLevelMeter(WaveFormat);
     }
 
     private CompositeDisposable CompositeDisposable { get; } = [];
@@ -54,8 +58,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     private BinaryReader BinaryReader { get; }
     private BinaryWriter BinaryWriter { get; }
     private NetworkStream NetworkStream { get; }
-    private BufferedWaveProvider BufferedWaveProvider { get; }
-    private AWeightingFilter AWeightingFilter { get; }
+    private AudioLevelMeter LevelMeter { get; }
     private CancellationTokenSource CancellationTokenSource { get; } = new();
 
 
@@ -72,10 +75,12 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         Task.Run(() =>
         {
             Measure = true;
+            int bytesPerSecond = WaveFormat.SampleRate * WaveFormat.Channels * (WaveFormat.BitsPerSample / 8);
+            int bufferSize = bytesPerSecond / 20; // 1秒の1/20 = 50ms
+            byte[] buffer = new byte[bufferSize];
             while (CancellationTokenSource.IsCancellationRequested is false)
             {
                 // ここにCaptureデバイスのデータを処理するコードを追加
-                var buffer = new byte[9600];
                 var length = BinaryReader.Read(buffer, 0, buffer.Length);
                 if (length == 0)
                 {
@@ -97,25 +102,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     {
         if (Measure is false) return;
 
-        BufferedWaveProvider.AddSamples(bytes, 0, length);
-        DataAvailable?.Invoke(this, new WaveInEventArgs(bytes, length));
-
-        var buffer = new float[length / 2];
-        var samplesRead = AWeightingFilter.Read(buffer, 0, buffer.Length);
-
-        // 音量計算（RMS値）
-        double sum = 0;
-        for (var i = 0; i < samplesRead; i++)
-        {
-            sum += buffer[i] * buffer[i];
-        }
-        var rms = Math.Sqrt(sum / samplesRead);
-        var db = 20 * Math.Log10(rms);
-
-        var level = (Decibel)db;
-        Level = Decibel.Minimum <= level
-            ? level
-            : Decibel.Minimum;
+        Level = LevelMeter.CalculateLevel(bytes, length);
         _levels.Add(Level);
     }
 
