@@ -7,15 +7,20 @@ using Reactive.Bindings.Disposables;
 
 namespace Spector.Model;
 
-public abstract partial class DeviceBase : ObservableObject, IDevice
+public abstract partial class DeviceBase(
+    DeviceId id, 
+    DataFlow dataFlow, 
+    string name, 
+    string systemName)
+    : ObservableObject, IDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
-    public abstract DeviceId Id { get; }
-    public abstract DataFlow DataFlow { get; }
+    public DeviceId Id { get; } = id;
+    public DataFlow DataFlow { get; } = dataFlow;
     public abstract IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
     [ObservableProperty] private WaveFormat _waveFormat = default!;
-    [ObservableProperty] private string _name = string.Empty;
-    public abstract string SystemName { get; }
+    [ObservableProperty] private string _name = name;
+    public string SystemName { get; } = systemName;
     [ObservableProperty] private bool _measure;
     public abstract bool Connectable { get; }
     public abstract VolumeLevel VolumeLevel { get; set; }
@@ -105,7 +110,10 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
     public abstract void PlayLooping(CancellationToken token);
     public virtual void Dispose()
     {
-        // TODO release managed resources here
+        if(WaveIn is not null)
+        {
+            StopMeasure();
+        }
     }
 
 
@@ -146,7 +154,7 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
         }
     }
 
-    public class AWeightingFilter : ISampleProvider
+    public class AWeightingFilter
     {
         private readonly ISampleProvider _source;
         private readonly BiQuadFilter[] _filtersLeft;

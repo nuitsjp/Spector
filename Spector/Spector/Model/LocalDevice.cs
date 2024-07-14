@@ -15,12 +15,13 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         MMDevice mmDevice,
         string name,
         bool measure)
+        : base(
+            (DeviceId)mmDevice.ID,
+            mmDevice.DataFlow,
+            name,
+            mmDevice.FriendlyName)
     {
-        Id = (DeviceId)mmDevice.ID;
         MmDevice = mmDevice.AddTo(CompositeDisposable);
-        DataFlow = mmDevice.DataFlow;
-        Name = name;
-        SystemName = mmDevice.FriendlyName;
         Measure = measure;
 
         AvailableWaveFormats = GetAvailableWaveFormats().ToList();
@@ -34,17 +35,9 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
     private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
-    public override DeviceId Id { get; }
-
-    public override DataFlow DataFlow { get; }
 
     public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
 
-
-    /// <summary>
-    /// デバイス名。OSで設定されている名称。
-    /// </summary>
-    public override string SystemName { get; }
 
     public override bool Connectable => true;
 
@@ -144,14 +137,8 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         {
             return format;
         }
-        else if (closestMatch != null)
-        {
-            return closestMatch;
-        }
-        else
-        {
-            return MmDevice.AudioClient.MixFormat;
-        }
+
+        return closestMatch ?? MmDevice.AudioClient.MixFormat;
     }
 
     public override Task DisconnectAsync()
@@ -244,7 +231,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         return waveIn;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         CompositeDisposable.Dispose();
         GC.SuppressFinalize(this);
