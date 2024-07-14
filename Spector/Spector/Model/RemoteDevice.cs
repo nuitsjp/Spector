@@ -34,6 +34,8 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
             encoding == WaveFormatEncoding.IeeeFloat
                 ? WaveFormat.CreateIeeeFloatWaveFormat(rate, channels)
                 : new WaveFormat(rate, bits, channels);
+        AvailableWaveFormats = [WaveFormat];
+
         Name = deviceName;
         SystemName = deviceName;
 
@@ -43,6 +45,9 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
     private CompositeDisposable CompositeDisposable { get; } = [];
     public DeviceId Id { get; }
     public DataFlow DataFlow { get; }
+
+    public IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
+
     public WaveFormat WaveFormat { get; }
     public string Name { get; set; }
     public string SystemName { get; }

@@ -13,6 +13,7 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     event EventHandler<WaveInEventArgs> DataAvailable;
     DeviceId Id { get; }
     DataFlow DataFlow { get; }
+    IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
     WaveFormat WaveFormat { get; }
     string Name { get; set; }
     string SystemName { get; }

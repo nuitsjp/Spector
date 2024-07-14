@@ -25,13 +25,16 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         SystemName = mmDevice.FriendlyName;
         Measure = measure;
 
+        AvailableWaveFormats = GetAvailableWaveFormats().ToList();
+        WaveFormat = GetAvailableWageFormat(mmDevice.AudioClient.MixFormat);
+
         WasapiCapture = 
             (MmDevice.DataFlow == DataFlow.Capture
                 ? new WasapiCapture(mmDevice)
                 : new WasapiLoopbackCapture(mmDevice))
             .AddTo(CompositeDisposable);
                 
-        WasapiCapture.WaveFormat = mmDevice.AudioClient.MixFormat;
+        WasapiCapture.WaveFormat = WaveFormat;
 
         LevelMeter = new AudioLevelMeter(WasapiCapture.WaveFormat);
         WasapiCapture.DataAvailable += OnDataAvailable;
@@ -46,7 +49,9 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
 
     public DataFlow DataFlow { get; }
 
-    public WaveFormat WaveFormat => WasapiCapture.WaveFormat;
+    public IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
+
+    [ObservableProperty] private WaveFormat _waveFormat;
 
     /// <summary>
     /// デバイス名。利用者が変更可能な名称。
@@ -162,6 +167,24 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
             }
         }
     }
+
+    public WaveFormat GetAvailableWageFormat(WaveFormat format)
+    {
+        var isSupported = MmDevice.AudioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out var closestMatch);
+        if (isSupported)
+        {
+            return format;
+        }
+        else if (closestMatch != null)
+        {
+            return closestMatch;
+        }
+        else
+        {
+            return MmDevice.AudioClient.MixFormat;
+        }
+    }
+
     public Task DisconnectAsync()
     {
         if (NetworkStream is not null)
@@ -211,7 +234,9 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
             // ignore
         }
 
-        Level = LevelMeter.CalculateLevel(e.Buffer, e.BytesRecorded);
+        Level = e.BytesRecorded == 0
+            ? Decibel.Minimum
+            : LevelMeter.CalculateLevel(e.Buffer, e.BytesRecorded);
         _levels.Add(Level);
     }
 
