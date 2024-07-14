@@ -1,10 +1,15 @@
-﻿using NAudio.Dsp;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Dsp;
 using NAudio.Wave;
 
 namespace Spector.Model;
 
-public class AudioLevelMeter : IDisposable  
+public class AudioLevelMeter : IDisposable
 {
+    public event EventHandler<WaveInEventArgs>? DataAvailable;
+    public event EventHandler<Decibel>? LevelChanged;
+
+    private readonly WasapiCapture _wasapiCapture;
     private readonly BufferedWaveProvider _bufferedWaveProvider;
     private readonly AWeightingFilter _filter;
     private readonly int _bytesPerSample;
@@ -12,12 +17,20 @@ public class AudioLevelMeter : IDisposable
 
     public WaveFormat WaveFormat => _bufferedWaveProvider.WaveFormat;
 
-    public AudioLevelMeter(WaveFormat waveFormat)
+    public AudioLevelMeter(WasapiCapture wasapiCapture)
     {
-        _bytesPerSample = waveFormat.BitsPerSample / 8;
-        _channelCount = waveFormat.Channels;
-        _bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
+        _wasapiCapture = wasapiCapture;
+        _bytesPerSample = wasapiCapture.WaveFormat.BitsPerSample / 8;
+        _channelCount = wasapiCapture.WaveFormat.Channels;
+        _bufferedWaveProvider = new BufferedWaveProvider(wasapiCapture.WaveFormat);
         _filter = new AWeightingFilter(_bufferedWaveProvider.ToSampleProvider());
+
+        _wasapiCapture.DataAvailable += WasapiCaptureOnDataAvailable;
+    }
+
+    private void WasapiCaptureOnDataAvailable(object? sender, WaveInEventArgs e)
+    {
+        DataAvailable?.Invoke(this, e);
     }
 
     public Decibel CalculateLevel(byte[] buffer, int bytesRecorded)

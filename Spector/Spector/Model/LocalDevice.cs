@@ -36,7 +36,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
                 
         WasapiCapture.WaveFormat = WaveFormat;
 
-        LevelMeter = new AudioLevelMeter(WasapiCapture.WaveFormat);
+        LevelMeter = new AudioLevelMeter(WasapiCapture);
         WasapiCapture.DataAvailable += OnDataAvailable;
         WasapiCapture.DataAvailable += (_, args) => DataAvailable?.Invoke(this, args);
 
