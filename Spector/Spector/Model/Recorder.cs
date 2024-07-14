@@ -66,7 +66,7 @@ public class Recorder
         var file = Path.Combine(RootDirectory.FullName, record.DirectoryName, device.FileName);
         using var reader = new WaveFileReader(file);
         var waveFormat = reader.WaveFormat;
-        var aWeightingFilter = new AWeightingFilter(reader.ToSampleProvider());
+        var aWeightingFilter = new DeviceBase.AWeightingFilter(reader.ToSampleProvider());
 
         var samplesPerWindow = (int)(waveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
         var buffer = new float[samplesPerWindow];

@@ -13,13 +13,13 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
     public abstract DeviceId Id { get; }
     public abstract DataFlow DataFlow { get; }
     public abstract IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
-    public abstract WaveFormat WaveFormat { get; }
-    public abstract string Name { get; set; }
+    [ObservableProperty] private WaveFormat _waveFormat = default!;
+    [ObservableProperty] private string _name = string.Empty;
     public abstract string SystemName { get; }
-    public abstract bool Measure { get; }
+    [ObservableProperty] private bool _measure;
     public abstract bool Connectable { get; }
     public abstract VolumeLevel VolumeLevel { get; set; }
-    [ObservableProperty] private Decibel _level;
+    [ObservableProperty] private Decibel _level = Decibel.Minimum;
     private readonly List<Decibel> _levels = [];
     public IReadOnlyList<Decibel> Levels => _levels;
 
@@ -45,10 +45,11 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
 
         WaveIn.DataAvailable += OnDataAvailable;
         WaveIn.RecordingStopped += (_, _) => StopMeasure();
+        WaveIn.StartRecording();
     }
 
 
-    private void OnDataAvailable(object? sender, WaveInEventArgs e)
+    protected virtual void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
         // WaveInがnullの場合、すれ違いで停止されているため、処理を中断する。
         if (WaveIn is null) return;
@@ -79,6 +80,34 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
         Level = Decibel.Minimum <= level ? level : Decibel.Minimum;
         _levels.Add(Level);
     }
+
+    public abstract void StartMeasure();
+
+    public virtual void StopMeasure()
+    {
+        // WaveInが設定されていない場合は、未開始として例外をスローする
+        if (WaveIn is null)
+        {
+            throw new InvalidOperationException("Not started.");
+        }
+
+        WaveIn.DataAvailable -= OnDataAvailable;
+        WaveIn.StopRecording();
+        WaveIn.Dispose();
+        WaveIn = null;
+        BufferedWaveProvider = null;
+        Filter = null;
+        _levels.Clear();
+        // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
+        Level = Decibel.Minimum;
+    }
+
+    public abstract void PlayLooping(CancellationToken token);
+    public virtual void Dispose()
+    {
+        // TODO release managed resources here
+    }
+
 
     private void ConvertToFloat(byte[] input, float[] output, int bytesRecorded)
     {
@@ -115,30 +144,6 @@ public abstract partial class DeviceBase : ObservableObject, IDevice
 
             output[outputIndex++] = sample;
         }
-    }
-
-    public abstract void StartMeasure();
-
-    public virtual void StopMeasure()
-    {
-        // WaveInが設定されていない場合は、未開始として例外をスローする
-        if (WaveIn is null)
-        {
-            throw new InvalidOperationException("Not started.");
-        }
-
-        WaveIn.DataAvailable -= OnDataAvailable;
-        WaveIn.StopRecording();
-        WaveIn.Dispose();
-        WaveIn = null;
-        BufferedWaveProvider = null;
-        Filter = null;
-    }
-
-    public abstract void PlayLooping(CancellationToken token);
-    public virtual void Dispose()
-    {
-        // TODO release managed resources here
     }
 
     public class AWeightingFilter : ISampleProvider

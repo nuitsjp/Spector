@@ -9,10 +9,8 @@ using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
-public partial class LocalDevice : ObservableObject, ILocalDevice
+public partial class LocalDevice : DeviceBase, ILocalDevice
 {
-    public event EventHandler<WaveInEventArgs>? DataAvailable;
-
     public LocalDevice(
         MMDevice mmDevice,
         string name,
@@ -28,52 +26,32 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         AvailableWaveFormats = GetAvailableWaveFormats().ToList();
         WaveFormat = GetAvailableWageFormat(mmDevice.AudioClient.MixFormat);
 
-        WasapiCapture = 
-            (MmDevice.DataFlow == DataFlow.Capture
-                ? new WasapiCapture(mmDevice)
-                : new WasapiLoopbackCapture(mmDevice))
-            .AddTo(CompositeDisposable);
-                
-        WasapiCapture.WaveFormat = WaveFormat;
-
-        LevelMeter = new AudioLevelMeter(WasapiCapture);
-        WasapiCapture.DataAvailable += OnDataAvailable;
-        WasapiCapture.DataAvailable += (_, args) => DataAvailable?.Invoke(this, args);
-
-        if (Measure) StartMeasure();
+        if (Measure)
+        {
+            StartMeasure(CreateWaveIn());
+        }
     }
 
     private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
-    public DeviceId Id { get; }
+    public override DeviceId Id { get; }
 
-    public DataFlow DataFlow { get; }
+    public override DataFlow DataFlow { get; }
 
-    public IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
+    public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
 
-    [ObservableProperty] private WaveFormat _waveFormat;
-
-    /// <summary>
-    /// デバイス名。利用者が変更可能な名称。
-    /// </summary>
-    [ObservableProperty] private string _name;
 
     /// <summary>
     /// デバイス名。OSで設定されている名称。
     /// </summary>
-    public string SystemName { get; }
+    public override string SystemName { get; }
 
-    /// <summary>
-    /// 計測するかどうかを表す
-    /// </summary>
-    [ObservableProperty] private bool _measure;
-
-    public bool Connectable => true;
+    public override bool Connectable => true;
 
     /// <summary>
     /// 入出力レベル
     /// </summary>
-    public VolumeLevel VolumeLevel
+    public override VolumeLevel VolumeLevel
     {
         get => (VolumeLevel)MmDevice.AudioEndpointVolume.MasterVolumeLevelScalar;
         set
@@ -83,16 +61,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         }
     }
 
-    /// <summary>
-    /// 音量レベル
-    /// </summary>
-    public Decibel Level { get; private set; } = Decibel.Minimum;
 
-    private AudioLevelMeter LevelMeter { get; }
-    private readonly List<Decibel> _levels = [];
-    public IReadOnlyList<Decibel> Levels => _levels;
-
-    private WasapiCapture WasapiCapture { get; }
     private TcpClient? TcpClient { get; set; }
     private Stream? NetworkStream { get; set; }
 
@@ -185,7 +154,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         }
     }
 
-    public Task DisconnectAsync()
+    public override Task DisconnectAsync()
     {
         if (NetworkStream is not null)
         {
@@ -203,41 +172,34 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         return Task.CompletedTask;
     }
 
-    public void StartMeasure()
+    public override void StartMeasure()
     {
-        _levels.Clear();
-        WasapiCapture.StartRecording();
+        StartMeasure(CreateWaveIn());
         Measure = true;
     }
 
-    public void StopMeasure()
+    public override void StopMeasure()
     {
-        WasapiCapture.StopRecording();
         Measure = false;
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
 
         DisconnectAsync();
+        base.StopMeasure();
     }
 
-    private void OnDataAvailable(object? sender, WaveInEventArgs e)
+    protected override void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
         try
         {
-            if(NetworkStream is not null)
-            {
-                NetworkStream.Write(e.Buffer, 0, e.BytesRecorded);
-            }
+            NetworkStream?.Write(e.Buffer, 0, e.BytesRecorded);
         }
         catch
         {
             // ignore
         }
 
-        Level = e.BytesRecorded == 0
-            ? Decibel.Minimum
-            : LevelMeter.CalculateLevel(e.Buffer, e.BytesRecorded);
-        _levels.Add(Level);
+        base.OnDataAvailable(sender, e);
     }
 
     /// <summary>
@@ -245,7 +207,7 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public void PlayLooping(CancellationToken token)
+    public override void PlayLooping(CancellationToken token)
     {
         // スピーカーからNAudioで再生するためのプレイヤーを生成する。
         using var enumerator = new MMDeviceEnumerator();
@@ -268,6 +230,18 @@ public partial class LocalDevice : ObservableObject, ILocalDevice
         // 出力に入力を接続して再生を開始する。
         wavePlayer.Init(waveStream);
         wavePlayer.Play();
+    }
+
+    private WasapiCapture CreateWaveIn()
+    {
+        var waveIn =
+            (MmDevice.DataFlow == DataFlow.Capture
+                ? new WasapiCapture(MmDevice)
+                : new WasapiLoopbackCapture(MmDevice))
+            .AddTo(CompositeDisposable);
+
+        waveIn.WaveFormat = WaveFormat;
+        return waveIn;
     }
 
     public void Dispose()
