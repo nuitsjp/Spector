@@ -39,7 +39,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         Name = deviceName;
         SystemName = deviceName;
 
-        LevelMeter = new AudioLevelMeter(WaveFormat);
+        //LevelMeter = new AudioLevelMeter(WaveFormat);
     }
 
     private CompositeDisposable CompositeDisposable { get; } = [];
