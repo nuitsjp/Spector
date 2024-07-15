@@ -119,20 +119,19 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
                 var buffer = new byte[bufferSize];
                 while (IsRecording)
                 {
-                    // ここにCaptureデバイスのデータを処理するコードを追加
                     try
                     {
                         var length = binaryReader.Read(buffer, 0, buffer.Length);
                         if (length == 0)
                         {
                             // 接続が切れた場合、読み込みが0になる
-                            RecordingStopped?.Invoke(this, new StoppedEventArgs());
+                            StopRecording();
                         }
                         DataAvailable?.Invoke(this, new WaveInEventArgs(buffer, length));
                     }
                     catch (IOException)
                     {
-                        RecordingStopped?.Invoke(this, new StoppedEventArgs());
+                        StopRecording();
                     }
                 }
             });
@@ -152,11 +151,13 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
         {
             if (IsRecording is false) return;
 
+            IsRecording = false;
+
             binaryReader.Dispose();
             binaryWriter.Dispose();
             networkStream.Dispose();
             tcpClient.Dispose();
-            IsRecording = false;
+            RecordingStopped?.Invoke(this, new StoppedEventArgs());
         }
     }
 

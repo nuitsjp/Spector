@@ -94,10 +94,13 @@ public abstract partial class DeviceBase(
     {
         if (WaveIn is null) return;
 
-        WaveIn.DataAvailable -= OnDataAvailable;
-        WaveIn.StopRecording();
-        WaveIn.Dispose();
+        var waveIn = WaveIn;
         WaveIn = null;
+
+
+        waveIn.DataAvailable -= OnDataAvailable;
+        waveIn.StopRecording();
+        waveIn.Dispose();
         BufferedWaveProvider = null;
         Filter = null;
         _levels.Clear();
