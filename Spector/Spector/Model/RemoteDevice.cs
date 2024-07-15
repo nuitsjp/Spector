@@ -1,8 +1,5 @@
 ﻿using System.IO;
-using System.Net.Http;
 using System.Net.Sockets;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.VisualBasic;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Reactive.Bindings.Disposables;
@@ -32,41 +29,27 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
                 ? WaveFormat.CreateIeeeFloatWaveFormat(rate, channels)
                 : new WaveFormat(rate, bits, channels);
         return new RemoteDevice(
-            tcpClient,
-            networkStream,
-            reader,
-            writer,
+            new TcpWaveIn(waveFormat, tcpClient, networkStream, reader, writer),
             waveFormat,
             (DeviceId)deviceName,
             (DataFlow)dataFlow,
             deviceName);
     }
 
-    public RemoteDevice(
-        TcpClient tcpClient,
-        NetworkStream networkStream,
-        BinaryReader reader,
-        BinaryWriter writer,
+    private RemoteDevice(
+        TcpWaveIn writer,
         WaveFormat waveFormat,
         DeviceId id,
         DataFlow dataFlow,
         string name)
         : base(id, dataFlow, name, name)
     {
-        TcpClient = tcpClient;
-        NetworkStream = networkStream;
-        BinaryReader = reader;
-        BinaryWriter = writer;
         WaveFormat = waveFormat;
-        AvailableWaveFormats = [WaveFormat];
-
-        //LevelMeter = new AudioLevelMeter(WaveFormat);
+        WaveIn = writer.AddTo(CompositeDisposable);
+        AvailableWaveFormats = [waveFormat];
     }
 
-    private TcpClient TcpClient { get; }
-    private BinaryReader BinaryReader { get; }
-    private BinaryWriter BinaryWriter { get; }
-    private NetworkStream NetworkStream { get; }
+    private TcpWaveIn WaveIn { get; }
 
     private CompositeDisposable CompositeDisposable { get; } = [];
 
@@ -86,38 +69,43 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
 
     public override void StartMeasure()
     {
-        base.StartMeasure(new TcpWaveIn(WaveFormat, BinaryReader));
+        base.StartMeasure(WaveIn);
     }
 
     public override void StopMeasure()
     {
-        base.StopMeasure();
-        Disconnected?.Invoke(this, EventArgs.Empty);
+        Dispose();
     }
 
     public override void PlayLooping(CancellationToken token)
     {
-        BinaryWriter.Write((int)RemoteCommand.StartPlayLooping);
+        WaveIn.SendRemoteCommand(RemoteCommand.StartPlayLooping);
         token.Register(() =>
         {
-            BinaryWriter.Write((int)RemoteCommand.StopPlayLooping);
+            WaveIn.SendRemoteCommand(RemoteCommand.StopPlayLooping);
         });
     }
 
     public override void Dispose()
     {
-        CompositeDisposable.Dispose();
+        base.StopMeasure();
         Disconnected?.Invoke(this, EventArgs.Empty);
+        CompositeDisposable.Dispose();
+
         GC.SuppressFinalize(this);
     }
 
-    private class TcpWaveIn(WaveFormat waveFormat, BinaryReader binaryReader) : IWaveIn
+    private class TcpWaveIn(
+        WaveFormat waveFormat,
+        TcpClient tcpClient,
+        NetworkStream networkStream, 
+        BinaryReader binaryReader, 
+        BinaryWriter binaryWriter) : IWaveIn
     {
         public event EventHandler<WaveInEventArgs>? DataAvailable;
         public event EventHandler<StoppedEventArgs>? RecordingStopped;
 
         public WaveFormat WaveFormat { get; set; } = waveFormat;
-        private BinaryReader BinaryReader { get; } = binaryReader;
 
         private bool IsRecording { get; set; }
 
@@ -132,26 +120,43 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
                 while (IsRecording)
                 {
                     // ここにCaptureデバイスのデータを処理するコードを追加
-                    var length = BinaryReader.Read(buffer, 0, buffer.Length);
-                    if (length == 0)
+                    try
                     {
-                        // 接続が切れた場合、読み込みが0になる
+                        var length = binaryReader.Read(buffer, 0, buffer.Length);
+                        if (length == 0)
+                        {
+                            // 接続が切れた場合、読み込みが0になる
+                            RecordingStopped?.Invoke(this, new StoppedEventArgs());
+                        }
+                        DataAvailable?.Invoke(this, new WaveInEventArgs(buffer, length));
+                    }
+                    catch (IOException)
+                    {
                         RecordingStopped?.Invoke(this, new StoppedEventArgs());
                     }
-                    DataAvailable?.Invoke(this, new WaveInEventArgs(buffer, length));
                 }
             });
         }
 
+        public void SendRemoteCommand(RemoteCommand command)
+        {
+            binaryWriter.Write((int)command);
+        }
+
         public void StopRecording()
         {
-            if(IsRecording is false) return;
-
-            IsRecording = false;
+            Dispose();
         }
 
         public void Dispose()
         {
+            if (IsRecording is false) return;
+
+            binaryReader.Dispose();
+            binaryWriter.Dispose();
+            networkStream.Dispose();
+            tcpClient.Dispose();
+            IsRecording = false;
         }
     }
 

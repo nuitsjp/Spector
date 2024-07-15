@@ -1,9 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
-using System.IO;
-using System.Net.Sockets;
-using System.Net;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 

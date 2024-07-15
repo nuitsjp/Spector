@@ -1,10 +1,7 @@
-﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
 using NAudio.Dsp;
 using NAudio.Wave;
-using Reactive.Bindings.Disposables;
-using ScottPlot.MarkerShapes;
 
 namespace Spector.Model;
 

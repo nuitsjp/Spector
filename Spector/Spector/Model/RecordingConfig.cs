@@ -1,5 +1,4 @@
-﻿using NAudio.Wave;
-using UnitGenerator;
+﻿using UnitGenerator;
 
 namespace Spector.Model;
 

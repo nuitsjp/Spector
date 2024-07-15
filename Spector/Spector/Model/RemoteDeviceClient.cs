@@ -1,12 +1,8 @@
 ﻿using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Printing;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Xml.Linq;
-using NAudio.CoreAudioApi;
-using NAudio.Wave;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 
