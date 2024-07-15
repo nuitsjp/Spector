@@ -55,52 +55,32 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     }
 
 
-    private TcpClient? TcpClient { get; set; }
-    private Stream? NetworkStream { get; set; }
+    private RemoteDeviceClient? RemoteDeviceClient { get; set; }
 
     private CancellationTokenSource PlayLoopingCancellationTokenSource { get; set; } = new();
 
     public Task ConnectAsync(string address)
     {
-        return Task.Run(() =>
-        {
-            TcpClient = new TcpClient().AddTo(CompositeDisposable);
-            TcpClient.Connect(address, AudioInterface.RemotePort);
-
-            NetworkStream = new BufferedStream(TcpClient.GetStream()).AddTo(CompositeDisposable);
-            var writer = new BinaryWriter(NetworkStream).AddTo(CompositeDisposable);
-
-            // デバイス情報を送信
-            writer.Write((int)DataFlow);
-            writer.Write(WaveFormat.SampleRate);
-            writer.Write((ushort)WaveFormat.Encoding);
-            writer.Write(WaveFormat.BitsPerSample);
-            writer.Write(WaveFormat.Channels);
-            writer.Write(@$"{Name} - {Dns.GetHostName()}");
-            writer.Flush();
-            var reader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
-
-            try
+        RemoteDeviceClient = new RemoteDeviceClient(this).AddTo(CompositeDisposable);
+        RemoteDeviceClient
+            .RemoteCommandObservable
+            .Subscribe(command =>
             {
-                while (TcpClient is not null)
+                switch (command)
                 {
-                    var command = (RemoteCommand)reader.ReadInt32();
-                    if (command == RemoteCommand.StartPlayLooping)
-                    {
+                    case RemoteCommand.StartPlayLooping:
                         PlayLoopingCancellationTokenSource = new CancellationTokenSource();
                         PlayLooping(PlayLoopingCancellationTokenSource.Token);
-                    }
-                    else if (command == RemoteCommand.StopPlayLooping)
-                    {
+                        break;
+                    case RemoteCommand.StopPlayLooping:
                         PlayLoopingCancellationTokenSource.Cancel();
-                    }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(command), command, null);
                 }
-            }
-            catch (IOException)
-            {
-                // リモート接続が切断された場合
-            }
-        });
+            })
+            .AddTo(CompositeDisposable);
+        return RemoteDeviceClient.ConnectAsync(address, AudioInterface.RemotePort);
     }
 
     public IEnumerable<WaveFormat> GetAvailableWaveFormats()
@@ -143,19 +123,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
     public override Task DisconnectAsync()
     {
-        if (NetworkStream is not null)
-        {
-            CompositeDisposable.Remove(NetworkStream);
-            NetworkStream.Dispose();
-            NetworkStream = null;
-        }
-
-        if (TcpClient is not null)
-        {
-            CompositeDisposable.Remove(TcpClient);
-            TcpClient.Dispose();
-            TcpClient = null;
-        }
+        RemoteDeviceClient?.Disconnect();
         return Task.CompletedTask;
     }
 
@@ -179,7 +147,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     {
         try
         {
-            NetworkStream?.Write(e.Buffer, 0, e.BytesRecorded);
+            RemoteDeviceClient?.Write(e.Buffer, 0, e.BytesRecorded);
         }
         catch
         {
