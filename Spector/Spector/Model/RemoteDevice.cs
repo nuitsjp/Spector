@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Net.Http;
 using System.Net.Sockets;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.VisualBasic;
@@ -9,109 +10,133 @@ using Reactive.Bindings.Extensions;
 
 namespace Spector.Model;
 
-public partial class RemoteDevice : ObservableObject, IRemoteDevice
+public partial class RemoteDevice : DeviceBase, IRemoteDevice
 {
-    public event EventHandler<WaveInEventArgs>? DataAvailable;
-    public event EventHandler? Disconnected;
-    public RemoteDevice(TcpClient tcpClient)
+    public static RemoteDevice Create(TcpClient tcpClient)
     {
-        TcpClient = tcpClient.AddTo(CompositeDisposable);
-        NetworkStream = TcpClient.GetStream().AddTo(CompositeDisposable);
-        BinaryReader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
-        BinaryWriter = new BinaryWriter(NetworkStream).AddTo(CompositeDisposable);
+        var networkStream = tcpClient.GetStream();
+        var reader = new BinaryReader(networkStream);
+        var writer = new BinaryWriter(networkStream);
 
         // デバイス情報の受信
-        var dataFlow = BinaryReader.ReadInt32();
-        var rate = BinaryReader.ReadInt32();
-        var encoding = (WaveFormatEncoding)BinaryReader.ReadUInt16();
-        var bits = BinaryReader.ReadInt32();
-        var channels = BinaryReader.ReadInt32();
-        var deviceName = BinaryReader.ReadString();
-
-        Id = (DeviceId)deviceName;
-        DataFlow = (DataFlow)dataFlow;
-        WaveFormat = 
+        var dataFlow = reader.ReadInt32();
+        var rate = reader.ReadInt32();
+        var encoding = (WaveFormatEncoding)reader.ReadUInt16();
+        var bits = reader.ReadInt32();
+        var channels = reader.ReadInt32();
+        var deviceName = reader.ReadString();
+        var waveFormat =
             encoding == WaveFormatEncoding.IeeeFloat
                 ? WaveFormat.CreateIeeeFloatWaveFormat(rate, channels)
                 : new WaveFormat(rate, bits, channels);
-        AvailableWaveFormats = [WaveFormat];
+        return new RemoteDevice(
+            tcpClient,
+            networkStream,
+            reader,
+            writer,
+            waveFormat,
+            (DeviceId)deviceName,
+            (DataFlow)dataFlow,
+            deviceName);
+    }
 
-        Name = deviceName;
-        SystemName = deviceName;
+    public RemoteDevice(
+        TcpClient tcpClient,
+        NetworkStream networkStream,
+        BinaryReader reader,
+        BinaryWriter writer,
+        WaveFormat waveFormat,
+        DeviceId id,
+        DataFlow dataFlow,
+        string name)
+        : base(id, dataFlow, name, name)
+    {
+        TcpClient = tcpClient;
+        NetworkStream = networkStream;
+        BinaryReader = reader;
+        BinaryWriter = writer;
+        WaveFormat = waveFormat;
+        AvailableWaveFormats = [WaveFormat];
 
         //LevelMeter = new AudioLevelMeter(WaveFormat);
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = [];
-    public DeviceId Id { get; }
-    public DataFlow DataFlow { get; }
-
-    public IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
-
-    public WaveFormat WaveFormat { get; }
-    public string Name { get; set; }
-    public string SystemName { get; }
-    public bool Measure { get; private set; }
-    public bool Connect { get; set; } = true;
-    public bool Connectable => false;
-    public VolumeLevel VolumeLevel { get; set; }
-    public Decibel Level { get; private set; } = Decibel.Minimum;
-
-    private readonly List<Decibel> _levels = [];
-    public IReadOnlyList<Decibel> Levels => _levels;
     private TcpClient TcpClient { get; }
     private BinaryReader BinaryReader { get; }
     private BinaryWriter BinaryWriter { get; }
     private NetworkStream NetworkStream { get; }
-    private AudioLevelMeter LevelMeter { get; }
-    private CancellationTokenSource CancellationTokenSource { get; } = new();
+
+    private CompositeDisposable CompositeDisposable { get; } = [];
+
+    public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
+    public override bool Connectable => false;
+    public override VolumeLevel VolumeLevel { get; set; }
+    public event EventHandler? Disconnected;
+    public bool Connect { get; set; } = true;
 
 
-    public Task DisconnectAsync()
+    public override Task DisconnectAsync()
     {
-        CancellationTokenSource.Cancel();
+        StopMeasure();
         Dispose();
         return Task.CompletedTask;
     }
 
-    public void StartMeasure()
+
+    private class TcpWaveIn(WaveFormat waveFormat, BinaryReader binaryReader) : IWaveIn
     {
-        _levels.Clear();
-        Task.Run(() =>
+        public event EventHandler<WaveInEventArgs>? DataAvailable;
+        public event EventHandler<StoppedEventArgs>? RecordingStopped;
+
+        public WaveFormat WaveFormat { get; set; } = waveFormat;
+        private BinaryReader BinaryReader { get; } = binaryReader;
+
+        private bool IsRecording { get; set; }
+
+        public void StartRecording()
         {
-            Measure = true;
-            int bytesPerSecond = WaveFormat.SampleRate * WaveFormat.Channels * (WaveFormat.BitsPerSample / 8);
-            int bufferSize = bytesPerSecond / 20; // 1秒の1/20 = 50ms
-            byte[] buffer = new byte[bufferSize];
-            while (CancellationTokenSource.IsCancellationRequested is false)
+            IsRecording = true;
+            Task.Run(() =>
             {
-                // ここにCaptureデバイスのデータを処理するコードを追加
-                var length = BinaryReader.Read(buffer, 0, buffer.Length);
-                if (length == 0)
+                var bytesPerSecond = WaveFormat.SampleRate * WaveFormat.Channels * (WaveFormat.BitsPerSample / 8);
+                var bufferSize = bytesPerSecond / 20; // 1秒の1/20 = 50ms
+                var buffer = new byte[bufferSize];
+                while (IsRecording)
                 {
-                    // 接続が切れた場合、読み込みが0になる
-                    DisconnectAsync();
+                    // ここにCaptureデバイスのデータを処理するコードを追加
+                    var length = BinaryReader.Read(buffer, 0, buffer.Length);
+                    if (length == 0)
+                    {
+                        // 接続が切れた場合、読み込みが0になる
+                        StopRecording();
+                    }
+                    DataAvailable?.Invoke(this, new WaveInEventArgs(buffer, length));
                 }
-                OnDataAvailable(buffer, length);
-            }
-        });
+            });
+        }
+
+        public void StopRecording()
+        {
+            IsRecording = false;
+            RecordingStopped?.Invoke(this, new StoppedEventArgs());
+        }
+
+        public void Dispose()
+        {
+        }
     }
 
-    public void StopMeasure()
+    public override void StartMeasure()
+    {
+        base.StartMeasure(new TcpWaveIn(WaveFormat, BinaryReader));
+    }
+
+    public override void StopMeasure()
     {
         Measure = false;
-        Level = Decibel.Minimum;
     }
 
-    private void OnDataAvailable(byte[] bytes, int length)
-    {
-        if (Measure is false) return;
-
-        Level = LevelMeter.CalculateLevel(bytes, length);
-        _levels.Add(Level);
-    }
-
-    public void PlayLooping(CancellationToken token)
+    public override void PlayLooping(CancellationToken token)
     {
         BinaryWriter.Write((int)RemoteCommand.StartPlayLooping);
         token.Register(() =>
@@ -120,7 +145,7 @@ public partial class RemoteDevice : ObservableObject, IRemoteDevice
         });
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         CompositeDisposable.Dispose();
         Disconnected?.Invoke(this, EventArgs.Empty);

@@ -121,7 +121,7 @@ public class AudioInterface(ISettingsRepository settingsRepository) : IDisposabl
 
     private void HandleClientAsync(TcpClient client)
     {
-        var device = new RemoteDevice(client);
+        var device = RemoteDevice.Create(client);
         device.Disconnected += RemoteDeviceOnDisconnected;
         device.StartMeasure();
         _devices.Add(device);

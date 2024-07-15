@@ -130,12 +130,10 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     public override void StartMeasure()
     {
         StartMeasure(CreateWaveIn());
-        Measure = true;
     }
 
     public override void StopMeasure()
     {
-        Measure = false;
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
 

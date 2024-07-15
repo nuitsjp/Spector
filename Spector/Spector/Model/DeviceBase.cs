@@ -4,6 +4,7 @@ using NAudio.CoreAudioApi;
 using NAudio.Dsp;
 using NAudio.Wave;
 using Reactive.Bindings.Disposables;
+using ScottPlot.MarkerShapes;
 
 namespace Spector.Model;
 
@@ -51,6 +52,8 @@ public abstract partial class DeviceBase(
         WaveIn.DataAvailable += OnDataAvailable;
         WaveIn.RecordingStopped += (_, _) => StopMeasure();
         WaveIn.StartRecording();
+
+        Measure = true;
     }
 
 
@@ -61,6 +64,8 @@ public abstract partial class DeviceBase(
 
         if (BufferedWaveProvider is null) throw new InvalidOperationException($"{nameof(BufferedWaveProvider)} is not initialized.");
         if (Filter is null) throw new InvalidOperationException($"{nameof(Filter)} is not initialized.");
+
+        if (e.BytesRecorded == 0) return;
 
         DataAvailable?.Invoke(sender, e);
 
@@ -90,11 +95,7 @@ public abstract partial class DeviceBase(
 
     public virtual void StopMeasure()
     {
-        // WaveInが設定されていない場合は、未開始として例外をスローする
-        if (WaveIn is null)
-        {
-            throw new InvalidOperationException("Not started.");
-        }
+        if (WaveIn is null) return;
 
         WaveIn.DataAvailable -= OnDataAvailable;
         WaveIn.StopRecording();
@@ -105,6 +106,7 @@ public abstract partial class DeviceBase(
         _levels.Clear();
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
+        Measure = false;
     }
 
     public abstract void PlayLooping(CancellationToken token);

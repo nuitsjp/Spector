@@ -45,10 +45,17 @@ public class RemoteDeviceClient : IDisposable
             writer.Flush();
 
             var reader = new BinaryReader(NetworkStream).AddTo(CompositeDisposable);
-            while (TcpClient.Connected)
+            try
             {
-                var command = (RemoteCommand)reader.ReadInt32();
-                RemoteCommandSubject.OnNext(command);
+                while (TcpClient.Connected)
+                {
+                    var command = (RemoteCommand)reader.ReadInt32();
+                    RemoteCommandSubject.OnNext(command);
+                }
+            }
+            catch (IOException)
+            {
+                // TcpClientが切断された場合
             }
         });
     }
