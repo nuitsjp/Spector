@@ -53,6 +53,7 @@ public class RemoteDeviceClient : IDisposable
             {
                 // TcpClientが切断された場合
             }
+            Disconnect();
         });
     }
 
@@ -68,8 +69,11 @@ public class RemoteDeviceClient : IDisposable
 
     public void Dispose()
     {
+        if(TcpClient.Connected is false) return;
+
         TcpClient.Close();
         NetworkStream?.Close();
+        RemoteCommandSubject.OnCompleted();
         CompositeDisposable.Dispose();
     }
 }

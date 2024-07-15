@@ -25,10 +25,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         // 計測状態を同期する
         Measure = Device.Measure;
-        EnableConnect = this.ObserveProperty<DeviceViewModel, bool>(x => x.Measure)
-            .ToReadOnlyReactivePropertySlim()
-            .AddTo(CompositeDisposable);
-        this.ObserveProperty<DeviceViewModel, bool>(x => x.Measure)
+        this.ObserveProperty(x => x.Measure)
             .Skip(1) // 上記の「Measure = Device.Measure;」の変更をスキップする。
             .Subscribe(measure =>
             {
@@ -42,6 +39,11 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
                     Connect = false;
                 }
             })
+            .AddTo(CompositeDisposable);
+
+        // 接続状態を同期する
+        device.ObserveProperty(x => x.IsConnected)
+            .Subscribe(x => Connect = x)
             .AddTo(CompositeDisposable);
 
         // 入出力レベルを同期する
@@ -91,7 +93,6 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     [ObservableProperty] private float _volumeLevel;
     [ObservableProperty] private bool _connect;
 
-    public ReadOnlyReactivePropertySlim<bool> EnableConnect { get; }
     public Visibility VisibleConnect => Device.Connectable 
         ? Visibility.Visible 
         : Visibility.Collapsed;

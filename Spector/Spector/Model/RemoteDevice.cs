@@ -157,7 +157,10 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
             binaryWriter.Dispose();
             networkStream.Dispose();
             tcpClient.Dispose();
-            RecordingStopped?.Invoke(this, new StoppedEventArgs());
+            CurrentDispatcher.Invoke(() =>
+            {
+                RecordingStopped?.Invoke(this, new StoppedEventArgs());
+            });
         }
     }
 

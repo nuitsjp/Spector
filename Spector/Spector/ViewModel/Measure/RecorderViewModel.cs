@@ -80,7 +80,11 @@ public partial class RecorderViewModel(
             {
                 MeasureDevice ??= MeasureDevices.FirstOrDefault();
             }
-            StartRecordingCommand.NotifyCanExecuteChanged();
+
+            CurrentDispatcher.Dispatcher.Invoke(() =>
+            {
+                StartRecordingCommand.NotifyCanExecuteChanged();
+            });
         };
         PlaybackDevices.CollectionChanged += (_, _) => { PlaybackDevice ??= PlaybackDevices.FirstOrDefault(); };
 

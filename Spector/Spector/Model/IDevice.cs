@@ -19,6 +19,7 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     string SystemName { get; }
     bool Measure { get; }
     bool Connectable { get; }
+    bool IsConnected { get; }
 
     /// <summary>
     /// 入出力レベル

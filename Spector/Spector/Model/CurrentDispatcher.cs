@@ -22,4 +22,15 @@ public static class CurrentDispatcher
     {
         return Dispatcher.InvokeAsync(callback);
     }
+
+    /// <summary>
+    /// ディスパッチャーを使用して処理を行う
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public static void Invoke(Action action)
+    {
+        Dispatcher.Invoke(action);
+    }
+
 }

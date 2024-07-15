@@ -38,5 +38,7 @@ public abstract class RepositoryBase<T> where T : class
 
         await using var stream = new FileStream(fileInfo.FullName, FileMode.Create, FileAccess.Write);
         await JsonSerializer.SerializeAsync(stream, value, JsonEnvironments.Options);
+        stream.Flush();
+        stream.Close();
     }
 }

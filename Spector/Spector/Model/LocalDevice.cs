@@ -60,22 +60,28 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         RemoteDeviceClient = new RemoteDeviceClient(this).AddTo(CompositeDisposable);
         RemoteDeviceClient
             .RemoteCommandObservable
-            .Subscribe(command =>
-            {
-                switch (command)
+            .Subscribe(
+                onNext: command =>
                 {
-                    case RemoteCommand.StartPlayLooping:
-                        PlayLoopingCancellationTokenSource = new CancellationTokenSource();
-                        PlayLooping(PlayLoopingCancellationTokenSource.Token);
-                        break;
-                    case RemoteCommand.StopPlayLooping:
-                        PlayLoopingCancellationTokenSource.Cancel();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(command), command, null);
-                }
-            })
+                    switch (command)
+                    {
+                        case RemoteCommand.StartPlayLooping:
+                            PlayLoopingCancellationTokenSource = new CancellationTokenSource();
+                            PlayLooping(PlayLoopingCancellationTokenSource.Token);
+                            break;
+                        case RemoteCommand.StopPlayLooping:
+                            PlayLoopingCancellationTokenSource.Cancel();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(command), command, null);
+                    }
+                },
+                onCompleted: () =>
+                {
+                    DisconnectAsync();
+                })
             .AddTo(CompositeDisposable);
+        IsConnected = true;
         return RemoteDeviceClient.ConnectAsync(address, AudioInterface.RemotePort);
     }
 
@@ -120,6 +126,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     public override Task DisconnectAsync()
     {
         RemoteDeviceClient?.Disconnect();
+        IsConnected = false;
         return Task.CompletedTask;
     }
 

@@ -21,6 +21,7 @@ public abstract partial class DeviceBase(
     public string SystemName { get; } = systemName;
     [ObservableProperty] private bool _measure;
     public abstract bool Connectable { get; }
+    [ObservableProperty] private bool _isConnected;
     public abstract VolumeLevel VolumeLevel { get; set; }
     [ObservableProperty] private Decibel _level = Decibel.Minimum;
     private readonly List<Decibel> _levels = [];
