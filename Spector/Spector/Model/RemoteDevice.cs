@@ -12,6 +12,8 @@ namespace Spector.Model;
 
 public partial class RemoteDevice : DeviceBase, IRemoteDevice
 {
+    public event EventHandler? Disconnected;
+
     public static RemoteDevice Create(TcpClient tcpClient)
     {
         var networkStream = tcpClient.GetStream();
@@ -71,7 +73,6 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
     public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
     public override bool Connectable => false;
     public override VolumeLevel VolumeLevel { get; set; }
-    public event EventHandler? Disconnected;
     public bool Connect { get; set; } = true;
 
 
@@ -82,6 +83,33 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
         return Task.CompletedTask;
     }
 
+
+    public override void StartMeasure()
+    {
+        base.StartMeasure(new TcpWaveIn(WaveFormat, BinaryReader));
+    }
+
+    public override void StopMeasure()
+    {
+        base.StopMeasure();
+        Disconnected?.Invoke(this, EventArgs.Empty);
+    }
+
+    public override void PlayLooping(CancellationToken token)
+    {
+        BinaryWriter.Write((int)RemoteCommand.StartPlayLooping);
+        token.Register(() =>
+        {
+            BinaryWriter.Write((int)RemoteCommand.StopPlayLooping);
+        });
+    }
+
+    public override void Dispose()
+    {
+        CompositeDisposable.Dispose();
+        Disconnected?.Invoke(this, EventArgs.Empty);
+        GC.SuppressFinalize(this);
+    }
 
     private class TcpWaveIn(WaveFormat waveFormat, BinaryReader binaryReader) : IWaveIn
     {
@@ -108,7 +136,7 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
                     if (length == 0)
                     {
                         // 接続が切れた場合、読み込みが0になる
-                        StopRecording();
+                        RecordingStopped?.Invoke(this, new StoppedEventArgs());
                     }
                     DataAvailable?.Invoke(this, new WaveInEventArgs(buffer, length));
                 }
@@ -117,8 +145,9 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
 
         public void StopRecording()
         {
+            if(IsRecording is false) return;
+
             IsRecording = false;
-            RecordingStopped?.Invoke(this, new StoppedEventArgs());
         }
 
         public void Dispose()
@@ -126,29 +155,5 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
         }
     }
 
-    public override void StartMeasure()
-    {
-        base.StartMeasure(new TcpWaveIn(WaveFormat, BinaryReader));
-    }
 
-    public override void StopMeasure()
-    {
-        Measure = false;
-    }
-
-    public override void PlayLooping(CancellationToken token)
-    {
-        BinaryWriter.Write((int)RemoteCommand.StartPlayLooping);
-        token.Register(() =>
-        {
-            BinaryWriter.Write((int)RemoteCommand.StopPlayLooping);
-        });
-    }
-
-    public override void Dispose()
-    {
-        CompositeDisposable.Dispose();
-        Disconnected?.Invoke(this, EventArgs.Empty);
-        GC.SuppressFinalize(this);
-    }
 }
