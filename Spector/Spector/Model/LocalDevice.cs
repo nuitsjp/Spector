@@ -25,7 +25,9 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
         if (Measure)
         {
-            StartMeasure(CreateWaveIn());
+            var waveIn = CreateWaveIn();
+            WaveFormat = waveIn.WaveFormat;
+            StartMeasure(waveIn);
         }
     }
 

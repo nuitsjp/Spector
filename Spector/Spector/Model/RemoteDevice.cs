@@ -24,10 +24,15 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
         var bits = reader.ReadInt32();
         var channels = reader.ReadInt32();
         var deviceName = reader.ReadString();
-        var waveFormat =
-            encoding == WaveFormatEncoding.IeeeFloat
-                ? WaveFormat.CreateIeeeFloatWaveFormat(rate, channels)
-                : new WaveFormat(rate, bits, channels);
+        var waveFormat = encoding switch
+        {
+            WaveFormatEncoding.Pcm => new WaveFormat(rate, bits, channels),
+            WaveFormatEncoding.IeeeFloat => WaveFormat.CreateIeeeFloatWaveFormat(rate, channels),
+            WaveFormatEncoding.Extensible => new WaveFormatExtensible(rate, bits, channels),
+            WaveFormatEncoding.ALaw => WaveFormat.CreateALawFormat(rate, channels),
+            WaveFormatEncoding.MuLaw => WaveFormat.CreateMuLawFormat(rate, channels),
+            _ => throw new ArgumentOutOfRangeException(nameof(encoding))
+        };
         return new RemoteDevice(
             new TcpWaveIn(waveFormat, tcpClient, networkStream, reader, writer),
             waveFormat,

@@ -65,7 +65,8 @@ public class Recording
             WithBuzz,
             StartTime,
             DateTime.Now, 
-            RecorderByDevices.Select(x => x.ToRecord()).ToArray());
+            RecorderByDevices
+                .Select(x => x.ToRecord()).ToArray());
 
         using var stream = new FileStream(Path.Combine(CurrentRecordDirectory.FullName, "record.json"), FileMode.Create);
         // JSON形式で保存
