@@ -21,12 +21,11 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         Measure = measure;
 
         AvailableWaveFormats = GetAvailableWaveFormats().ToList();
-        WaveFormat = GetAvailableWageFormat(mmDevice.AudioClient.MixFormat);
+        WaveFormat = mmDevice.AudioClient.MixFormat;
 
         if (Measure)
         {
             var waveIn = CreateWaveIn();
-            WaveFormat = waveIn.WaveFormat;
             StartMeasure(waveIn);
         }
     }
@@ -114,17 +113,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         }
     }
 
-    public WaveFormat GetAvailableWageFormat(WaveFormat format)
-    {
-        var isSupported = MmDevice.AudioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out var closestMatch);
-        if (isSupported)
-        {
-            return format;
-        }
-
-        return closestMatch ?? MmDevice.AudioClient.MixFormat;
-    }
-
     public override Task DisconnectAsync()
     {
         RemoteDeviceClient?.Disconnect();
@@ -199,6 +187,9 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
             .AddTo(CompositeDisposable);
 
         waveIn.WaveFormat = WaveFormat;
+        // 上で設定したフォーマットが反映されないことがあるため、その場合はWaveInのフォーマットを使用する
+        WaveFormat = waveIn.WaveFormat;
+
         return waveIn;
     }
 
