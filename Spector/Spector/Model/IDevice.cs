@@ -11,6 +11,7 @@ public partial struct DeviceId;
 public interface IDevice : INotifyPropertyChanged, IDisposable
 {
     event EventHandler<WaveInEventArgs> DataAvailable;
+    event EventHandler<EventArgs> Disconnected;
     DeviceId Id { get; }
     DataFlow DataFlow { get; }
     IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }

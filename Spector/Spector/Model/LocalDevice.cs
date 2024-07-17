@@ -7,6 +7,8 @@ namespace Spector.Model;
 
 public partial class LocalDevice : DeviceBase, ILocalDevice
 {
+    public override event EventHandler<EventArgs>? Disconnected;
+
     public LocalDevice(
         MMDevice mmDevice,
         string name,
@@ -118,6 +120,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     {
         RemoteDeviceClient?.Disconnect();
         IsConnected = false;
+        Disconnected?.Invoke(this, EventArgs.Empty);
     }
 
     public sealed override void StartMeasure()

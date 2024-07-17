@@ -9,7 +9,7 @@ namespace Spector.Model;
 
 public partial class RemoteDevice : DeviceBase, IRemoteDevice
 {
-    public event EventHandler? Disconnected;
+    public override event EventHandler<EventArgs>? Disconnected;
 
     public static RemoteDevice Create(TcpClient tcpClient)
     {

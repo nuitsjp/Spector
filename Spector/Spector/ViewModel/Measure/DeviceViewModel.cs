@@ -41,7 +41,15 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             })
             .AddTo(CompositeDisposable);
 
-        // 接続状態を同期する
+        // DisconnectedイベントをObservable.FromEventでObservableに変換、購読してConnectをfalseにする
+        Observable.FromEvent<EventHandler<EventArgs>, EventArgs>(
+            h => (_, e) => h(e),
+            h => Device.Disconnected += h,
+            h => Device.Disconnected -= h)
+            .Subscribe(_ => Connect = false)
+            .AddTo(CompositeDisposable);
+
+
         device.ObserveProperty(x => x.IsConnected)
             .Subscribe(x => Connect = x)
             .AddTo(CompositeDisposable);

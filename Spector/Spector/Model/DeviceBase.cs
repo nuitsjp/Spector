@@ -12,6 +12,8 @@ public abstract partial class DeviceBase(
     : ObservableObject, IDevice
 {
     public event EventHandler<WaveInEventArgs>? DataAvailable;
+    public abstract event EventHandler<EventArgs>? Disconnected;
+
     public DeviceId Id { get; } = id;
     public DataFlow DataFlow { get; } = dataFlow;
     public abstract IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
@@ -20,7 +22,7 @@ public abstract partial class DeviceBase(
     public string SystemName { get; } = systemName;
     [ObservableProperty] private bool _measure;
     public abstract bool Connectable { get; }
-    [ObservableProperty] private bool _isConnected;
+    public bool IsConnected { get; protected set; }
     public abstract VolumeLevel VolumeLevel { get; set; }
     public Decibel Level { get; private set; } = Decibel.Minimum;
 
