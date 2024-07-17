@@ -24,7 +24,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     {
         PresentationService = presentationService;
         Recorder = recorder;
-        base.PropertyChanging += OnPropertyChanging;
+
+        PropertyChanging += OnPropertyChanging;
         PropertyChanged += OnPropertyChanged;
 
         UpdateRecords();
@@ -43,7 +44,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     private CompositeDisposable CompositeDisposable { get; } = new();
     private IPresentationService PresentationService { get; }
     private Recorder Recorder { get; }
-    [ObservableProperty] private IReadOnlyCollection<RecordViewModel> _records = [];
+    public ReactiveCollection<RecordViewModel> Records { get; } = [];
 
     [ObservableProperty] private RecordViewModel? _selectedRecord;
 
@@ -54,7 +55,9 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 
     private void UpdateRecords()
     {
-        Records = Recorder.Records
+        Records.Clear();
+
+        Recorder.Records
             .Select(record =>
             {
                 return new RecordViewModel(
@@ -81,7 +84,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                             recordByDevice.Minus50db))
                         .ToArray());
             })
-            .ToArray();
+            .ToList()
+            .ForEach(x => Records.Add(x));
     }
 
     private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)
