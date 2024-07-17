@@ -16,8 +16,16 @@ public abstract class RepositoryBase<T> where T : class
                 await SaveInnerAsync(fileInfo, getDefault());
             }
 
-            await using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-            return (await JsonSerializer.DeserializeAsync<T>(stream, JsonEnvironments.Options))!;
+            try
+            {
+                await using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+                return (await JsonSerializer.DeserializeAsync<T>(stream, JsonEnvironments.Options))!;
+            }
+            catch
+            {
+                fileInfo.Delete();
+                return await LoadAsync(fileInfo, getDefault);
+            }
         }
     }
     
