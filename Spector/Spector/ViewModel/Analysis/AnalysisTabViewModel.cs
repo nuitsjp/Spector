@@ -124,7 +124,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                 new AnalysisDeviceViewModel(
                     SelectedRecord!, 
                     device, 
-                    inputLevels));
+                    inputLevels.ToArray()));
         }
         else
         {

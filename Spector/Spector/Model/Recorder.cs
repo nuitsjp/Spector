@@ -1,22 +1,19 @@
 ﻿using System.IO;
 using System.Text.Json;
-using NAudio.Wave;
 using Reactive.Bindings;
 
 namespace Spector.Model;
 
 public class Recorder
 {
-    private ISettingsRepository SettingsRepository { get; }
     private Recording? Recording { get; set; }
     private readonly ReactiveCollection<Record> _records = [];
     public ReadOnlyReactiveCollection<Record> Records { get; }
     public DirectoryInfo RootDirectory { get; } = new("Record");
 
 
-    public Recorder(ISettingsRepository settingsRepository)
+    public Recorder()
     {
-        SettingsRepository = settingsRepository;
         Records = _records.ToReadOnlyReactiveCollection();
     }
 
@@ -58,31 +55,10 @@ public class Recorder
         Recording = null;
     }
 
-    public List<Decibel> AnalyzeWaveFile(Record record, Record.RecordByDevice device)
+    public IEnumerable<Decibel> AnalyzeWaveFile(Record record, Record.RecordByDevice device)
     {
-        var levels = new List<Decibel>();
-
         var file = Path.Combine(RootDirectory.FullName, record.DirectoryName, device.FileName);
-        using var reader = new WaveFileReader(file);
-        var waveFormat = reader.WaveFormat;
-        var aWeightingFilter = new DeviceBase.AWeightingFilter(reader.ToSampleProvider());
-
-        var samplesPerWindow = (int)(waveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
-        var buffer = new float[samplesPerWindow];
-
-        while (true)
-        {
-            var samplesRead = aWeightingFilter.Read(buffer, 0, buffer.Length);
-            if (samplesRead == 0) break;
-
-            var rms = Math.Sqrt(buffer.Take(samplesRead).Select(s => s * s).Average());
-            var db = 20 * Math.Log10(rms);
-
-            var level = Math.Max(db, Decibel.MinimumValue);
-            levels.Add((Decibel)level);
-        }
-
-        return levels;
+        return WaveFileAnalyzer.Analyze(file);
     }
 
     public void DeleteRecord(Record record)

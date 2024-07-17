@@ -24,8 +24,6 @@ public abstract partial class DeviceBase(
     [ObservableProperty] private bool _isConnected;
     public abstract VolumeLevel VolumeLevel { get; set; }
     [ObservableProperty] private Decibel _level = Decibel.Minimum;
-    private readonly List<Decibel> _levels = [];
-    public IReadOnlyList<Decibel> Levels => _levels;
 
     private IWaveIn? WaveIn { get; set; }
     private BufferedWaveProvider? BufferedWaveProvider { get; set; }
@@ -86,7 +84,6 @@ public abstract partial class DeviceBase(
         var level = (Decibel)db;
 
         Level = Decibel.Minimum <= level ? level : Decibel.Minimum;
-        _levels.Add(Level);
     }
 
     public abstract void StartMeasure();
@@ -104,7 +101,6 @@ public abstract partial class DeviceBase(
         waveIn.Dispose();
         BufferedWaveProvider = null;
         Filter = null;
-        _levels.Clear();
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
         Measure = false;
@@ -117,6 +113,7 @@ public abstract partial class DeviceBase(
         {
             StopMeasure();
         }
+        GC.SuppressFinalize(this);
     }
 
 

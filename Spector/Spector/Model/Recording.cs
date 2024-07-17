@@ -84,11 +84,13 @@ public class Recording
 
         private WaveFileWriter? Writer { get; set; }
 
+        private string FilePath => Path.Combine(directory.FullName, Record.RecordByDevice.ToFileName(device.Name));
+
         public void StartRecording()
         {
             cancellationToken.Register(StopRecording);
 
-            Writer = new WaveFileWriter(Path.Combine(directory.FullName, Record.RecordByDevice.ToFileName(device.Name)), device.WaveFormat);
+            Writer = new WaveFileWriter(FilePath, device.WaveFormat);
 
             device.DataAvailable += (_, e) =>
             {
@@ -134,16 +136,17 @@ public class Recording
 
         public Record.RecordByDevice ToRecord()
         {
+            var levels = WaveFileAnalyzer.Analyze(FilePath).ToArray();
             return new Record.RecordByDevice(
                 device.Id,
                 device.Name,
                 device.SystemName,
-                device.Levels.Min(),
-                new Decibel(device.Levels.Average(x => x.AsPrimitive())),
-                device.Levels.Max(),
-                (double)device.Levels.Count(x => -30d < x.AsPrimitive()) / device.Levels.Count,
-                (double)device.Levels.Count(x => -40d < x.AsPrimitive()) / device.Levels.Count,
-                (double)device.Levels.Count(x => -50d < x.AsPrimitive()) / device.Levels.Count);
+                levels.Min(),
+                new Decibel(levels.Average(x => x.AsPrimitive())),
+                levels.Max(),
+                (double)levels.Count(x => -30d < x.AsPrimitive()) / levels.Length,
+                (double)levels.Count(x => -40d < x.AsPrimitive()) / levels.Length,
+                (double)levels.Count(x => -50d < x.AsPrimitive()) / levels.Length);
         }
 
         public void Dispose()
