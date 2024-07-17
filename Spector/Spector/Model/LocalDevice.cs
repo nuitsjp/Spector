@@ -25,8 +25,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
         if (Measure)
         {
-            var waveIn = CreateWaveIn();
-            StartMeasure(waveIn);
+            StartMeasure(CreateWaveIn());
         }
     }
 
@@ -107,7 +106,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
                 }
                 else if (closestMatch != null)
                 {
-                    yield return format;
+                    yield return closestMatch;
                 }
             }
         }
