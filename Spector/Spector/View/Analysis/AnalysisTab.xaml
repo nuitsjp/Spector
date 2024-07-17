@@ -33,8 +33,7 @@
                       Height="200"
                       Margin="5"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      Loaded="RecordGrid_OnLoaded"
-                      SourceUpdated="FrameworkElement_OnSourceUpdated">
+                      Loaded="RecordGrid_OnLoaded">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Time" Binding="{Binding StartTime, StringFormat=yyyy/MM/dd HH:mm}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Device" Binding="{Binding DeviceName}" IsReadOnly="True"/>

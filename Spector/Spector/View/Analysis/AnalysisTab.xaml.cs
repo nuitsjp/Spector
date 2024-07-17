@@ -17,16 +17,7 @@ namespace Spector.View.Analysis
 
         private void RecordGrid_OnLoaded(object sender, RoutedEventArgs e)
         {
-            SetupSort((DataGrid)sender);
-        }
-
-        private void FrameworkElement_OnSourceUpdated(object sender, DataTransferEventArgs e)
-        {
-            SetupSort((DataGrid)sender);
-        }
-
-        private void SetupSort(DataGrid dataGrid)
-        {
+            var dataGrid = (DataGrid)sender;
             var dataFlow = dataGrid.Columns[0]; // 0番目の列（DataFlow列）を指定
             dataGrid.Items.SortDescriptions.Clear();
             dataGrid.Items.SortDescriptions.Add(new SortDescription(dataFlow.SortMemberPath, ListSortDirection.Descending));
