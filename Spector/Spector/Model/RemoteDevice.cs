@@ -64,11 +64,10 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
     public bool Connect { get; set; } = true;
 
 
-    public override Task DisconnectAsync()
+    public override void Disconnect()
     {
         StopMeasure();
         Dispose();
-        return Task.CompletedTask;
     }
 
 

@@ -29,7 +29,7 @@ public abstract partial class DeviceBase(
     private AWeightingFilter? Filter { get; set; }
     private int BytesPerSample { get; set; }
 
-    public abstract Task DisconnectAsync();
+    public abstract void Disconnect();
 
     protected void StartMeasure(IWaveIn waveIn)
     {

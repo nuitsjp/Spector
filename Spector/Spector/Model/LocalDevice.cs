@@ -61,30 +61,33 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         RemoteDeviceClient
             .RemoteCommandObservable
             .Subscribe(
-                onNext: command =>
-                {
-                    switch (command)
-                    {
-                        case RemoteCommand.StartPlayLooping:
-                            PlayLoopingCancellationTokenSource = new CancellationTokenSource();
-                            PlayLooping(PlayLoopingCancellationTokenSource.Token);
-                            break;
-                        case RemoteCommand.StopPlayLooping:
-                            PlayLoopingCancellationTokenSource.Cancel();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(command), command, null);
-                    }
-                },
-                onCompleted: () =>
-                {
-                    DisconnectAsync();
-                })
+                onNext: OnReceiveRemoteCommand,
+                onCompleted: Disconnect)
             .AddTo(CompositeDisposable);
         IsConnected = true;
         return RemoteDeviceClient.ConnectAsync(address, AudioInterface.RemotePort);
     }
 
+    private void OnReceiveRemoteCommand(RemoteCommand command)
+    {
+        switch (command)
+        {
+            case RemoteCommand.StartPlayLooping:
+                PlayLoopingCancellationTokenSource = new CancellationTokenSource();
+                PlayLooping(PlayLoopingCancellationTokenSource.Token);
+                break;
+            case RemoteCommand.StopPlayLooping:
+                PlayLoopingCancellationTokenSource.Cancel();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(command), command, null);
+        }
+    }
+
+    /// <summary>
+    /// 有効はWaveFormatを取得する。
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<WaveFormat> GetAvailableWaveFormats()
     {
         // 一般的なサンプルレートとビット深度の組み合わせをチェック
@@ -111,11 +114,10 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         }
     }
 
-    public override Task DisconnectAsync()
+    public override void Disconnect()
     {
         RemoteDeviceClient?.Disconnect();
         IsConnected = false;
-        return Task.CompletedTask;
     }
 
     public sealed override void StartMeasure()
@@ -134,7 +136,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
 
-        DisconnectAsync();
+        Disconnect();
         base.StopMeasure();
     }
 

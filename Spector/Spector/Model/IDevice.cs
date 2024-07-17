@@ -31,7 +31,7 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     /// </summary>
     Decibel Level { get; }
 
-    Task DisconnectAsync();
+    void Disconnect();
 
     void StartMeasure();
     void StopMeasure();

@@ -77,7 +77,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
         }
         else
         {
-            localDevice.DisconnectAsync();
+            localDevice.Disconnect();
         }
     }
 
