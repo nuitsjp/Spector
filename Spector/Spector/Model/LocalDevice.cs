@@ -25,7 +25,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
         if (Measure)
         {
-            StartMeasure(CreateWaveIn());
+            StartMeasure();
         }
     }
 
@@ -118,9 +118,15 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         return Task.CompletedTask;
     }
 
-    public override void StartMeasure()
+    public sealed override void StartMeasure()
     {
-        StartMeasure(CreateWaveIn());
+        var waveIn =
+            (MmDevice.DataFlow == DataFlow.Capture
+                ? new WasapiCapture(MmDevice)
+                : new WasapiLoopbackCapture(MmDevice))
+            .AddTo(CompositeDisposable);
+        waveIn.WaveFormat = WaveFormat;
+        StartMeasure(waveIn);
     }
 
     public override void StopMeasure()
@@ -174,21 +180,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         // 出力に入力を接続して再生を開始する。
         wavePlayer.Init(waveStream);
         wavePlayer.Play();
-    }
-
-    private WasapiCapture CreateWaveIn()
-    {
-        var waveIn =
-            (MmDevice.DataFlow == DataFlow.Capture
-                ? new WasapiCapture(MmDevice)
-                : new WasapiLoopbackCapture(MmDevice))
-            .AddTo(CompositeDisposable);
-
-        waveIn.WaveFormat = WaveFormat;
-        // 上で設定したフォーマットが反映されないことがあるため、その場合はWaveInのフォーマットを使用する
-        WaveFormat = waveIn.WaveFormat;
-
-        return waveIn;
     }
 
     public override void Dispose()
