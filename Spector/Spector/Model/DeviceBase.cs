@@ -27,7 +27,6 @@ public abstract partial class DeviceBase(
     public Decibel Level { get; private set; } = Decibel.Minimum;
 
     private IWaveIn? WaveIn { get; set; }
-    private BufferedWaveProvider? BufferedWaveProvider { get; set; }
     private AWeightingFilter? Filter { get; set; }
     private int BytesPerSample { get; set; }
 
@@ -43,8 +42,9 @@ public abstract partial class DeviceBase(
 
         WaveIn = waveIn;
         BytesPerSample = WaveIn.WaveFormat.BitsPerSample / 8;
-        BufferedWaveProvider = new BufferedWaveProvider(WaveIn.WaveFormat);
-        Filter = new AWeightingFilter(BufferedWaveProvider.ToSampleProvider());
+
+        var sampleProvider = new WaveInProvider(waveIn).ToSampleProvider();
+        Filter = new AWeightingFilter(sampleProvider);
 
         WaveIn.DataAvailable += OnDataAvailable;
         WaveIn.RecordingStopped += (_, _) => StopMeasure();
@@ -59,30 +59,28 @@ public abstract partial class DeviceBase(
         // WaveInがnullの場合、すれ違いで停止されているため、処理を中断する。
         if (WaveIn is null) return;
 
-        if (BufferedWaveProvider is null) throw new InvalidOperationException($"{nameof(BufferedWaveProvider)} is not initialized.");
         if (Filter is null) throw new InvalidOperationException($"{nameof(Filter)} is not initialized.");
 
         if (e.BytesRecorded == 0) return;
 
         DataAvailable?.Invoke(sender, e);
 
-        BufferedWaveProvider!.AddSamples(e.Buffer, 0, e.BytesRecorded);
+        float[] buffer = new float[e.BytesRecorded / BytesPerSample];
+        int samplesRead = Filter.Read(buffer, 0, buffer.Length);
 
-        var floatBuffer = new float[e.BytesRecorded / BytesPerSample];
-
-        ConvertToFloat(e.Buffer, floatBuffer, e.BytesRecorded);
-
-        var samplesRead = Filter.Read(floatBuffer, 0, floatBuffer.Length);
-
-        double sumSquares = 0;
-        for (var i = 0; i < samplesRead; i++)
+        // 音量計算（RMS値）
+        double sum = 0;
+        int validSamples = 0;
+        for (int i = 0; i < samplesRead; i++)
         {
-            sumSquares += floatBuffer[i] * floatBuffer[i];
+            if (!float.IsNaN(buffer[i]) && !float.IsInfinity(buffer[i]))
+            {
+                sum += buffer[i] * buffer[i];
+                validSamples++;
+            }
         }
-
-        var rms = Math.Sqrt(sumSquares / samplesRead);
-        var db = 20 * Math.Log10(rms);
-        var level = (Decibel)db;
+        double rms = (validSamples > 0) ? Math.Sqrt(sum / validSamples) : 0;
+        var level = (Decibel)((rms > 0) ? 20 * Math.Log10(rms) : -100);
 
         Level = Decibel.Minimum <= level ? level : Decibel.Minimum;
     }
@@ -100,7 +98,6 @@ public abstract partial class DeviceBase(
         waveIn.DataAvailable -= OnDataAvailable;
         waveIn.StopRecording();
         waveIn.Dispose();
-        BufferedWaveProvider = null;
         Filter = null;
         // 停止したあとLevelが更新されなくなる。計測を停止しているため最小音量で更新しておく。
         Level = Decibel.Minimum;
