@@ -21,7 +21,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         Measure = measure;
 
         AvailableWaveFormats = GetAvailableWaveFormats().ToList();
-        WaveFormat = mmDevice.AudioClient.MixFormat;
+        WaveFormat = AvailableWaveFormats.Last();
 
         if (Measure)
         {
@@ -32,7 +32,7 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
     private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
 
-    public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
+    public sealed override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
 
 
     public override bool Connectable => true;
@@ -90,23 +90,22 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         // 一般的なサンプルレートとビット深度の組み合わせをチェック
         int[] sampleRates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 96000];
         int[] bitDepths = [8, 16, 24, 32];
+        int[] channels = [1, 2];
 
+        using var audioClient = MmDevice.AudioClient;
         foreach (var sampleRate in sampleRates)
         {
             foreach (var bitDepth in bitDepths)
             {
-                var format = new WaveFormat(sampleRate, bitDepth, MmDevice.AudioClient.MixFormat.Channels);
+                foreach (var channel in channels)
+                {
+                    var format = new WaveFormat(sampleRate, bitDepth, channel);
 
-                // AudioClientを使用してフォーマットがサポートされているかチェック
-                using var audioClient = MmDevice.AudioClient;
-                var isSupported = audioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out var closestMatch);
-                if (isSupported)
-                {
-                    yield return format;
-                }
-                else if (closestMatch != null)
-                {
-                    yield return closestMatch;
+                    // AudioClientを使用してフォーマットがサポートされているかチェック
+                    if (audioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out _))
+                    {
+                        yield return format;
+                    }
                 }
             }
         }
