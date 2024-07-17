@@ -22,7 +22,7 @@ public abstract partial class DeviceBase(
     public abstract bool Connectable { get; }
     [ObservableProperty] private bool _isConnected;
     public abstract VolumeLevel VolumeLevel { get; set; }
-    [ObservableProperty] private Decibel _level = Decibel.Minimum;
+    public Decibel Level { get; private set; } = Decibel.Minimum;
 
     private IWaveIn? WaveIn { get; set; }
     private BufferedWaveProvider? BufferedWaveProvider { get; set; }

@@ -30,7 +30,10 @@ public static class CurrentDispatcher
     /// <returns></returns>
     public static void Invoke(Action action)
     {
-        Dispatcher.Invoke(action);
+        if (Dispatcher.HasShutdownStarted is false)
+        {
+            Dispatcher.Invoke(action);
+        }
     }
 
 }

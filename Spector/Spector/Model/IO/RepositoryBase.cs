@@ -11,20 +11,24 @@ public abstract class RepositoryBase<T> where T : class
     {
         using (await Lock.LockAsync())
         {
-            if (fileInfo.Exists is false)
+            return await LoadInnerAsync();
+            async Task<T> LoadInnerAsync()
             {
-                await SaveInnerAsync(fileInfo, getDefault());
-            }
+                if (fileInfo.Exists is false)
+                {
+                    await SaveInnerAsync(fileInfo, getDefault());
+                }
 
-            try
-            {
-                await using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-                return (await JsonSerializer.DeserializeAsync<T>(stream, JsonEnvironments.Options))!;
-            }
-            catch
-            {
-                fileInfo.Delete();
-                return await LoadAsync(fileInfo, getDefault);
+                try
+                {
+                    await using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+                    return (await JsonSerializer.DeserializeAsync<T>(stream, JsonEnvironments.Options))!;
+                }
+                catch
+                {
+                    fileInfo.Delete();
+                    return await LoadInnerAsync();
+                }
             }
         }
     }
