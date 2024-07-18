@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
@@ -14,6 +15,8 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     public DeviceViewModel(IDevice device)
     {
         Device = device;
+        WaveFormats = device.AvailableWaveFormats;
+        SelectedWaveFormat = WaveFormats.Last();
         CompositeDisposable.Add(Device);
 
         // デバイス名を同期する
@@ -97,6 +100,10 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     public string SystemName => Device.SystemName;
 
     [ObservableProperty] private bool _measure;
+
+    public IReadOnlyList<WaveFormat> WaveFormats { get; }
+
+    [ObservableProperty] private WaveFormat _selectedWaveFormat;
 
     [ObservableProperty] private float _volumeLevel;
     [ObservableProperty] private bool _connect;
