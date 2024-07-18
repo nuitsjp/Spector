@@ -24,10 +24,10 @@ public partial struct Decibel
 #region Direction
 public enum Direction
 {
-    Front,
-    Right,
-    Rear,
-    Left
+    R0 = 0,
+    R90 = 90,
+    R180 = 180,
+    R270 = 270,
 }
 #endregion
 

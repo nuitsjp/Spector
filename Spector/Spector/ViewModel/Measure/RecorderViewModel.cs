@@ -30,7 +30,7 @@ public partial class RecorderViewModel(
 
     [ObservableProperty] private IDevice? _playbackDevice;
 
-    public Direction SelectedDirection { get; set; } = Direction.Front;
+    public Direction SelectedDirection { get; set; } = Direction.R0;
 
     [ObservableProperty] private bool _withVoice;
     [ObservableProperty] private bool _withBuzz;
