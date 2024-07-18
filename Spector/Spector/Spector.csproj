@@ -16,6 +16,7 @@
 	  <None Remove="View\LoadingPage.xaml" />
 	  <None Remove="View\MainPage.xaml" />
 	  <None Remove="View\MeasureTab.xaml" />
+	  <None Remove="View\Measure\DeviceDetail.xaml" />
 	  <None Remove="View\Recorder.xaml" />
 	  <None Remove="View\Style\Generic.xaml" />
 	</ItemGroup>

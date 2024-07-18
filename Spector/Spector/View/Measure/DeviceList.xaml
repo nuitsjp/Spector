@@ -16,6 +16,7 @@
                 <DataGridTextColumn Header="DataFlow" Binding="{Binding DataFlow}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="(SystemName)" Binding="{Binding SystemName}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Wave Format" Binding="{Binding SelectedWaveFormat}" IsReadOnly="True"/>
                 <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
