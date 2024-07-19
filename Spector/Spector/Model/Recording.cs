@@ -117,22 +117,19 @@ public class Recording
         {
             IsStopped = true;
             BufferQueue.CompleteAdding();
+
+            Writer?.Flush();
+            Writer?.Dispose();
         }
 
         private void ProcessQueue()
         {
-            try
+            foreach (var buffer in BufferQueue.GetConsumingEnumerable())
             {
-                foreach (var buffer in BufferQueue.GetConsumingEnumerable())
-                {
-                    // データの処理
-                    Writer?.Write(buffer, 0, buffer.Length);
-                }
-            }
-            finally
-            {
-                Writer?.Flush();
-                Writer?.Dispose();
+                if (IsStopped) break;
+
+                // データの処理
+                Writer?.Write(buffer, 0, buffer.Length);
             }
         }
 
