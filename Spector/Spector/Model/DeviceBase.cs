@@ -16,7 +16,6 @@ public abstract partial class DeviceBase(
 
     public DeviceId Id { get; } = id;
     public DataFlow DataFlow { get; } = dataFlow;
-    public abstract IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
     [ObservableProperty] private WaveFormat _waveFormat = default!;
     [ObservableProperty] private string _name = name;
     public string SystemName { get; } = systemName;

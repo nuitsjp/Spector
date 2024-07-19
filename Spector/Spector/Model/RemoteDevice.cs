@@ -51,14 +51,12 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
     {
         WaveFormat = waveFormat;
         WaveIn = writer.AddTo(CompositeDisposable);
-        AvailableWaveFormats = [waveFormat];
     }
 
     private TcpWaveIn WaveIn { get; }
 
     private CompositeDisposable CompositeDisposable { get; } = [];
 
-    public override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
     public override bool Connectable => false;
     public override VolumeLevel VolumeLevel { get; set; }
     public bool Connect { get; set; } = true;

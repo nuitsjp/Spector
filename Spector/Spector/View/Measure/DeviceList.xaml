@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:view="clr-namespace:Spector.View"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
@@ -13,37 +14,9 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   Background="Transparent">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="DataFlow" SortMemberPath="DataFlow">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding DataFlow}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="Name" SortMemberPath="Name">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"
-                                       Margin="0"
-                                       Padding="0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0"
-                                     Padding="0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Wave Format">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding WaveFormat}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <materialDesign:DataGridTextColumn Header="DataFlow" Binding="{Binding DataFlow}" IsReadOnly="True"/>
+                <materialDesign:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <materialDesign:DataGridTextColumn Header="Wave Format" Binding="{Binding WaveFormat}" IsReadOnly="True"/>
 
                 <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
@@ -55,13 +28,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Volume Level" SortMemberPath="VolumeLevel">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding VolumeLevel}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <materialDesign:DataGridTextColumn Header="Volume Level" Binding="{Binding VolumeLevel}"/>
 
                 <DataGridTemplateColumn IsReadOnly="True" Header="Connect" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>

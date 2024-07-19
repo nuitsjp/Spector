@@ -22,7 +22,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         MmDevice = mmDevice.AddTo(CompositeDisposable);
         Measure = measure;
 
-        AvailableWaveFormats = GetAvailableWaveFormats().ToList();
         using var waveIn = CreateWaveIn();
         WaveFormat = waveIn.WaveFormat;
 
@@ -34,9 +33,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
     private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
-
-    public sealed override IReadOnlyList<WaveFormat> AvailableWaveFormats { get; }
-
 
     public override bool Connectable => true;
 
@@ -84,36 +80,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(command), command, null);
-        }
-    }
-
-    /// <summary>
-    /// 有効はWaveFormatを取得する。
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerable<WaveFormat> GetAvailableWaveFormats()
-    {
-        // 一般的なサンプルレートとビット深度の組み合わせをチェック
-        int[] sampleRates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 96000];
-        int[] bitDepths = [8, 16, 24, 32];
-        int[] channels = [1, 2];
-
-        using var audioClient = MmDevice.AudioClient;
-        foreach (var sampleRate in sampleRates)
-        {
-            foreach (var bitDepth in bitDepths)
-            {
-                foreach (var channel in channels)
-                {
-                    var format = new WaveFormat(sampleRate, bitDepth, channel);
-
-                    // AudioClientを使用してフォーマットがサポートされているかチェック
-                    if (audioClient.IsFormatSupported(AudioClientShareMode.Shared, format, out _))
-                    {
-                        yield return format;
-                    }
-                }
-            }
         }
     }
 
