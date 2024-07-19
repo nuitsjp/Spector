@@ -40,12 +40,17 @@
                 <DataGridTemplateColumn Header="Wave Format">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
+                            <TextBlock Text="{Binding SelectedWaveFormat}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
                             <ComboBox ItemsSource="{Binding WaveFormats}"
                                       SelectedItem="{Binding SelectedWaveFormat}"
                                       Margin="0"
                                       Padding="0"/>
                         </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
