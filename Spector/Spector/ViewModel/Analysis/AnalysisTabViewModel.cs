@@ -1,18 +1,18 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentTextTable;
 using Kamishibai;
-using NAudio.Wave;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
 using Spector.Model;
+using Spector.View.Measure;
+using Recorder = Spector.Model.Recorder;
 
 namespace Spector.ViewModel.Analysis;
 
@@ -20,13 +20,12 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
 {
     public AnalysisTabViewModel(
         [Inject] IPresentationService presentationService,
-        Recorder recorder)
+        Model.Recorder recorder)
     {
         PresentationService = presentationService;
         Recorder = recorder;
 
-        PropertyChanging += OnPropertyChanging;
-        PropertyChanged += OnPropertyChanged;
+        Records.CollectionChanged += RecordsOnCollectionChanged;
 
         UpdateRecords();
         recorder.Records.ToCollectionChanged()
@@ -39,6 +38,31 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                 DeleteRecordCommand.NotifyCanExecuteChanged();
             })
             .AddTo(CompositeDisposable);
+    }
+
+    private void RecordsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems is not null)
+        {
+            foreach (RecordViewModel record in e.NewItems)
+            {
+                foreach (var device in record.RecordByDevices)
+                {
+                    device.PropertyChanged += DeviceOnPropertyChanged;
+                }
+            }
+        }
+
+        if (e.OldItems is not null)
+        {
+            foreach (RecordViewModel record in e.OldItems)
+            {
+                foreach (var device in record.RecordByDevices)
+                {
+                    device.PropertyChanged -= DeviceOnPropertyChanged;
+                }
+            }
+        }
     }
 
     private CompositeDisposable CompositeDisposable { get; } = new();
@@ -86,33 +110,6 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             })
             .ToList()
             .ForEach(x => Records.Add(x));
-    }
-
-    private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)
-    {
-        if (e.PropertyName != nameof(Records)) return;
-
-        foreach (var record in Records)
-        {
-            foreach (var device in record.RecordByDevices)
-            {
-                device.PropertyChanged -= DeviceOnPropertyChanged;
-            }
-        }
-        AnalysisDevices.Clear();
-    }
-
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(Records)) return;
-
-        foreach (var record in Records)
-        {
-            foreach (var device in record.RecordByDevices)
-            {
-                device.PropertyChanged += DeviceOnPropertyChanged;
-            }
-        }
     }
 
     private void DeviceOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
