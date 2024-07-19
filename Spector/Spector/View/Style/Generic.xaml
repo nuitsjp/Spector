@@ -27,7 +27,7 @@
 
     <!-- ComboBox -->
     <Style x:Key="ComboBoxBase" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignFloatingHintComboBox}">
-        <Setter Property="Margin" Value="5" />
+        <Setter Property="Margin" Value="5, 0" />
     </Style>
 
     <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxBase}" />

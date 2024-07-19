@@ -42,11 +42,11 @@
 
         <!-- 音声 -->
         <CheckBox Content="With Voice" IsChecked="{Binding WithVoice}"
-                      Margin="5"/>
+                  Margin="5, 0"/>
 
         <!-- 騒音 -->
         <CheckBox Content="With Buzz" IsChecked="{Binding WithBuzz}"
-                      Margin="5"/>
+                  Margin="5, 0"/>
 
         <!-- 録音ボタン -->
         <Button materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRecording}"

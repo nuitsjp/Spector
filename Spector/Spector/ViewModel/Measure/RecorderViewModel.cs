@@ -87,6 +87,7 @@ public partial class RecorderViewModel(
             });
         };
         PlaybackDevices.CollectionChanged += (_, _) => { PlaybackDevice ??= PlaybackDevices.FirstOrDefault(); };
+        PlaybackDevice = PlaybackDevices.FirstOrDefault();
 
         var settings = await settingsRepository.LoadAsync();
         RecordingSpan = settings.Recorder.RecordingSpan;
