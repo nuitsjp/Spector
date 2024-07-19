@@ -30,7 +30,6 @@ public class Recording
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
     private IReadOnlyList<IDevice> Devices { get; }
-    private CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <summary>
     /// 録音中のデバイス
@@ -47,7 +46,7 @@ public class Recording
             new DirectoryInfo(Path.Combine(RootDirectory.FullName, Record.ToDirectoryName(StartTime)))
                 .CreateIfNotExists();
         RecorderByDevices = Devices
-            .Select(x => new RecordingByDevice(x, CurrentRecordDirectory, CancellationTokenSource.Token))
+            .Select(x => new RecordingByDevice(x, CurrentRecordDirectory))
             .ToArray();
         foreach (var device in RecorderByDevices)
         {
@@ -57,7 +56,10 @@ public class Recording
 
     public Record StopRecording()
     {
-        CancellationTokenSource.Cancel();
+        foreach (var device in RecorderByDevices)
+        {
+            device.StopRecording();
+        }
         var record = new Record(
             MeasureDeviceId,
             Direction,
@@ -75,10 +77,7 @@ public class Recording
         return record;
     }
 
-    private class RecordingByDevice(
-        IDevice device, 
-        DirectoryInfo directory,
-        CancellationToken cancellationToken) : IDisposable
+    private class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDisposable
     {
         private BlockingCollection<byte[]> BufferQueue { get; } = [];
 
@@ -86,9 +85,11 @@ public class Recording
 
         private string FilePath => Path.Combine(directory.FullName, Record.RecordByDevice.ToFileName(device.Name));
 
+        private bool IsStopped { get; set; } = true;
+
         public void StartRecording()
         {
-            cancellationToken.Register(StopRecording);
+            IsStopped = false;
 
             Writer = new WaveFileWriter(FilePath, device.WaveFormat);
 
@@ -97,7 +98,7 @@ public class Recording
                 var buffer = new byte[e.BytesRecorded];
                 Array.Copy(e.Buffer, buffer, e.BytesRecorded);
 
-                if (cancellationToken.IsCancellationRequested) return;
+                if (IsStopped) return;
 
                 try
                 {
@@ -112,8 +113,9 @@ public class Recording
             Task.Run(ProcessQueue);
         }
 
-        private void StopRecording()
+        public void StopRecording()
         {
+            IsStopped = true;
             BufferQueue.CompleteAdding();
         }
 

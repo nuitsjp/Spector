@@ -65,7 +65,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         }
     }
 
-    private CompositeDisposable CompositeDisposable { get; } = new();
+    private CompositeDisposable CompositeDisposable { get; } = [];
     private IPresentationService PresentationService { get; }
     private Recorder Recorder { get; }
     public ReactiveCollection<RecordViewModel> Records { get; } = [];
@@ -194,5 +194,6 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         CompositeDisposable.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
