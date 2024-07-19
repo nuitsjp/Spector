@@ -13,9 +13,41 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   Background="Transparent">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="DataFlow" Binding="{Binding DataFlow}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="Wave Format" Binding="{Binding SelectedWaveFormat}" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="DataFlow" SortMemberPath="DataFlow">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DataFlow}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Name" SortMemberPath="Name">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"
+                                       Margin="0"
+                                       Padding="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0"
+                                     Padding="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Wave Format">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding WaveFormats}"
+                                      SelectedItem="{Binding SelectedWaveFormat}"
+                                      Margin="0"
+                                      Padding="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTemplateColumn IsReadOnly="True" Header="Measure" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -25,7 +57,15 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Volume Level" Binding="{Binding VolumeLevel}"/>
+
+                <DataGridTemplateColumn Header="Volume Level" SortMemberPath="VolumeLevel">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding VolumeLevel}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTemplateColumn IsReadOnly="True" Header="Connect" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

@@ -17,14 +17,7 @@
         
         <measure:Recorder/>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <measure:DeviceList />
-            <measure:DeviceDetail Grid.Column="1"/>
-        </Grid>
+        <measure:DeviceList Grid.Row="1"/>
 
         <measure:AudioInterfaceChart Grid.Row="2"
                                   AudioInterface="{Binding MeasureTabViewModel.AudioInterfaceViewModel}"/>
