@@ -23,7 +23,8 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         Measure = measure;
 
         AvailableWaveFormats = GetAvailableWaveFormats().ToList();
-        WaveFormat = AvailableWaveFormats.Last();
+        using var waveIn = CreateWaveIn();
+        WaveFormat = waveIn.WaveFormat;
 
         if (Measure)
         {
@@ -125,14 +126,16 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
     public sealed override void StartMeasure()
     {
-        var waveIn =
-            (MmDevice.DataFlow == DataFlow.Capture
-                ? new WasapiCapture(MmDevice)
-                : new WasapiLoopbackCapture(MmDevice))
-            .AddTo(CompositeDisposable);
+        var waveIn = CreateWaveIn();
         waveIn.WaveFormat = WaveFormat;
         StartMeasure(waveIn);
     }
+
+    private WasapiCapture CreateWaveIn()
+        => (MmDevice.DataFlow == DataFlow.Capture
+                ? new WasapiCapture(MmDevice)
+                : new WasapiLoopbackCapture(MmDevice))
+            .AddTo(CompositeDisposable);
 
     public override void StopMeasure()
     {

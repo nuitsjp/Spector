@@ -15,8 +15,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
     public DeviceViewModel(IDevice device)
     {
         Device = device;
-        WaveFormats = device.AvailableWaveFormats;
-        SelectedWaveFormat = WaveFormats.Last();
+        WaveFormat = device.WaveFormat;
         CompositeDisposable.Add(Device);
 
         // デバイス名を同期する
@@ -101,9 +100,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private bool _measure;
 
-    public IReadOnlyList<WaveFormat> WaveFormats { get; }
-
-    [ObservableProperty] private WaveFormat _selectedWaveFormat;
+    public WaveFormat WaveFormat { get; }
 
     [ObservableProperty] private float _volumeLevel;
     [ObservableProperty] private bool _connect;
