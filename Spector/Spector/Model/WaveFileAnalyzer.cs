@@ -10,7 +10,7 @@ public static class WaveFileAnalyzer
         var waveFormat = reader.WaveFormat;
         var aWeightingFilter = new AWeightingFilter(reader.ToSampleProvider());
 
-        var samplesPerWindow = (int)(waveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds);
+        var samplesPerWindow = (int)(waveFormat.SampleRate * RecordingConfig.Default.RefreshRate.Interval.TotalSeconds * waveFormat.Channels);
         var buffer = new float[samplesPerWindow];
 
         while (true)
