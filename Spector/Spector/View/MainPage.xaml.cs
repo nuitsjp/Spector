@@ -16,4 +16,5 @@ public partial class MainPage
 public class DesignTimeMainPageViewModel() :
     MainPageViewModel(
         default!,
+        default!,
         default!);

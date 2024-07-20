@@ -196,7 +196,7 @@ public partial class RecorderViewModel(
             settings with
             {
                 RecorderHost = RecorderHost,
-                Recorder = new Settings.RecorderSettings(RecordingSpan, settings.Recorder.OutputDirectory, WithVoice, WithBuzz)
+                Recorder = new Model.Settings.RecorderSettings(RecordingSpan, settings.Recorder.OutputDirectory, WithVoice, WithBuzz)
             });
     }
 

@@ -17,6 +17,7 @@
 	  <None Remove="View\MainPage.xaml" />
 	  <None Remove="View\MeasureTab.xaml" />
 	  <None Remove="View\Recorder.xaml" />
+	  <None Remove="View\Settings\SettingsTab.xaml" />
 	  <None Remove="View\Style\Generic.xaml" />
 	</ItemGroup>
 
