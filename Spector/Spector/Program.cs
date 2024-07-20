@@ -10,6 +10,17 @@ using Spector.ViewModel;
 using Spector.ViewModel.Analysis;
 using Spector.ViewModel.Measure;
 
+if (Firewall.IsAdd(args))
+{
+    Firewall.AddRule();
+    return;
+}
+if (Firewall.IsRemove(args))
+{
+    Firewall.RemoveRule();
+    return;
+}
+
 // Create a builder by specifying the application and main window.
 var builder = KamishibaiApplication<App, MainWindow>.CreateBuilder();
 

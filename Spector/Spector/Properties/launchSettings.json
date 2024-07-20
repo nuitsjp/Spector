@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Spector": {
+      "commandName": "Project",
+      "commandLineArgs": "--remove-firewall"
+    }
+  }
+}
