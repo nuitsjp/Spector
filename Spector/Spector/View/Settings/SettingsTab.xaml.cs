@@ -8,6 +8,14 @@
         public SettingsTab()
         {
             InitializeComponent();
+            DataContextChanged += (sender, args) =>
+            {
+
+            };
+            FooGrid.DataContextChanged += (sender, args) =>
+            {
+
+            };
         }
     }
 }

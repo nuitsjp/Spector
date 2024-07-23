@@ -7,7 +7,9 @@
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid DataContext="{Binding SettingsTabViewModel}">
+    <Grid DataContext="{Binding SettingsTabViewModel}"
+          x:Name="FooGrid"
+          Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -22,13 +24,14 @@
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
             <StackPanel.Resources>
                 <ResourceDictionary>
-                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-
+                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                        <Setter Property="Margin" Value="5"/>
+                        <Setter Property="Width" Value="130"/>
                     </Style>
                 </ResourceDictionary>
             </StackPanel.Resources>
-            <Button Content="Add Rule" Command="{Binding AddRuleCommand}" Style="{StaticResource MaterialDesignRaisedButton}"/>
-            <Button Content="Remove Rule" Command="{Binding RemoveRuleCommand}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+            <Button Content="Add Rule" Command="{Binding AddRuleCommand}" />
+            <Button Content="Remove Rule" Command="{Binding RemoveRuleCommand}" />
         </StackPanel>
     </Grid>
 </UserControl>
