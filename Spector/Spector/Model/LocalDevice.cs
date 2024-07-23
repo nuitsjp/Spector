@@ -24,6 +24,12 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
         using var waveIn = CreateWaveIn();
         WaveFormat = waveIn.WaveFormat;
+        if (WaveFormat.SampleRate == 44_100)
+        {
+            // TODO: 44.1kHzの場合、現状の実装だとなぜかWaveFileReaderから正しく読み取れないため
+            // 一時的に48kHzに変換する
+            WaveFormat = new WaveFormat(48_000, WaveFormat.BitsPerSample, WaveFormat.Channels);
+        }
 
         if (Measure)
         {
