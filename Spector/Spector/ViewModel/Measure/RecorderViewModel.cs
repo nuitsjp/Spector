@@ -150,6 +150,11 @@ public partial class RecorderViewModel(
         RecordTimer.Tick += (_, _) => StopRecording();
         RecordTimer.Start();
 
+        if (WithBuzz)
+        {
+            StartPlayback();
+        }
+
         IsRecording = true;
     }
 
@@ -162,6 +167,7 @@ public partial class RecorderViewModel(
 
         // 録音タイマーを停止する
         RecordTimer.Stop();
+        StopPlayback();
 
         IsRecording = false;
         RecordingProgress = 0;
@@ -173,20 +179,30 @@ public partial class RecorderViewModel(
     {
         if (playBack)
         {
-            if (PlaybackDevice is null)
-            {
-                IsPlaying = false;
-                return;
-            }
-
-            PlayBackCancellationTokenSource = new();
-            PlaybackDevice.PlayLooping(PlayBackCancellationTokenSource.Token);
+            StartPlayback();
         }
         else
         {
-            PlayBackCancellationTokenSource.Cancel();
+            StopPlayback();
         }
 
+    }
+
+    private void StartPlayback()
+    {
+        if (PlaybackDevice is null)
+        {
+            IsPlaying = false;
+            return;
+        }
+
+        PlayBackCancellationTokenSource = new();
+        PlaybackDevice.PlayLooping(PlayBackCancellationTokenSource.Token);
+    }
+
+    private void StopPlayback()
+    {
+        PlayBackCancellationTokenSource.Cancel();
     }
 
     private async void OnUpdated()
