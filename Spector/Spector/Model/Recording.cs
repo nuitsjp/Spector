@@ -136,16 +136,27 @@ public class Recording
         public Record.RecordByDevice ToRecord()
         {
             var levels = WaveFileAnalyzer.Analyze(FilePath).ToArray();
-            return new Record.RecordByDevice(
-                device.Id,
-                device.Name,
-                device.SystemName,
-                levels.Min(),
-                new Decibel(levels.Average(x => x.AsPrimitive())),
-                levels.Max(),
-                (double)levels.Count(x => -30d < x.AsPrimitive()) / levels.Length,
-                (double)levels.Count(x => -40d < x.AsPrimitive()) / levels.Length,
-                (double)levels.Count(x => -50d < x.AsPrimitive()) / levels.Length);
+            return levels.Any()
+                ? new Record.RecordByDevice(
+                    device.Id,
+                    device.Name,
+                    device.SystemName,
+                    levels.Min(),
+                    new Decibel(levels.Average(x => x.AsPrimitive())),
+                    levels.Max(),
+                    (double)levels.Count(x => -30d < x.AsPrimitive()) / levels.Length,
+                    (double)levels.Count(x => -40d < x.AsPrimitive()) / levels.Length,
+                    (double)levels.Count(x => -50d < x.AsPrimitive()) / levels.Length)
+                : new Record.RecordByDevice(
+                    device.Id,
+                    device.Name,
+                    device.SystemName,
+                    Decibel.Minimum,
+                    Decibel.Minimum,
+                    Decibel.Minimum,
+                    0,
+                    0,
+                    0);
         }
 
         public void Dispose()
