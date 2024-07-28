@@ -25,9 +25,13 @@ public partial struct Decibel
 public enum Direction
 {
     R0 = 0,
+    R45 = 45,
     R90 = 90,
+    R135 = 135,
     R180 = 180,
+    R225 = 225,
     R270 = 270,
+    R315 = 315,
 }
 #endregion
 
