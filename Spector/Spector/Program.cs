@@ -8,6 +8,7 @@ using Spector.View;
 using Spector.View.Measure;
 using Spector.ViewModel;
 using Spector.ViewModel.Analysis;
+using Spector.ViewModel.Calibration;
 using Spector.ViewModel.Measure;
 using Spector.ViewModel.Settings;
 
@@ -33,6 +34,7 @@ builder.Services.AddPresentation<MainPage, MainPageViewModel>();
 // ViewModel
 builder.Services.AddSingleton<MeasureTabViewModel>();
 builder.Services.AddSingleton<AnalysisTabViewModel>();
+builder.Services.AddSingleton<CalibrationTabViewModel>();
 builder.Services.AddSingleton<SettingsTabViewModel>();
 builder.Services.AddSingleton<AudioInterfaceViewModel>();
 builder.Services.AddSingleton<RecorderViewModel>();

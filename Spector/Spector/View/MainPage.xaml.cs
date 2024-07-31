@@ -17,4 +17,5 @@ public class DesignTimeMainPageViewModel() :
     MainPageViewModel(
         default!,
         default!,
+        default!,
         default!);
