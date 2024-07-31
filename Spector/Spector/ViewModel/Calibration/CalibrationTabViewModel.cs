@@ -6,11 +6,13 @@ using Spector.Model;
 using Spector.Model.IO;
 using Spector.View.Measure;
 using Spector.ViewModel.Measure;
+using Recorder = Spector.Model.Recorder;
 
 namespace Spector.ViewModel.Calibration;
 
 public partial class CalibrationTabViewModel(
-    AudioInterfaceViewModel audioInterface)
+    AudioInterfaceViewModel audioInterface,
+    Recorder recorder)
     : ObservableBase
 {
     public IFilteredReadOnlyObservableCollection<DeviceViewModel> PlaybackDevices { get; } = audioInterface
@@ -33,18 +35,18 @@ public partial class CalibrationTabViewModel(
     {
         if (playBack)
         {
-            StartPlayback();
+            Start();
         }
         else
         {
-            StopPlayback();
+            Stop();
         }
 
     }
 
-    private CancellationTokenSource PlayBackCancellationTokenSource { get; set; } = new();
+    private CancellationTokenSource CancellationTokenSource { get; set; } = new();
 
-    private void StartPlayback()
+    private void Start()
     {
         if (PlaybackDevice is null)
         {
@@ -52,13 +54,13 @@ public partial class CalibrationTabViewModel(
             return;
         }
 
-        PlayBackCancellationTokenSource = new();
-        PlaybackDevice.Device.PlayLooping(PlayBackCancellationTokenSource.Token);
+        CancellationTokenSource = new();
+        PlaybackDevice.Device.PlayLooping(CancellationTokenSource.Token);
     }
 
-    private void StopPlayback()
+    private void Stop()
     {
-        PlayBackCancellationTokenSource.Cancel();
+        CancellationTokenSource.Cancel();
     }
 
 }

@@ -29,14 +29,14 @@ public class Recorder
         }
     }
 
-    public void StartRecording(
+    public bool StartRecording(
         DeviceId measureDeviceId,
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
         IEnumerable<IDevice> devices)
     {
-        if(Recording is not null) throw new InvalidOperationException("Recording is already started.");
+        if(Recording is not null) return false;
 
         Recording = new Recording(
             RootDirectory,
@@ -46,6 +46,7 @@ public class Recorder
             withBuzz,
             devices);
         Recording.StartRecording();
+        return true;
     }
 
     public void StopRecording()

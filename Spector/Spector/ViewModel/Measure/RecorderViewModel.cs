@@ -126,12 +126,13 @@ public partial class RecorderViewModel(
     {
         var settings = await settingsRepository.LoadAsync();
 
-        recorder.StartRecording(
+        var started = recorder.StartRecording(
             MeasureDevice!.Id,
             SelectedDirection,
             WithVoice,
             WithBuzz,
             audioInterface.Devices.Where(x => x.Measure));
+        if(started is false) return;
 
         // 録音開始時刻を記録する
         StartRecordingTime = DateTime.Now;
