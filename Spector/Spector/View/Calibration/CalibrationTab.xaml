@@ -3,12 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Spector.View.Calibration"
              xmlns:view="clr-namespace:Spector.View"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type view:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
-    <Grid DataContext="{Binding CalibrationTabViewModel}">
-            
+    <Grid DataContext="{Binding CalibrationTabViewModel}"
+          Margin="10, 20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+            <!-- 騒音再生デバイス -->
+            <ComboBox ItemsSource="{Binding PlaybackDevices}"
+                      SelectedItem="{Binding PlaybackDevice, Mode=TwoWay}"
+                      SelectionChanged="SelectedPlaybackDevice_OnSelectionChanged"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Playback Device"
+                      Width="250"/>
+
+            <!-- 騒音再生ボタン -->
+            <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
+                          IsChecked="{Binding IsPlaying}"
+                          ToolTip="再生"/>
+
+        </StackPanel>
+
+        <WpfPlot Grid.Row="1" 
+                 x:Name="AudioInterfacePlot"/>
+
     </Grid>
 </UserControl>
