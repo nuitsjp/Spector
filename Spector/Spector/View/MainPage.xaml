@@ -7,6 +7,7 @@
              xmlns:measure="clr-namespace:Spector.View.Measure"
              xmlns:analysis="clr-namespace:Spector.View.Analysis"
              xmlns:settings="clr-namespace:Spector.View.Settings"
+             xmlns:calibration="clr-namespace:Spector.View.Calibration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type local:DesignTimeMainPageViewModel}, IsDesignTimeCreatable=True}">
     <TabControl HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
@@ -16,6 +17,9 @@
         </TabItem>
         <TabItem Header="Analysis">
             <analysis:AnalysisTab/>
+        </TabItem>
+        <TabItem Header="Calibration">
+            <calibration:CalibrationTab/>
         </TabItem>
         <TabItem Header="Settings">
             <settings:SettingsTab/>
