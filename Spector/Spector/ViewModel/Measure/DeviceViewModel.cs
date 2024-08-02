@@ -58,7 +58,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
         // 入出力レベルを同期する
         VolumeLevel = Device.VolumeLevel.AsPrimitive() * 100;
-        this.ObserveProperty<DeviceViewModel, float>(x => x.VolumeLevel)
+        this.ObserveProperty(x => x.VolumeLevel)
             .Skip(1) // 上記の「VolumeLevel = Device.VolumeLevel;」の変更をスキップする。
             .Subscribe(volumeLevel =>
             {
@@ -72,7 +72,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
             .AddTo(CompositeDisposable);
 
         // Connectを同期する
-        this.ObserveProperty<DeviceViewModel, bool>(x => x.Connect)
+        this.ObserveProperty(x => x.Connect)
             .Subscribe(ConnectOnUpdated)
             .AddTo(CompositeDisposable);
     }
@@ -102,7 +102,7 @@ public partial class DeviceViewModel : ObservableObject, IDisposable
 
     public WaveFormat WaveFormat { get; }
 
-    [ObservableProperty] private float _volumeLevel;
+    [ObservableProperty] private double _volumeLevel;
     [ObservableProperty] private bool _connect;
 
     public Visibility VisibleConnect => Device.Connectable 

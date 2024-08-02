@@ -1,7 +1,7 @@
 ﻿namespace Spector.Model;
 
 /// <summary>
-/// スピーカーの出力をデシベル値から振幅に変換するためのキャリブレーションを行うクラス
+/// スプライン補間を使用してオーディオのキャリブレーションを行うクラス
 /// </summary>
 public class AudioCalibrator
 {
@@ -14,15 +14,15 @@ public class AudioCalibrator
     private readonly double[] _d; // 3次の項
 
     /// <summary>
-    /// AudioCalibratorクラスのコンストラクタ
+    /// AudioSplineCalibratorのコンストラクタ
     /// </summary>
-    /// <param name="calibrationPoints">キャリブレーションポイントのリスト（デシベル値と振幅のペア）</param>
-    public AudioCalibrator(List<(double Decibels, double Amplitude)> calibrationPoints)
+    /// <param name="calibrationPoints">キャリブレーションポイントのリスト</param>
+    public AudioCalibrator(List<CalibrationPoint> calibrationPoints)
     {
         var sortedPoints = calibrationPoints.OrderBy(p => p.Decibels).ToList();
 
-        _decibels = sortedPoints.Select(p => p.Decibels).ToArray();
-        _amplitudes = sortedPoints.Select(p => p.Amplitude).ToArray();
+        _decibels = sortedPoints.Select(p => p.Decibels.AsPrimitive()).ToArray();
+        _amplitudes = sortedPoints.Select(p => p.Amplitude.AsPrimitive()).ToArray();
 
         var numberOfPoints = _decibels.Length;
         _a = new double[numberOfPoints - 1];
@@ -34,7 +34,7 @@ public class AudioCalibrator
     }
 
     /// <summary>
-    /// スプライン補間の係数を計算するメソッド
+    /// スプライン補間の係数を計算するプライベートメソッド
     /// </summary>
     private void CalculateSplineCoefficients()
     {
@@ -47,7 +47,7 @@ public class AudioCalibrator
             decibelDifferences[i] = _decibels[i + 1] - _decibels[i];
         }
 
-        // スプライン方程式の右辺を計算
+        // スプライン方程式の右辺
         var equationRightSide = new double[numberOfPoints - 1];
         for (var i = 1; i < numberOfPoints - 1; i++)
         {
@@ -55,7 +55,7 @@ public class AudioCalibrator
                                         (_amplitudes[i] - _amplitudes[i - 1]) / decibelDifferences[i - 1]);
         }
 
-        // トーマスアルゴリズムの係数を初期化
+        // トーマスアルゴリズムの係数
         var lowerDiagonal = new double[numberOfPoints];
         var diagonal = new double[numberOfPoints];
         var upperDiagonal = new double[numberOfPoints];
@@ -65,7 +65,6 @@ public class AudioCalibrator
         diagonal[0] = 1;
         result[0] = 0;
 
-        // トーマスアルゴリズムの係数を設定
         for (var i = 1; i < numberOfPoints - 1; i++)
         {
             lowerDiagonal[i] = decibelDifferences[i - 1];
@@ -86,7 +85,6 @@ public class AudioCalibrator
             result[i] -= m * result[i - 1];
         }
 
-        // 2次導関数を計算
         var secondDerivatives = new double[numberOfPoints];
         secondDerivatives[numberOfPoints - 1] = result[numberOfPoints - 1] / diagonal[numberOfPoints - 1];
         for (var i = numberOfPoints - 2; i >= 0; i--)

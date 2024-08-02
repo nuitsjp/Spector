@@ -47,18 +47,18 @@ public enum RemoteCommand
 /// <summary>
 /// 入出力レベル
 /// </summary>
-[UnitOf<float>(
+[UnitOf<double>(
     UnitGenerateOptions.Comparable | UnitGenerateOptions.Validate | UnitGenerateOptions.ArithmeticOperator | UnitGenerateOptions.JsonConverter)]
 public readonly partial struct VolumeLevel
 {
     /// <summary>
     /// 最小値
     /// </summary>
-    private const float MinimumValue = 0f;
+    private const double MinimumValue = 0f;
     /// <summary>
     /// 最大値
     /// </summary>
-    private const float MaximumValue = 1.0f;
+    private const double MaximumValue = 1.0f;
 
     /// <summary>
     /// 最小値
