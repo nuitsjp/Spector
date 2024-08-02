@@ -18,7 +18,7 @@
         <TabItem Header="Analysis">
             <analysis:AnalysisTab/>
         </TabItem>
-        <TabItem Header="Calibration">
+        <TabItem Header="Speaker Calibration">
             <calibration:CalibrationTab/>
         </TabItem>
         <TabItem Header="Settings">

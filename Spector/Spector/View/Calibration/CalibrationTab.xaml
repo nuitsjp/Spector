@@ -12,6 +12,7 @@
           Margin="10, 20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -24,6 +25,10 @@
                       materialDesign:HintAssist.Hint="Playback Device"
                       Width="250"/>
 
+            <!-- 騒音再生音量 -->
+            <TextBox Text="{Binding PlaybackDevice.VolumeLevel, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Volume Level"/>
+
             <!-- 騒音再生ボタン -->
             <ToggleButton Content="{materialDesign:PackIcon Kind=Play}"
                           IsChecked="{Binding IsPlaying}"
@@ -31,7 +36,23 @@
 
         </StackPanel>
 
-        <WpfPlot Grid.Row="1" 
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding CalibrationPoints}"
+                  AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <materialDesign:DataGridTextColumn Header="目安" 
+                                                   Binding="{Binding Note}" 
+                                                   IsReadOnly="True"/>
+
+                <materialDesign:DataGridTextColumn Header="Volume Level" 
+                                                   Binding="{Binding VolumeLevel}" />
+
+                <materialDesign:DataGridTextColumn Header="Decibel" 
+                                                   Binding="{Binding Decibel}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <WpfPlot Grid.Row="2" 
                  x:Name="AudioInterfacePlot"/>
 
     </Grid>

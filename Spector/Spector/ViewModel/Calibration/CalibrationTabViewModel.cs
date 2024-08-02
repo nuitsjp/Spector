@@ -23,6 +23,15 @@ public partial class CalibrationTabViewModel(
 
     [ObservableProperty] private bool _isPlaying;
 
+    public IReadOnlyList<CalibrationPointViewModel> CalibrationPoints { get; } = new[]
+    {
+        new CalibrationPointViewModel(50, 0, "50dB"),
+        new CalibrationPointViewModel(55, 0, "55dB"),
+        new CalibrationPointViewModel(60, 0, "60dB"),
+        new CalibrationPointViewModel(65, 0, "65dB"),
+        new CalibrationPointViewModel(70, 0, "70dB"),
+    };
+
     public void Activate()
     {
         this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
