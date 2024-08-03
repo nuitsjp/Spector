@@ -128,10 +128,14 @@ public partial class RecorderViewModel(
 
         var started = recorder.StartRecording(
             MeasureDevice!.Id,
-            SelectedDirection,
-            WithVoice,
-            WithBuzz,
-            audioInterface.Devices.Where(x => x.Measure));
+            audioInterface.Devices.Where(x => x.Measure),
+            [
+                new RecordingProcess(
+                    SelectedDirection,
+                    WithVoice,
+                    WithBuzz,
+                    (VolumeLevel)0.4)
+            ]);
         if(started is false) return;
 
         // 録音開始時刻を記録する

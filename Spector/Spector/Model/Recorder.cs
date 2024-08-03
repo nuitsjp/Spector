@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.ComponentModel;
+using HarfBuzzSharp;
 using Reactive.Bindings;
 
 namespace Spector.Model;
@@ -31,21 +33,24 @@ public class Recorder
 
     public bool StartRecording(
         DeviceId measureDeviceId,
-        Direction direction, 
-        bool withVoice, 
-        bool withBuzz,
-        IEnumerable<IDevice> devices)
+        IEnumerable<IDevice> devices,
+        IEnumerable<RecordingProcess> recordingProcesses)
     {
         if(Recording is not null) return false;
 
-        Recording = new Recording(
-            RootDirectory,
-            measureDeviceId,
-            direction,
-            withVoice,
-            withBuzz,
-            devices);
-        Recording.StartRecording();
+        var devicesArray = devices.ToArray();
+
+        foreach (var recordingProcess in recordingProcesses)
+        {
+            Recording = new Recording(
+                RootDirectory,
+                measureDeviceId,
+                recordingProcess.Direction,
+                recordingProcess.WithVoice,
+                recordingProcess.WithBuzz,
+                devicesArray);
+            Recording.StartRecording();
+        }
         return true;
     }
 
@@ -68,4 +73,24 @@ public class Recorder
         if(directory.Exists) directory.Delete(true);
         _records.Remove(record);
     }
+}
+
+public partial class RecordingProcess(
+    Direction direction,
+    bool withVoice,
+    bool withBuzz,
+    VolumeLevel volumeLevel) : ObservableBase
+{
+    public Direction Direction { get; } = direction;
+    public bool WithVoice { get; } = withVoice;
+    public bool WithBuzz { get; } = withBuzz;
+    public VolumeLevel VolumeLevel { get; } = volumeLevel;
+    [ObservableProperty] private RecordingState _state = RecordingState.Stopped;
+}
+
+public enum RecordingState
+{
+    Stopped,
+    Ready,
+    Recording
 }
