@@ -41,7 +41,11 @@
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <materialDesign:DataGridTextColumn Header="目安" 
-                                                   Binding="{Binding Note}" 
+                                                   Binding="{Binding Criterion}" 
+                                                   IsReadOnly="True"/>
+
+                <materialDesign:DataGridTextColumn Header="参考" 
+                                                   Binding="{Binding Example}" 
                                                    IsReadOnly="True"/>
 
                 <materialDesign:DataGridTextColumn Header="Volume Level" 

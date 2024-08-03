@@ -1,15 +1,29 @@
-﻿namespace Spector.ViewModel.Calibration;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Spector.Model;
 
-public class CalibrationPointViewModel : ObservableBase
+namespace Spector.ViewModel.Calibration;
+
+public partial class CalibrationPointViewModel(CalibrationPoint calibrationPoint) : ObservableBase
 {
-    public double Decibel { get; set; } = 0;
-    public double VolumeLevel { get; set; } = 0;
-    public string Note { get; }
+    [ObservableProperty] private double _decibel = calibrationPoint.Decibel.AsPrimitive();
+    [ObservableProperty] private double _volumeLevel = calibrationPoint.VolumeLevel.AsPrimitive() * 100;
 
-    public CalibrationPointViewModel(double decibel, double volumeLevel, string note)
-    {
-        Decibel = decibel;
-        VolumeLevel = volumeLevel;
-        Note = note;
-    }
+    /// <summary>
+    /// 目安
+    /// </summary>
+    public string Criterion { get; private set; } = $"{calibrationPoint.Criterion.AsPrimitive()}db";
+
+    /// <summary>
+    /// 参考
+    /// </summary>
+    public string Example { get; private set; } = calibrationPoint.Example;
+
+    /// <summary>
+    /// CalibrationPointに変換する
+    /// </summary>
+    public CalibrationPoint ToCalibrationPoint => new(
+        new Decibel(_decibel),
+        Example,
+        new VolumeLevel(_volumeLevel / 100),
+        new Decibel(_decibel));
 }

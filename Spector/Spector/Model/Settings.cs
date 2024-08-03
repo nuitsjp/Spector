@@ -10,7 +10,8 @@ public record Settings(
     bool EnableAWeighting,
     bool EnableFastTimeWeighting,
     Settings.RecorderSettings Recorder,
-    IReadOnlyList<Settings.DeviceSettings> Devices)
+    IReadOnlyList<Settings.DeviceSettings> Devices,
+    IReadOnlyList<CalibrationPoint> CalibrationPoints)
 {
     public bool TryGetDeviceSettings(DeviceId id, out DeviceSettings deviceSettings)
     {

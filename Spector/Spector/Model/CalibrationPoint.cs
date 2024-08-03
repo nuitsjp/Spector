@@ -1,3 +1,7 @@
 ﻿namespace Spector.Model;
 
-public record CalibrationPoint(Decibel Decibels, VolumeLevel Amplitude);
+public record CalibrationPoint(
+    Decibel Criterion,
+    string Example,
+    VolumeLevel VolumeLevel,
+    Decibel Decibel);

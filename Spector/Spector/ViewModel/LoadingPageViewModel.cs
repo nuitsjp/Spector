@@ -15,7 +15,7 @@ public class LoadingPageViewModel(
     {
         await audioInterfaceViewModel.ActivateAsync();
         await recorderViewModel.ActivateAsync();
-        calibrationTabViewModel.Activate();
+        await calibrationTabViewModel.ActivateAsync();
         await presentationService.NavigateToMainPageAsync();
     }
 }

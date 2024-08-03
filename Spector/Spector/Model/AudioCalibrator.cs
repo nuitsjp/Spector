@@ -19,10 +19,10 @@ public class AudioCalibrator
     /// <param name="calibrationPoints">キャリブレーションポイントのリスト</param>
     public AudioCalibrator(List<CalibrationPoint> calibrationPoints)
     {
-        var sortedPoints = calibrationPoints.OrderBy(p => p.Decibels).ToList();
+        var sortedPoints = calibrationPoints.OrderBy(p => p.Decibel).ToList();
 
-        _decibels = sortedPoints.Select(p => p.Decibels.AsPrimitive()).ToArray();
-        _amplitudes = sortedPoints.Select(p => p.Amplitude.AsPrimitive()).ToArray();
+        _decibels = sortedPoints.Select(p => p.Decibel.AsPrimitive()).ToArray();
+        _amplitudes = sortedPoints.Select(p => p.VolumeLevel.AsPrimitive()).ToArray();
 
         var numberOfPoints = _decibels.Length;
         _a = new double[numberOfPoints - 1];

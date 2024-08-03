@@ -1,10 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NAudio.CoreAudioApi;
 using Reactive.Bindings.Extensions;
 using Reactive.Bindings.Helpers;
 using Spector.Model;
-using Spector.Model.IO;
-using Spector.View.Measure;
 using Spector.ViewModel.Measure;
 using Recorder = Spector.Model.Recorder;
 
@@ -12,6 +12,7 @@ namespace Spector.ViewModel.Calibration;
 
 public partial class CalibrationTabViewModel(
     AudioInterfaceViewModel audioInterface,
+    ISettingsRepository settingsRepository,
     Recorder recorder)
     : ObservableBase
 {
@@ -23,21 +24,35 @@ public partial class CalibrationTabViewModel(
 
     [ObservableProperty] private bool _isPlaying;
 
-    public IReadOnlyList<CalibrationPointViewModel> CalibrationPoints { get; } = new[]
-    {
-        new CalibrationPointViewModel(50, 0, "50dB"),
-        new CalibrationPointViewModel(55, 0, "55dB"),
-        new CalibrationPointViewModel(60, 0, "60dB"),
-        new CalibrationPointViewModel(65, 0, "65dB"),
-        new CalibrationPointViewModel(70, 0, "70dB"),
-    };
+    public ObservableCollection<CalibrationPointViewModel> CalibrationPoints { get; private set; } = [];
 
-    public void Activate()
+    public async Task ActivateAsync()
     {
         this.ObserveProperty(x => x.IsPlaying).Subscribe(PlayingOnUpdated).AddTo(CompositeDisposable);
 
+        await settingsRepository.LoadAsync()
+            .ContinueWith(task => task.Result.CalibrationPoints.Select(x => new CalibrationPointViewModel(x)))
+            .ContinueWith(task =>
+            {
+                foreach (var calibrationPointViewModel in task.Result)
+                {
+                    calibrationPointViewModel.PropertyChanged += CalibrationPointOnPropertyChanged;
+                    CalibrationPoints.Add(calibrationPointViewModel);
+                }
+            });
+
+
         PlaybackDevices.CollectionChanged += (_, _) => { PlaybackDevice ??= PlaybackDevices.FirstOrDefault(); };
         PlaybackDevice = PlaybackDevices.FirstOrDefault();
+    }
+
+    private async void CalibrationPointOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        var settings = await settingsRepository.LoadAsync();
+        await settingsRepository.SaveAsync(settings with
+        {
+            CalibrationPoints = CalibrationPoints.Select(x => x.ToCalibrationPoint).ToList()
+        });
     }
 
     private void PlayingOnUpdated(bool playBack)
