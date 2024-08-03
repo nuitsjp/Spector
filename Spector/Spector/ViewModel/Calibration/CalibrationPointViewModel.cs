@@ -22,8 +22,8 @@ public partial class CalibrationPointViewModel(CalibrationPoint calibrationPoint
     /// CalibrationPointに変換する
     /// </summary>
     public CalibrationPoint ToCalibrationPoint => new(
-        new Decibel(_decibel),
+        new Decibel(Decibel),
         Example,
-        new VolumeLevel(_volumeLevel / 100),
-        new Decibel(_decibel));
+        (VolumeLevel)(VolumeLevel / 100),
+        (Decibel)Decibel);
 }
