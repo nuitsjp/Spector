@@ -34,10 +34,12 @@ public class Recorder
     public bool StartRecording(
         DeviceId measureDeviceId,
         IEnumerable<IDevice> devices,
+        IDevice playbackDevice,
         IEnumerable<RecordingProcess> recordingProcesses)
     {
         if(Recording is not null) return false;
 
+        var originalVolumeLevel = playbackDevice.VolumeLevel;
         var devicesArray = devices.ToArray();
 
         foreach (var recordingProcess in recordingProcesses)
@@ -51,6 +53,9 @@ public class Recorder
                 devicesArray);
             Recording.StartRecording();
         }
+
+        playbackDevice.VolumeLevel = originalVolumeLevel;
+
         return true;
     }
 

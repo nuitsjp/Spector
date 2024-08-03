@@ -129,6 +129,7 @@ public partial class RecorderViewModel(
         var started = recorder.StartRecording(
             MeasureDevice!.Id,
             audioInterface.Devices.Where(x => x.Measure),
+            PlaybackDevice!,
             [
                 new RecordingProcess(
                     SelectedDirection,
