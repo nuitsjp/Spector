@@ -11,9 +11,10 @@ public class AnalysisDeviceViewModel(
     public RecordByDeviceViewModel DeviceRecord { get; } = deviceRecord;
     public DateTime StartTime => AudioRecord.StartTime;
     public string Device => DeviceRecord.Name;
-    public Direction Direction => AudioRecord.Direction;
-    public bool WithBuzz => AudioRecord.WithBuzz;
-    public bool WithVoice => AudioRecord.WithVoice;
+    public Direction Direction => deviceRecord.Direction;
+    public bool WithBuzz => deviceRecord.WithBuzz;
+    public bool WithVoice => deviceRecord.WithVoice;
+    public VolumeLevel VolumeLevel => deviceRecord.VolumeLevel;
     public Decibel Min => DeviceRecord.Min;
     public Decibel Avg => DeviceRecord.Avg;
     public Decibel Max => DeviceRecord.Max;

@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentTextTable;
@@ -89,9 +90,6 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                     record.MeasureDeviceId,
                     record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
                     record.MeasureDeviceId.ToString(),
-                    record.Direction,
-                    record.WithVoice,
-                    record.WithBuzz,
                     record.StartTime,
                     record.StopTime,
                     record.RecordByDevices
@@ -100,6 +98,10 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                             recordByDevice.Id,
                             recordByDevice.Name,
                             recordByDevice.SystemName,
+                            recordByDevice.Direction,
+                            recordByDevice.WithVoice,
+                            recordByDevice.WithBuzz,
+                            recordByDevice.VolumeLevel,
                             recordByDevice.Min,
                             recordByDevice.Avg,
                             recordByDevice.Max,

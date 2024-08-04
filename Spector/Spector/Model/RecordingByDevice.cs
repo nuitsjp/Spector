@@ -4,7 +4,13 @@ using NAudio.Wave;
 
 namespace Spector.Model;
 
-public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDisposable
+public class RecordingByDevice(
+    IDevice device,
+    Direction direction,
+    bool withVoice,
+    bool withBuzz,
+    VolumeLevel volumeLevel,
+    DirectoryInfo directory) : IDisposable
 {
     private BlockingCollection<byte[]> BufferQueue { get; } = [];
 
@@ -68,6 +74,10 @@ public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDispo
                 device.Id,
                 device.Name,
                 device.SystemName,
+                direction,
+                withVoice,
+                withBuzz,
+                volumeLevel,
                 levels.Min(),
                 new Decibel(levels.Average(x => x.AsPrimitive())),
                 levels.Max(),
@@ -78,6 +88,10 @@ public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDispo
                 device.Id,
                 device.Name,
                 device.SystemName,
+                direction,
+                withVoice,
+                withBuzz,
+                volumeLevel,
                 Decibel.Minimum,
                 Decibel.Minimum,
                 Decibel.Minimum,

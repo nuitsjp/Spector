@@ -41,21 +41,13 @@ public class Recorder
         // 録音開始時の音量を保存
         var originalVolumeLevel = playbackDevice.VolumeLevel;
 
-        // デバイス一覧を複数回利用して問題ないように配列に変換
-        var devicesArray = devices.ToArray();
-
-        foreach (var recordingProcess in recordingProcesses)
-        {
-            Recording = new Recording(
-                RootDirectory,
-                measureDeviceId,
-                recordingProcess.Direction,
-                recordingProcess.WithVoice,
-                recordingProcess.WithBuzz,
-                devicesArray,
-                playbackDevice);
-            Recording.StartRecording();
-        }
+        Recording = new Recording(
+            RootDirectory,
+            measureDeviceId,
+            devices.ToArray(),
+            recordingProcesses.ToArray(),
+            playbackDevice);
+        Recording.StartRecording();
 
         // 録音開始時の音量に戻す
         playbackDevice.VolumeLevel = originalVolumeLevel;
