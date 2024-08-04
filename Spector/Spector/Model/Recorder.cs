@@ -70,7 +70,7 @@ public class Recorder
         Recording = null;
     }
 
-    public IEnumerable<Decibel> AnalyzeWaveFile(Record record, Record.RecordByDevice device)
+    public IEnumerable<Decibel> AnalyzeWaveFile(Record record, RecordByDevice device)
     {
         var file = Path.Combine(RootDirectory.FullName, record.DirectoryName, device.FileName);
         return WaveFileAnalyzer.Analyze(file);

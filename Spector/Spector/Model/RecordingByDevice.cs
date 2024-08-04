@@ -10,7 +10,7 @@ public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDispo
 
     private WaveFileWriter? Writer { get; set; }
 
-    private string FilePath => Path.Combine(directory.FullName, Record.RecordByDevice.ToFileName(device.Name));
+    private string FilePath => Path.Combine(directory.FullName, RecordByDevice.ToFileName(device.Name));
 
     private bool IsStopped { get; set; } = true;
 
@@ -60,11 +60,11 @@ public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDispo
         }
     }
 
-    public Record.RecordByDevice ToRecord()
+    public RecordByDevice ToRecord()
     {
         var levels = WaveFileAnalyzer.Analyze(FilePath).ToArray();
         return levels.Any()
-            ? new Record.RecordByDevice(
+            ? new RecordByDevice(
                 device.Id,
                 device.Name,
                 device.SystemName,
@@ -74,7 +74,7 @@ public class RecordingByDevice(IDevice device, DirectoryInfo directory) : IDispo
                 (double)levels.Count(x => -30d < x.AsPrimitive()) / levels.Length,
                 (double)levels.Count(x => -40d < x.AsPrimitive()) / levels.Length,
                 (double)levels.Count(x => -50d < x.AsPrimitive()) / levels.Length)
-            : new Record.RecordByDevice(
+            : new RecordByDevice(
                 device.Id,
                 device.Name,
                 device.SystemName,
