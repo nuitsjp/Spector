@@ -45,11 +45,18 @@ public abstract partial class DeviceBase(
         var sampleProvider = new WaveInProvider(waveIn).ToSampleProvider();
         Filter = new AWeightingFilter(sampleProvider);
 
-        WaveIn.DataAvailable += OnDataAvailable;
-        WaveIn.RecordingStopped += (_, _) => StopMeasure();
-        WaveIn.StartRecording();
+        try
+        {
+            WaveIn.DataAvailable += OnDataAvailable;
+            WaveIn.RecordingStopped += (_, _) => StopMeasure();
+            WaveIn.StartRecording();
 
-        Measure = true;
+            Measure = true;
+        }
+        catch (Exception)
+        {
+            Measure = false;
+        }
     }
 
 
