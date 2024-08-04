@@ -79,13 +79,14 @@ public partial class RemoteDevice : DeviceBase, IRemoteDevice
         Dispose();
     }
 
-    public override void PlayLooping(CancellationToken token)
+    public override void StartPlayback()
     {
         WaveIn.SendRemoteCommand(RemoteCommand.StartPlayLooping);
-        token.Register(() =>
-        {
-            WaveIn.SendRemoteCommand(RemoteCommand.StopPlayLooping);
-        });
+    }
+
+    public override void StopPlayback()
+    {
+        WaveIn.SendRemoteCommand(RemoteCommand.StopPlayLooping);
     }
 
     public override void Dispose()

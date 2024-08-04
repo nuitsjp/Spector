@@ -39,7 +39,10 @@ public class Recorder
     {
         if(Recording is not null) return false;
 
+        // 録音開始時の音量を保存
         var originalVolumeLevel = playbackDevice.VolumeLevel;
+
+        // デバイス一覧を複数回利用して問題ないように配列に変換
         var devicesArray = devices.ToArray();
 
         foreach (var recordingProcess in recordingProcesses)
@@ -50,10 +53,12 @@ public class Recorder
                 recordingProcess.Direction,
                 recordingProcess.WithVoice,
                 recordingProcess.WithBuzz,
-                devicesArray);
+                devicesArray,
+                playbackDevice);
             Recording.StartRecording();
         }
 
+        // 録音開始時の音量に戻す
         playbackDevice.VolumeLevel = originalVolumeLevel;
 
         return true;

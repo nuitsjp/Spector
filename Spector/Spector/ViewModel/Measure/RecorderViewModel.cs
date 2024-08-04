@@ -179,8 +179,6 @@ public partial class RecorderViewModel(
         RecordingProgress = 0;
     }
 
-    private CancellationTokenSource PlayBackCancellationTokenSource { get; set; } = new();
-
     private void PlayingOnUpdated(bool playBack)
     {
         if (playBack)
@@ -202,13 +200,18 @@ public partial class RecorderViewModel(
             return;
         }
 
-        PlayBackCancellationTokenSource = new();
-        PlaybackDevice.PlayLooping(PlayBackCancellationTokenSource.Token);
+        PlaybackDevice.StartPlayback();
     }
 
     private void StopPlayback()
     {
-        PlayBackCancellationTokenSource.Cancel();
+        if (PlaybackDevice is null)
+        {
+            IsPlaying = false;
+            return;
+        }
+
+        PlaybackDevice.StopPlayback();
     }
 
     private async void OnUpdated()

@@ -1,4 +1,5 @@
-﻿using NAudio.CoreAudioApi;
+﻿using System.IO;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
@@ -37,6 +38,8 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         }
     }
 
+    public static WaveStream PlaybackStream { get; } = new LoopStream(new WaveFileReader(Properties.Resources.吾輩は猫である));
+
     private CompositeDisposable CompositeDisposable { get; } = [];
     private MMDevice MmDevice { get; }
 
@@ -58,8 +61,6 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
 
     private RemoteDeviceClient? RemoteDeviceClient { get; set; }
 
-    private CancellationTokenSource PlayLoopingCancellationTokenSource { get; set; } = new();
-
     public Task ConnectAsync(string address)
     {
         RemoteDeviceClient = new RemoteDeviceClient(this).AddTo(CompositeDisposable);
@@ -78,11 +79,10 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         switch (command)
         {
             case RemoteCommand.StartPlayLooping:
-                PlayLoopingCancellationTokenSource = new CancellationTokenSource();
-                PlayLooping(PlayLoopingCancellationTokenSource.Token);
+                StartPlayback();
                 break;
             case RemoteCommand.StopPlayLooping:
-                PlayLoopingCancellationTokenSource.Cancel();
+                StopPlayback();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(command), command, null);
@@ -129,34 +129,33 @@ public partial class LocalDevice : DeviceBase, ILocalDevice
         base.OnDataAvailable(sender, e);
     }
 
+
+    private WasapiOut? WavePlayer { get; set; }
+
     /// <summary>
-    /// キャンセルされるまでループ再生する。
+    /// 停止されるまでループ再生する。
     /// </summary>
-    /// <param name="token"></param>
     /// <returns></returns>
-    public override void PlayLooping(CancellationToken token)
+    public override void StartPlayback()
     {
         // スピーカーからNAudioで再生するためのプレイヤーを生成する。
         using var enumerator = new MMDeviceEnumerator();
-        var mmDevice = enumerator.GetDevice(Id.AsPrimitive());
-        var wavePlayer = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 0);
+        using var mmDevice = enumerator.GetDevice(Id.AsPrimitive());
+        WavePlayer = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 0);
 
         // ループ音源を作成する。
-        WaveStream waveStream = new LoopStream(new WaveFileReader(Properties.Resources.吾輩は猫である));
-
-        // 終了処理を登録する。
-        token.Register(() =>
-        {
-            // リソースを開放する。
-            wavePlayer.Stop();
-            wavePlayer.Dispose();
-            mmDevice.Dispose();
-            waveStream.Dispose();
-        });
+        PlaybackStream.Seek(0, SeekOrigin.Begin);
 
         // 出力に入力を接続して再生を開始する。
-        wavePlayer.Init(waveStream);
-        wavePlayer.Play();
+        WavePlayer.Init(PlaybackStream);
+        WavePlayer.Play();
+    }
+
+    public override void StopPlayback()
+    {
+        // リソースを開放する。
+        WavePlayer?.Stop();
+        WavePlayer?.Dispose();
     }
 
     public override void Dispose()

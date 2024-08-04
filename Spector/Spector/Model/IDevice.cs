@@ -36,5 +36,6 @@ public interface IDevice : INotifyPropertyChanged, IDisposable
     void StartMeasure();
     void StopMeasure();
 
-    void PlayLooping(CancellationToken token);
+    void StartPlayback();
+    void StopPlayback();
 }

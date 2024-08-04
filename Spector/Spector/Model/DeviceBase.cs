@@ -110,7 +110,9 @@ public abstract partial class DeviceBase(
         Measure = false;
     }
 
-    public abstract void PlayLooping(CancellationToken token);
+    public abstract void StartPlayback();
+    public abstract void StopPlayback();
+
     public virtual void Dispose()
     {
         if(WaveIn is not null)
@@ -118,43 +120,5 @@ public abstract partial class DeviceBase(
             StopMeasure();
         }
         GC.SuppressFinalize(this);
-    }
-
-
-    private void ConvertToFloat(byte[] input, float[] output, int bytesRecorded)
-    {
-        var outputIndex = 0;
-
-        for (var inputIndex = 0; inputIndex < bytesRecorded; inputIndex += BytesPerSample)
-        {
-            float sample = 0;
-
-            switch (BytesPerSample)
-            {
-                case 1: // 8-bit PCM
-                    sample = (input[inputIndex] - 128) / 128f;
-                    break;
-                case 2: // 16-bit PCM
-                    sample = BitConverter.ToInt16(input, inputIndex) / 32768f;
-                    break;
-                case 3: // 24-bit PCM
-                    var sample24 = (input[inputIndex + 2] << 16) | (input[inputIndex + 1] << 8) | input[inputIndex];
-                    if ((sample24 & 0x800000) != 0) sample24 |= ~0xFFFFFF; // Sign extend
-                    sample = sample24 / 8388608f;
-                    break;
-                case 4: // 32-bit PCM or 32-bit IEEE float
-                    if (WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
-                    {
-                        sample = BitConverter.ToSingle(input, inputIndex);
-                    }
-                    else
-                    {
-                        sample = BitConverter.ToInt32(input, inputIndex) / 2147483648f;
-                    }
-                    break;
-            }
-
-            output[outputIndex++] = sample;
-        }
     }
 }

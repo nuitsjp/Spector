@@ -11,12 +11,13 @@ public class Recording
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
-        IEnumerable<IDevice> devices)
+        IEnumerable<IDevice> devices, IDevice playbackDevice)
     {
         RootDirectory = rootDirectory;
         Direction = direction;
         WithVoice = withVoice;
         WithBuzz = withBuzz;
+        PlaybackDevice = playbackDevice;
         Devices = devices.ToArray();
         MeasureDeviceId = measureDeviceId;
     }
@@ -28,6 +29,7 @@ public class Recording
     private bool WithVoice { get; }
     private bool WithBuzz { get; }
     private IReadOnlyList<IDevice> Devices { get; }
+    private IDevice PlaybackDevice { get; }
 
     /// <summary>
     /// 録音中のデバイス
@@ -51,7 +53,7 @@ public class Recording
             device.StartRecording();
         }
     }
-
+    
     public Record StopRecording()
     {
         foreach (var device in RecorderByDevices)

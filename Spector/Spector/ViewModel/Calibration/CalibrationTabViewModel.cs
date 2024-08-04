@@ -68,8 +68,6 @@ public partial class CalibrationTabViewModel(
 
     }
 
-    private CancellationTokenSource CancellationTokenSource { get; set; } = new();
-
     private void Start()
     {
         if (PlaybackDevice is null)
@@ -78,13 +76,18 @@ public partial class CalibrationTabViewModel(
             return;
         }
 
-        CancellationTokenSource = new();
-        PlaybackDevice.Device.PlayLooping(CancellationTokenSource.Token);
+        PlaybackDevice.Device.StartPlayback();
     }
 
     private void Stop()
     {
-        CancellationTokenSource.Cancel();
+        if (PlaybackDevice is null)
+        {
+            IsPlaying = false;
+            return;
+        }
+
+        PlaybackDevice.Device.StopPlayback();
     }
 
 }
