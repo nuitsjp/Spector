@@ -11,7 +11,8 @@ public class Recording
         Direction direction, 
         bool withVoice, 
         bool withBuzz,
-        IEnumerable<IDevice> devices, IDevice playbackDevice)
+        IEnumerable<IDevice> devices, 
+        IDevice playbackDevice)
     {
         RootDirectory = rootDirectory;
         Direction = direction;

@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text.Json;
-using CommunityToolkit.Mvvm.ComponentModel;
 using HarfBuzzSharp;
 using Reactive.Bindings;
 
@@ -83,19 +82,6 @@ public class Recorder
         if(directory.Exists) directory.Delete(true);
         _records.Remove(record);
     }
-}
-
-public partial class RecordingProcess(
-    Direction direction,
-    bool withVoice,
-    bool withBuzz,
-    VolumeLevel volumeLevel) : ObservableBase
-{
-    public Direction Direction { get; } = direction;
-    public bool WithVoice { get; } = withVoice;
-    public bool WithBuzz { get; } = withBuzz;
-    public VolumeLevel VolumeLevel { get; } = volumeLevel;
-    [ObservableProperty] private RecordingState _state = RecordingState.Stopped;
 }
 
 public enum RecordingState
