@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="650"/>
+                <ColumnDefinition Width="500"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -37,6 +37,18 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Time" Binding="{Binding StartTime, StringFormat=yyyy/MM/dd HH:mm}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Device" Binding="{Binding DeviceName}" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <DataGrid  Grid.Column="1"
+                       ItemsSource="{Binding Devices}" 
+                       SelectedItem="{Binding SelectedDevice}"
+                       AutoGenerateColumns="False"
+                       Height="200"
+                       Margin="5"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" IsReadOnly="True"/>
                     <DataGridTemplateColumn IsReadOnly="True" Header="Buzz" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
@@ -72,18 +84,6 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-
-            <DataGrid  Grid.Column="1"
-                       ItemsSource="{Binding Devices}" 
-                       SelectedItem="{Binding SelectedDevice}"
-                       AutoGenerateColumns="False"
-                       Height="200"
-                       Margin="5"
-                       ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Min" Binding="{Binding Min, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Avg" Binding="{Binding Avg, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Max" Binding="{Binding Max, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
