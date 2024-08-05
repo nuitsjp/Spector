@@ -97,8 +97,11 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                 return new RecordViewModel(
                     record,
                     record.MeasureDeviceId,
-                    record.RecordProcesses.SelectMany(x => x.RecordByDevices).FirstOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
-                    record.MeasureDeviceId.ToString(),
+                    record.RecordProcesses
+                        .SelectMany(x => x.RecordByDevices)
+                        .FirstOrDefault(x => x.Id == record.MeasureDeviceId)?
+                        .Name 
+                    ?? record.MeasureDeviceId.ToString(),
                     record.StartTime,
                     record.StopTime,
                     record
@@ -120,7 +123,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                                     recordByDevice.Minus40db,
                                     recordByDevice.Minus50db))
                                 .ToArray()
-                            )).ToArray());
+                        )).ToArray());
             })
             .ToList()
             .ForEach(x => Records.Add(x));
