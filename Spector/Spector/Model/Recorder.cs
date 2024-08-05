@@ -34,7 +34,9 @@ public class Recorder
         DeviceId measureDeviceId,
         IEnumerable<IDevice> devices,
         IDevice playbackDevice,
-        IEnumerable<RecordingProcess> recordingProcesses)
+        IEnumerable<RecordingProcess> recordingProcesses,
+        TimeSpan recordingSpan,
+        CancellationToken cancellationToken)
     {
         if(Recording is not null) return false;
 
@@ -47,7 +49,7 @@ public class Recorder
             devices.ToArray(),
             recordingProcesses.ToArray(),
             playbackDevice);
-        Recording.StartRecording();
+        Recording.StartRecording(recordingSpan, cancellationToken);
 
         // 録音開始時の音量に戻す
         playbackDevice.VolumeLevel = originalVolumeLevel;

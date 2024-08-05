@@ -33,8 +33,15 @@ public class Recording
 
     private DateTime StartTime { get; set; }
 
-    internal void StartRecording()
+    internal void StartRecording(TimeSpan recordingSpan, CancellationToken cancellationToken)
     {
+        var devices = Devices
+            .Select(x =>
+                new RecordingByDevice(
+                    x,
+                    CurrentRecordDirectory))
+            .ToArray();
+
         foreach (var recordingProcess in RecordingProcesses)
         {
             StartTime = DateTime.Now;
@@ -43,18 +50,27 @@ public class Recording
                 new DirectoryInfo(Path.Combine(RootDirectory.FullName, Record.ToDirectoryName(StartTime)))
                     .CreateIfNotExists();
 
-            var devices = Devices
-                .Select(x => 
-                    new RecordingByDevice(
-                        x, 
-                        CurrentRecordDirectory))
-                .ToArray();
             RecorderByDevices.Add((recordingProcess, devices));
+            recordingProcess.StartRecording(recordingSpan, cancellationToken, devices);
             foreach (var device in devices)
             {
                 device.StartRecording();
             }
         }
+    }
+
+
+    private CancellationTokenSource RecordingCancellationTokenSource { get; } = new();
+
+    private Task RecordingAsync()
+    {
+        return Task.Run(() =>
+        {
+            while (RecordingCancellationTokenSource.IsCancellationRequested is false)
+            {
+                
+            }
+        });
     }
     
     public Record StopRecording()

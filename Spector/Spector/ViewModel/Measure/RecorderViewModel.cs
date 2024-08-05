@@ -122,10 +122,13 @@ public partial class RecorderViewModel(
         }
     }
 
+    private CancellationTokenSource RecordingCancellationTokenSource { get; set; } = new();
+
     private async Task StartRecording()
     {
-        var settings = await settingsRepository.LoadAsync();
+        await Task.CompletedTask;
 
+        RecordingCancellationTokenSource = new CancellationTokenSource();
         var started = recorder.StartRecording(
             MeasureDevice!.Id,
             audioInterface.Devices.Where(x => x.Measure),
@@ -136,7 +139,9 @@ public partial class RecorderViewModel(
                     WithVoice,
                     WithBuzz,
                     (VolumeLevel)0.4)
-            ]);
+            ],
+            RecordingSpan,
+            RecordingCancellationTokenSource.Token);
         if(started is false) return;
 
         // 録音開始時刻を記録する
@@ -162,6 +167,7 @@ public partial class RecorderViewModel(
         }
 
         IsRecording = true;
+
     }
 
     private void StopRecording()
