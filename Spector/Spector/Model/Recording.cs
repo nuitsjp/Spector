@@ -29,7 +29,7 @@ public class Recording
     /// <summary>
     /// 録音中のデバイス
     /// </summary>
-    private IReadOnlyList<RecordingByDevice> RecorderByDevices { get; set; } = [];
+    private List<(RecordingProcess Process, IReadOnlyList<RecordingByDevice> Devices)> RecorderByDevices { get; } = [];
 
     private DateTime StartTime { get; set; }
 
@@ -42,17 +42,15 @@ public class Recording
             CurrentRecordDirectory =
                 new DirectoryInfo(Path.Combine(RootDirectory.FullName, Record.ToDirectoryName(StartTime)))
                     .CreateIfNotExists();
-            RecorderByDevices = Devices
+
+            var devices = Devices
                 .Select(x => 
                     new RecordingByDevice(
                         x, 
-                        recordingProcess.Direction,
-                        recordingProcess.WithVoice,
-                        recordingProcess.WithBuzz,
-                        x.VolumeLevel,
                         CurrentRecordDirectory))
                 .ToArray();
-            foreach (var device in RecorderByDevices)
+            RecorderByDevices.Add((recordingProcess, devices));
+            foreach (var device in devices)
             {
                 device.StartRecording();
             }
@@ -61,7 +59,7 @@ public class Recording
     
     public Record StopRecording()
     {
-        foreach (var device in RecorderByDevices)
+        foreach (var device in RecorderByDevices.SelectMany(x => x.Devices))
         {
             device.StopRecording();
         }
@@ -70,7 +68,7 @@ public class Recording
             StartTime,
             DateTime.Now, 
             RecorderByDevices
-                .Select(x => x.ToRecord()).ToArray());
+                .Select(x => x.Process.ToRecordProcess(x.Devices)).ToArray());
 
         using var stream = new FileStream(Path.Combine(CurrentRecordDirectory.FullName, "record.json"), FileMode.Create);
         // JSON形式で保存

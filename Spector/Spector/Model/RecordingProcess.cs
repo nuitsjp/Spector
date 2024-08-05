@@ -13,4 +13,7 @@ public partial class RecordingProcess(
     public bool WithBuzz { get; } = withBuzz;
     public VolumeLevel VolumeLevel { get; } = volumeLevel;
     [ObservableProperty] private RecordingState _state = RecordingState.Stopped;
+
+    public RecordProcess ToRecordProcess(IEnumerable<RecordingByDevice> devices) => 
+        new(Direction, WithVoice, WithBuzz, VolumeLevel, devices.Select(x => x.ToRecord()).ToArray());
 }

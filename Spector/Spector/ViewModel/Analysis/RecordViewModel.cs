@@ -8,6 +8,4 @@ public record RecordViewModel(
     string DeviceName,
     DateTime StartTime,
     DateTime StopTime,
-    IReadOnlyList<RecordByDeviceViewModel> RecordByDevices)
-{
-}
+    IReadOnlyList<RecordProcessViewModel> RecordProcesses);

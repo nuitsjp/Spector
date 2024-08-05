@@ -9,10 +9,6 @@ public partial class RecordByDeviceViewModel(
     DeviceId id,
     string name,
     string systemName,
-    Direction direction,
-    bool withVoice,
-    bool withBuzz,
-    VolumeLevel volumeLevel,
     Decibel min,
     Decibel avg,
     Decibel max,
@@ -24,10 +20,6 @@ public partial class RecordByDeviceViewModel(
     public DeviceId Id { get; init; } = id;
     public string Name { get; init; } = name;
     public string SystemName { get; init; } = systemName;
-    public Direction Direction { get; init; } = direction;
-    public bool WithVoice { get; init; } = withVoice;
-    public bool WithBuzz { get; init; } = withBuzz;
-    public VolumeLevel VolumeLevel { get; init; } = volumeLevel;
     public Decibel Min { get; init; } = min;
     public Decibel Avg { get; init; } = avg;
     public Decibel Max { get; init; } = max;

@@ -35,6 +35,13 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         this.ObserveProperty(x => x.SelectedRecord)
             .Subscribe(x =>
             {
+                Processes = x?.RecordProcesses ?? [];
+                DeleteRecordCommand.NotifyCanExecuteChanged();
+            })
+            .AddTo(CompositeDisposable);
+        this.ObserveProperty(x => x.SelectedProcess)
+            .Subscribe(x =>
+            {
                 Devices = x?.RecordByDevices ?? [];
                 DeleteRecordCommand.NotifyCanExecuteChanged();
             })
@@ -47,7 +54,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         {
             foreach (RecordViewModel record in e.NewItems)
             {
-                foreach (var device in record.RecordByDevices)
+                foreach (var device in record.RecordProcesses.SelectMany(x => x.RecordByDevices))
                 {
                     device.PropertyChanged += DeviceOnPropertyChanged;
                 }
@@ -58,7 +65,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
         {
             foreach (RecordViewModel record in e.OldItems)
             {
-                foreach (var device in record.RecordByDevices)
+                foreach (var device in record.RecordProcesses.SelectMany(x => x.RecordByDevices))
                 {
                     device.PropertyChanged -= DeviceOnPropertyChanged;
                 }
@@ -72,6 +79,8 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
     public ReactiveCollection<RecordViewModel> Records { get; } = [];
 
     [ObservableProperty] private RecordViewModel? _selectedRecord;
+    [ObservableProperty] private IReadOnlyList<RecordProcessViewModel> _processes = [];
+    [ObservableProperty] private RecordProcessViewModel? _selectedProcess;
 
     [ObservableProperty] private IReadOnlyCollection<RecordByDeviceViewModel> _devices = [];
     [ObservableProperty] private RecordByDeviceViewModel? _selectedDevice;
@@ -88,27 +97,30 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
                 return new RecordViewModel(
                     record,
                     record.MeasureDeviceId,
-                    record.RecordByDevices.SingleOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
+                    record.RecordProcesses.SelectMany(x => x.RecordByDevices).FirstOrDefault(x => x.Id == record.MeasureDeviceId)?.Name ??
                     record.MeasureDeviceId.ToString(),
                     record.StartTime,
                     record.StopTime,
-                    record.RecordByDevices
-                        .Select(recordByDevice => new RecordByDeviceViewModel(
-                            recordByDevice,
-                            recordByDevice.Id,
-                            recordByDevice.Name,
-                            recordByDevice.SystemName,
-                            recordByDevice.Direction,
-                            recordByDevice.WithVoice,
-                            recordByDevice.WithBuzz,
-                            recordByDevice.VolumeLevel,
-                            recordByDevice.Min,
-                            recordByDevice.Avg,
-                            recordByDevice.Max,
-                            recordByDevice.Minus30db,
-                            recordByDevice.Minus40db,
-                            recordByDevice.Minus50db))
-                        .ToArray());
+                    record
+                        .RecordProcesses
+                        .Select(x => new RecordProcessViewModel(
+                            x.Direction,
+                            x.WithVoice,
+                            x.WithBuzz,
+                            x.VolumeLevel,
+                            x.RecordByDevices.Select(recordByDevice => new RecordByDeviceViewModel(
+                                    recordByDevice,
+                                    recordByDevice.Id,
+                                    recordByDevice.Name,
+                                    recordByDevice.SystemName,
+                                    recordByDevice.Min,
+                                    recordByDevice.Avg,
+                                    recordByDevice.Max,
+                                    recordByDevice.Minus30db,
+                                    recordByDevice.Minus40db,
+                                    recordByDevice.Minus50db))
+                                .ToArray()
+                            )).ToArray());
             })
             .ToList()
             .ForEach(x => Records.Add(x));
@@ -126,6 +138,7 @@ public partial class AnalysisTabViewModel : ObservableObject, IDisposable
             AnalysisDevices.Add(
                 new AnalysisDeviceViewModel(
                     SelectedRecord!, 
+                    SelectedProcess!,
                     device, 
                     inputLevels.ToArray()));
         }
