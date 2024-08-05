@@ -21,7 +21,8 @@
         </Grid.RowDefinitions>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="500"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="330"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -40,16 +41,18 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <DataGrid  Grid.Column="1"
-                       ItemsSource="{Binding Devices}" 
-                       SelectedItem="{Binding SelectedDevice}"
-                       AutoGenerateColumns="False"
-                       Height="200"
-                       Margin="5"
-                       ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <DataGrid Grid.Column="1" 
+                      ItemsSource="{Binding Processes}" 
+                      SelectedItem="{Binding SelectedProcess}"
+                      VerticalAlignment="Top"
+                      AutoGenerateColumns="False"
+                      Height="200"
+                      Margin="5"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Loaded="RecordGrid_OnLoaded">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Volume Level" Binding="{Binding VolumeLevel}" IsReadOnly="True"/>
                     <DataGridTemplateColumn IsReadOnly="True" Header="Buzz" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -84,6 +87,18 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <DataGrid  Grid.Column="2"
+                       ItemsSource="{Binding Devices}" 
+                       SelectedItem="{Binding SelectedDevice}"
+                       AutoGenerateColumns="False"
+                       Height="200"
+                       Margin="5"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Min" Binding="{Binding Min, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Avg" Binding="{Binding Avg, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Max" Binding="{Binding Max, Converter={StaticResource DecibelConverter}}" IsReadOnly="True"/>
@@ -101,7 +116,7 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Grid.Column="2" Content="{materialDesign:PackIcon Kind=Delete}"
+            <Button Grid.Column="3" Content="{materialDesign:PackIcon Kind=Delete}"
                     Command="{Binding DeleteRecordCommand}"
                     CommandParameter="{Binding SelectedRecord}"
                     Style="{StaticResource AccentButton}"
