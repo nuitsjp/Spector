@@ -28,6 +28,7 @@ public partial class RecorderViewModel(
         .Devices
         .ToFilteredReadOnlyObservableCollection(x => x.DataFlow == DataFlow.Render);
 
+    [ObservableProperty] private IReadOnlyList<RecordingProcessViewModel> _recordingProcesses = [];
     [ObservableProperty] private IDevice? _playbackDevice;
 
     public Direction SelectedDirection { get; set; } = Direction.R0;
