@@ -96,6 +96,23 @@ public partial class RecorderViewModel(
         WithBuzz = settings.Recorder.WithBuzz;
         RecorderHost = settings.RecorderHost;
 
+        var audioCalibrator = new AudioCalibrator(settings.CalibrationPoints);
+        RecordingProcesses =
+        [
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R0, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(50))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R0, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(60))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R0, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(70))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R90, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(50))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R90, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(60))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R90, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(70))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R180, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(50))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R180, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(60))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R180, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(70))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R270, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(50))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R270, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(60))),
+            new RecordingProcessViewModel(new RecordingProcess(Direction.R270, false, true, (VolumeLevel)audioCalibrator.EstimateAmplitude(70))),
+        ];
+
 
         this.ObserveProperty(x => x.RecordingSpan).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);
         this.ObserveProperty(x => x.WithVoice).Subscribe(_ => OnUpdated()).AddTo(CompositeDisposable);

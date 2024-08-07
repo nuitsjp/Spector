@@ -17,7 +17,7 @@ public class AudioCalibrator
     /// AudioSplineCalibratorのコンストラクタ
     /// </summary>
     /// <param name="calibrationPoints">キャリブレーションポイントのリスト</param>
-    public AudioCalibrator(List<CalibrationPoint> calibrationPoints)
+    public AudioCalibrator(IEnumerable<CalibrationPoint> calibrationPoints)
     {
         var sortedPoints = calibrationPoints.OrderBy(p => p.Decibel).ToList();
 
