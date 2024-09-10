@@ -49,10 +49,10 @@
                                                    IsReadOnly="True"/>
 
                 <materialDesign:DataGridTextColumn Header="Volume Level" 
-                                                   Binding="{Binding VolumeLevel}" />
+                                                   Binding="{Binding VolumeLevel, Mode=TwoWay}" />
 
                 <materialDesign:DataGridTextColumn Header="Decibel" 
-                                                   Binding="{Binding Decibel}" />
+                                                   Binding="{Binding Decibel, Mode=TwoWay}" />
             </DataGrid.Columns>
         </DataGrid>
 
