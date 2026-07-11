@@ -35,6 +35,7 @@
 | 04 | `tasks/04-webrtc.md` | Write | opus | 01 | 手動SDPと2チャネルプロトコルがテスト済み |
 | 05 | `tasks/05-ui-integration.md` | Write | opus | 02,03,04 | 4タブとremoteモードが統合され、E2E・描画確認済み |
 | 06 | `tasks/06-release-cleanup.md` | Write | sonnet | 05 | CI/Pages設定、ignore、WPF除去、production buildが完了 |
+| 07 | `tasks/07-initial-microphone-permission.md` | Write | sonnet | 06 | 初回権限前の空deviceIdを使わず、実Edgeでマイク開始できる |
 
 ## 全体検証
 

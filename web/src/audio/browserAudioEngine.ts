@@ -8,7 +8,7 @@ import type {
 import { createPlaybackGain, type PlaybackGain } from '../domain';
 
 import { BrowserAudioSource } from './capture/browserAudioSource';
-import { AudioEngineError } from './errors';
+import { AudioEngineError, toAudioCaptureError } from './errors';
 import { EventStream } from './events';
 import {
   createTestNoisePlaybackForAudioContext,
@@ -155,6 +155,17 @@ export class BrowserAudioEngine {
             'AudioContextを開始できませんでした。',
           );
         }
+
+        let permissionStream: MediaStream;
+        try {
+          permissionStream = await mediaDevices.getUserMedia({
+            audio: true,
+            video: false,
+          });
+        } catch (error) {
+          throw toAudioCaptureError(error, 'microphone-capture');
+        }
+        for (const track of permissionStream.getTracks()) track.stop();
 
         const gainNode = context.createGain();
         gainNode.gain.value = this.currentPlaybackGain;

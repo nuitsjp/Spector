@@ -95,10 +95,21 @@ class FakeAudioContext extends EventTarget {
 
 class FakeMediaDevices extends EventTarget {
   devices: MediaDeviceInfo[] = [];
+  permissionDevices: MediaDeviceInfo[] | null = null;
+  permissionStream: MediaStream | null = null;
   microphoneStream: MediaStream | null = null;
   displayStream: MediaStream | null = null;
   readonly enumerateDevices = vi.fn(async () => this.devices);
-  readonly getUserMedia = vi.fn(async () => {
+  readonly getUserMedia = vi.fn(async (constraints: MediaStreamConstraints) => {
+    if (constraints.audio === true) {
+      if (this.permissionStream === null) {
+        throw new Error('missing permission fixture');
+      }
+      if (this.permissionDevices !== null) {
+        this.devices = this.permissionDevices;
+      }
+      return this.permissionStream;
+    }
     if (this.microphoneStream === null) throw new Error('missing mic fixture');
     return this.microphoneStream;
   });
@@ -135,8 +146,12 @@ const createHarness = (withSinkSelection = true) => {
     channelCount: 1,
     deviceId: 'mic-1',
   });
+  const permissionTrack = new FakeTrack('audio');
   const videoTrack = new FakeTrack('video');
   const systemAudioTrack = new FakeTrack('audio', { channelCount: 2 });
+  mediaDevices.permissionStream = new FakeStream([
+    permissionTrack,
+  ]) as unknown as MediaStream;
   mediaDevices.microphoneStream = new FakeStream([
     microphoneTrack,
   ]) as unknown as MediaStream;
@@ -161,6 +176,7 @@ const createHarness = (withSinkSelection = true) => {
     engine,
     mediaDevices,
     microphoneTrack,
+    permissionTrack,
     setSinkId,
     systemAudioTrack,
     videoTrack,
@@ -179,12 +195,60 @@ describe('BrowserAudioEngine', () => {
       '/capture-worklet.js',
     );
     expect(harness.context.resume).toHaveBeenCalledOnce();
+    expect(harness.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      audio: true,
+      video: false,
+    });
+    expect(harness.permissionTrack.stop).toHaveBeenCalledOnce();
     expect(harness.engine.devices.inputs).toEqual([
       { id: 'mic-1', label: 'Main microphone', kind: 'audioinput' },
     ]);
     expect(harness.engine.devices.outputs).toEqual([
       { id: 'speaker-1', label: 'Main speaker', kind: 'audiooutput' },
     ]);
+  });
+
+  it('enumerates devices after permission and starts the selected microphone by its valid id', async () => {
+    const harness = createHarness();
+    harness.mediaDevices.devices = [mediaDevice('audioinput', '', '')];
+    harness.mediaDevices.permissionDevices = [
+      mediaDevice('audioinput', 'mic-after-permission', 'Allowed microphone'),
+      mediaDevice('audiooutput', 'speaker-1', 'Main speaker'),
+    ];
+
+    await harness.engine.initialize();
+    await harness.engine.startMicrophone('mic-after-permission');
+
+    expect(harness.mediaDevices.enumerateDevices).toHaveBeenCalledOnce();
+    expect(harness.engine.devices.inputs).toEqual([
+      {
+        id: 'mic-after-permission',
+        label: 'Allowed microphone',
+        kind: 'audioinput',
+      },
+    ]);
+    expect(harness.mediaDevices.getUserMedia).toHaveBeenLastCalledWith({
+      audio: { deviceId: { exact: 'mic-after-permission' } },
+      video: false,
+    });
+  });
+
+  it('converts permission denial and releases initialization resources', async () => {
+    const harness = createHarness();
+    harness.mediaDevices.getUserMedia.mockRejectedValueOnce(
+      new DOMException('denied', 'NotAllowedError'),
+    );
+
+    await expect(harness.engine.initialize()).rejects.toEqual(
+      expect.objectContaining({
+        code: 'permission-denied',
+        feature: 'microphone-capture',
+      }),
+    );
+
+    expect(harness.engine.isInitialized).toBe(false);
+    expect(harness.context.close).toHaveBeenCalledOnce();
+    expect(harness.context.createGain).not.toHaveBeenCalled();
   });
 
   it('starts one selected microphone and emits Worklet PCM/level events', async () => {
