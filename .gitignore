@@ -396,3 +396,13 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Spector Web build and test output
+web/dist/
+web/playwright-report/
+web/test-results/
+.playwright-cli/
+
+# Local data created by the former WPF application
+/Settings.json
+/Record/
